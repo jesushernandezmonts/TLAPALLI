@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+body {
+  background-image: url('/huamantla-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  /* Mejorar visualización de la imagen */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+}
+
+#root {
+  @apply min-h-screen;
+}
