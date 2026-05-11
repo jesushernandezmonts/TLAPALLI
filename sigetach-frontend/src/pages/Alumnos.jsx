@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import Modal from '../components/Modal';
+import AlumnoForm from '../components/AlumnoForm';
 
 function Alumnos() {
   const [alumnos, setAlumnos] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editAlumno, setEditAlumno] = useState(null);
 
   useEffect(() => {
     fetchAlumnos();
@@ -21,6 +25,32 @@ function Alumnos() {
     }
   };
 
+  const handleEdit = (alumno) => {
+    setEditAlumno(alumno);
+    setModalOpen(true);
+  };
+
+  const handleNew = () => {
+    setEditAlumno(null);
+    setModalOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('¿Eliminar este alumno?')) {
+      try {
+        await api.delete(`/alumnos/${id}`);
+        fetchAlumnos();
+      } catch (err) {
+        console.error('Error al eliminar alumno', err);
+      }
+    }
+  };
+
+  const handleSave = () => {
+    setModalOpen(false);
+    fetchAlumnos();
+  };
+
   const filtered = alumnos.filter(a =>
     a.nombre.toLowerCase().includes(search.toLowerCase()) ||
     a.curp.toLowerCase().includes(search.toLowerCase())
@@ -30,7 +60,7 @@ function Alumnos() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-white/90">Gestión de Alumnos</h1>
-        <button className="bg-pink-600 hover:bg-pink-700 text-white font-bold px-4 py-2 rounded-xl transition shadow-lg">
+        <button onClick={handleNew} className="bg-pink-600 hover:bg-pink-700 text-white font-bold px-4 py-2 rounded-xl transition shadow-lg">
           + Nuevo Alumno
         </button>
       </div>
@@ -77,8 +107,8 @@ function Alumnos() {
                       </span>
                     </td>
                     <td className="p-4 text-right space-x-3">
-                      <button className="text-cyan-400 hover:text-cyan-300 transition text-sm font-medium">Editar</button>
-                      <button className="text-rose-400 hover:text-rose-300 transition text-sm font-medium">Borrar</button>
+                      <button onClick={() => handleEdit(a)} className="text-cyan-400 hover:text-cyan-300 transition text-sm font-medium">Editar</button>
+                      <button onClick={() => handleDelete(a.id)} className="text-rose-400 hover:text-rose-300 transition text-sm font-medium">Borrar</button>
                     </td>
                   </tr>
                 ))
@@ -87,6 +117,11 @@ function Alumnos() {
           </table>
         </div>
       </div>
+
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}
+             title={editAlumno ? 'Editar Alumno' : 'Nuevo Alumno'}>
+        <AlumnoForm alumno={editAlumno} onClose={() => setModalOpen(false)} onSave={handleSave} />
+      </Modal>
     </div>
   );
 }

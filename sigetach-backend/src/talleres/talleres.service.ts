@@ -14,11 +14,11 @@ export class TalleresService {
   }
 
   async findAll() {
-    return this.prisma.taller.findMany();
+    return this.prisma.taller.findMany({ include: { inscripciones: true } });
   }
 
   async findOne(id: number) {
-    const taller = await this.prisma.taller.findUnique({ where: { id } });
+    const taller = await this.prisma.taller.findUnique({ where: { id }, include: { inscripciones: true } });
     if (!taller) throw new NotFoundException('Taller no encontrado');
     return taller;
   }
