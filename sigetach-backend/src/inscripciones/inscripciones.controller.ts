@@ -1,33 +1,36 @@
-import { Controller, Get, Post, Body, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { InscripcionesService } from './inscripciones.service';
 import { CreateInscripcionDto } from './dto/create-inscripcion.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { UpdateInscripcionDto } from './dto/update-inscripcion.dto';
 
-@ApiTags('Inscripciones')
 @Controller('inscripciones')
 export class InscripcionesController {
   constructor(private readonly inscripcionesService: InscripcionesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Inscribir un alumno a un taller' })
-  create(@Body() createInscripcionDto: CreateInscripcionDto) {
-    return this.inscripcionesService.create(createInscripcionDto);
+  create(@Body() dto: CreateInscripcionDto) {
+    return this.inscripcionesService.create(dto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todas las inscripciones' })
-  findAll() {
+  findAll(@Query('alumnoId') alumnoId?: string) {
+    if (alumnoId) {
+      return this.inscripcionesService.findByAlumno(parseInt(alumnoId));
+    }
     return this.inscripcionesService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener detalle de una inscripción' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.inscripcionesService.findOne(id);
   }
 
+  @Patch(':id')
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateInscripcionDto) {
+    return this.inscripcionesService.update(id, dto);
+  }
+
   @Delete(':id')
-  @ApiOperation({ summary: 'Eliminar una inscripción' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.inscripcionesService.remove(id);
   }

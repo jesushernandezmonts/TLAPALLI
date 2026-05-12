@@ -9,5 +9,5 @@ export class CreateInscripcionDto {
 
   @IsOptional()
   @IsString()
-  estatusPago?: string; // pendiente, al_corriente, deudor
+  estatusPago?: string; // 'pendiente', 'al_corriente', 'deudor'
 }
