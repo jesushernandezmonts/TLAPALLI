@@ -1,0 +1,117 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id               Int            @id @default(autoincrement())
+  nombre           String
+  email            String         @unique
+  passwordHash     String?        @map("password_hash") // Optional if using Google only
+  googleId         String?        @unique @map("google_id")
+  rol              String         @default("profesor") // admin o profesor
+  intentosFallidos Int            @default(0) @map("intentos_fallidos")
+  bloqueadoHasta   DateTime?      @map("bloqueado_hasta")
+  resetToken       String?        @unique @map("reset_token")
+  resetTokenExp    DateTime?      @map("reset_token_exp")
+  instructorId     Int?           @unique @map("instructor_id")
+  instructor       Instructor?    @relation(fields: [instructorId], references: [id])
+  refreshTokens    RefreshToken[]
+  creadoEn         DateTime       @default(now()) @map("creado_en")
+  pagos            Pago[]
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  usuarioId Int      @map("usuario_id")
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  expiraEn  DateTime @map("expira_en")
+  revocado  Boolean  @default(false)
+  creadoEn  DateTime @default(now()) @map("creado_en")
+}
+
+model Alumno {
+  id               Int           @id @default(autoincrement())
+  nombre           String
+  apellidoPaterno  String        @map("apellido_paterno")
+  apellidoMaterno  String?       @map("apellido_materno")
+  curp             String        @unique
+  fechaNacimiento  DateTime?     @map("fecha_nacimiento")
+  telefono         String?
+  estatusActivo    Boolean       @default(true) @map("estatus_activo")
+  fotoUrl          String?       @map("foto_url")
+  inscripciones    Inscripcion[]
+  pagos            Pago[]
+  documentos       Documento[]
+}
+
+model Documento {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  tipo      String   // acta_nacimiento, curp, identificacion, foto, constancia_medica, otro
+  url       String
+  alumnoId  Int      @map("alumno_id")
+  alumno    Alumno   @relation(fields: [alumnoId], references: [id])
+  subidoEn  DateTime @default(now()) @map("subido_en")
+}
+
+model Taller {
+  id                Int           @id @default(autoincrement())
+  nombreTaller      String        @map("nombre_taller")
+  descripcion       String?
+  costoMensual      Decimal       @map("costo_mensual") @db.Decimal(10, 2)
+  cupoMaximo        Int           @map("cupo_maximo")
+  horarioDescripcion String?      @map("horario_descripcion")
+  inscripciones     Inscripcion[]
+  instructores      Instructor[]
+}
+
+model Instructor {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  email     String?  @unique
+  telefono  String?
+  activo    Boolean  @default(true)
+  tallerId  Int?     @map("taller_id")
+  taller    Taller?  @relation(fields: [tallerId], references: [id])
+  usuario   Usuario?
+}
+
+model Inscripcion {
+  id               Int          @id @default(autoincrement())
+  alumnoId         Int          @map("alumno_id")
+  tallerId         Int          @map("taller_id")
+  fechaInscripcion DateTime     @default(now()) @map("fecha_inscripcion")
+  estatusPago      String       @default("pendiente") @map("estatus_pago") // pendiente, al_corriente, deudor
+  alumno           Alumno       @relation(fields: [alumnoId], references: [id])
+  taller           Taller       @relation(fields: [tallerId], references: [id])
+  asistencias      Asistencia[]
+}
+
+model Asistencia {
+  id             Int         @id @default(autoincrement())
+  inscripcionId  Int         @map("inscripcion_id")
+  fecha          DateTime    @default(now())
+  estado         String      // asistencia, falta, retardo, justificada
+  observaciones  String?
+  inscripcion    Inscripcion @relation(fields: [inscripcionId], references: [id])
+}
+
+model Pago {
+  id                Int       @id @default(autoincrement())
+  alumnoId          Int       @map("alumno_id")
+  monto             Decimal   @db.Decimal(10, 2)
+  fechaPago         DateTime  @default(now()) @map("fecha_pago")
+  mesCorrespondiente String  @map("mes_correspondiente")
+  metodoPago        String?   @map("metodo_pago") // efectivo, transferencia
+  registradoPor     Int?      @map("registrado_por")
+  alumno            Alumno    @relation(fields: [alumnoId], references: [id])
+  usuario           Usuario?  @relation(fields: [registradoPor], references: [id])
+}
