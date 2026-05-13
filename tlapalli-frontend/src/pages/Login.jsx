@@ -31,7 +31,6 @@ function Login() {
 
     try {
       const user = await login(email, password);
-      // Redirigir según rol
       if (user.rol === 'admin') {
         navigate('/dashboard');
       } else {
@@ -41,7 +40,6 @@ function Login() {
       if (err.response?.status === 401) {
         setError('Credenciales inválidas. Verifique su correo y contraseña.');
       } else if (err.response?.status === 403) {
-        // Ya lo maneja el AuthContext con bloqueoMsg
         if (!bloqueoMsg) {
           setError('Cuenta bloqueada temporalmente.');
         }
@@ -59,19 +57,8 @@ function Login() {
     window.location.href = 'http://localhost:3000/auth/google';
   };
 
-  const handleTestCreds = (type) => {
-    if (type === 'admin') {
-      setEmail('admin@tlapalli.com');
-      setPassword('Admin2025');
-    } else {
-      setEmail('juan@email.com');
-      setPassword('Juan2025');
-    }
-  };
-
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-['Outfit']">
-      {/* Background with dynamic overlay */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-900/60 via-purple-900/60 to-orange-900/60 z-10" />
         <motion.div
@@ -90,7 +77,6 @@ function Login() {
         className="relative z-20 w-full max-w-lg px-4"
       >
         <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
-          {/* Logo Section */}
           <div className="flex flex-col items-center mb-10">
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -153,7 +139,6 @@ function Login() {
               </div>
             </div>
 
-            {/* Mensaje de bloqueo de cuenta */}
             <AnimatePresence>
               {bloqueoMsg && (
                 <motion.div
@@ -171,7 +156,6 @@ function Login() {
               )}
             </AnimatePresence>
 
-            {/* Mensaje de error general */}
             <AnimatePresence>
               {error && !bloqueoMsg && (
                 <motion.div
@@ -219,26 +203,6 @@ function Login() {
               Google
             </motion.button>
           </form>
-
-          {/* Test Credentials Helper */}
-          <div className="mt-10 pt-8 border-t border-white/10">
-            <p className="text-center text-white/40 text-xs font-medium uppercase tracking-tighter mb-4">Credenciales de Prueba</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleTestCreds('admin')}
-                className="flex-1 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 text-xs hover:bg-white/10 hover:text-white transition-all"
-              >
-                Admin
-              </button>
-              <button
-                onClick={() => handleTestCreds('profe')}
-                className="flex-1 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 text-xs hover:bg-white/10 hover:text-white transition-all"
-              >
-                Profesor
-              </button>
-            </div>
-            <p className="text-center text-white/30 text-[10px] mt-2">Admin2025 / Juan2025</p>
-          </div>
         </div>
 
         <motion.p

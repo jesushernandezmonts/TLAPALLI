@@ -7,7 +7,8 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
     email: '',
     telefono: '',
     tallerId: '',
-    activo: true
+    activo: true,
+    password: ''
   });
   const [error, setError] = useState('');
 
@@ -18,7 +19,8 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
         email: instructor.email || '',
         telefono: instructor.telefono || '',
         tallerId: instructor.tallerId || '',
-        activo: instructor.activo ?? true
+        activo: instructor.activo ?? true,
+        password: '' // No editamos el password desde aquí por ahora
       });
     }
   }, [instructor]);
@@ -39,6 +41,11 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
         ...form,
         tallerId: form.tallerId ? parseInt(form.tallerId) : null
       };
+      
+      // Si estamos editando, no enviamos el password vacío
+      if (instructor && !payload.password) {
+        delete payload.password;
+      }
 
       if (instructor) {
         await api.patch(`/instructores/${instructor.id}`, payload);
@@ -54,53 +61,76 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-1">
-        <label className="text-sm text-white/60 ml-1">Nombre Completo</label>
-        <input
-          name="nombre"
-          placeholder="Ej. Juan Pérez"
-          value={form.nombre}
-          onChange={handleChange}
-          className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
-          required
-        />
-      </div>
-      <div className="space-y-1">
-        <label className="text-sm text-white/60 ml-1">Email (Gmail para acceso)</label>
-        <input
-          name="email"
-          type="email"
-          placeholder="profesor@gmail.com"
-          value={form.email}
-          onChange={handleChange}
-          className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
-        />
-      </div>
-
-      <div className="space-y-1">
-        <label className="text-sm text-white/60 ml-1">Teléfono</label>
-        <input
-          name="telefono"
-          placeholder="Ej. 5512345678"
-          value={form.telefono}
-          onChange={handleChange}
-          className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <label className="text-sm text-white/60 ml-1">Nombre Completo</label>
+          <input
+            name="nombre"
+            placeholder="Ej. Juan Pérez"
+            value={form.nombre}
+            onChange={handleChange}
+            className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
+            required
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm text-white/60 ml-1">Email (Gmail o Institucional)</label>
+          <input
+            name="email"
+            type="email"
+            placeholder="profesor@ejemplo.com"
+            value={form.email}
+            onChange={handleChange}
+            className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
+            required
+          />
+        </div>
       </div>
 
-      <div className="space-y-1">
-        <label className="text-sm text-white/60 ml-1">Taller Asignado</label>
-        <select
-          name="tallerId"
-          value={form.tallerId}
-          onChange={handleChange}
-          className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white focus:outline-none focus:border-pink-500/50"
-        >
-          <option value="" className="text-black">Sin taller asignado</option>
-          {talleres.map(t => (
-            <option key={t.id} value={t.id} className="text-black">{t.nombreTaller}</option>
-          ))}
-        </select>
+      {!instructor && (
+        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2">
+          <p className="text-xs font-bold text-pink-400 uppercase tracking-widest">Opción B: Registro Manual</p>
+          <div className="space-y-1">
+            <label className="text-sm text-white/60 ml-1">Contraseña Temporal</label>
+            <input
+              name="password"
+              type="password"
+              placeholder="Ej. Profe2026!"
+              value={form.password}
+              onChange={handleChange}
+              className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
+            />
+            <p className="text-[10px] text-white/40 italic">El profesor podrá usar esta clave para entrar si no usa Google.</p>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <label className="text-sm text-white/60 ml-1">Teléfono</label>
+          <input
+            name="telefono"
+            placeholder="Ej. 5512345678"
+            value={form.telefono}
+            onChange={handleChange}
+            className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm text-white/60 ml-1">Taller Asignado</label>
+          <select
+            name="tallerId"
+            value={form.tallerId}
+            onChange={handleChange}
+            className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white focus:outline-none focus:border-pink-500/50"
+          >
+            <option value="" className="text-black">Sin taller asignado</option>
+            {talleres.map(t => (
+              <option key={t.id} value={t.id} className="text-black">{t.nombreTaller}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 pt-2">

@@ -92,7 +92,7 @@ export class AuthService {
     };
   }
 
-  // ========== GOOGLE LOGIN (Solo autorizados) ==========
+  // ========== GOOGLE LOGIN (Unificación por Email) ==========
   async googleLogin(req) {
     if (!req.user) {
       throw new BadRequestException('No se recibió información de Google');
@@ -100,44 +100,53 @@ export class AuthService {
 
     const { email, googleId, fullName } = req.user;
 
-    // 1. Buscar si el correo existe en la BD (Usuario)
+    // 1. Buscar usuario por email (Unificación automática)
     let usuario = await this.prisma.usuario.findUnique({
       where: { email },
     });
 
-    // 2. Si NO existe en Usuario, buscar en Instructor
-    if (!usuario) {
+    if (usuario) {
+      // Si el usuario existe pero no tiene googleId, lo vinculamos ahora
+      if (!usuario.googleId) {
+        usuario = await this.prisma.usuario.update({
+          where: { id: usuario.id },
+          data: { googleId },
+        });
+      }
+    } else {
+      // 2. Si NO existe el usuario, verificamos si es un instructor registrado por el Admin
       const instructor = await this.prisma.instructor.findFirst({
-        where: { email: email },
+        where: { email },
       });
 
       if (instructor) {
-        // Crear usuario profesor vinculado al instructor
+        // El admin ya lo dio de alta como instructor, creamos su usuario automáticamente
         usuario = await this.prisma.usuario.create({
           data: {
             nombre: instructor.nombre,
             email: email,
             googleId: googleId,
-            passwordHash: 'GOOGLE_AUTH',
+            passwordHash: null, // No tiene pass manual aún
             rol: 'profesor',
             instructorId: instructor.id,
           },
         });
       } else {
-        // ❌ NO AUTORIZADO: Ni es admin ni es instructor registrado
-        throw new UnauthorizedException(
-          'Correo no autorizado. Contacte al administrador para ser registrado como instructor.'
-        );
+        // 3. Si no existe ni como usuario ni como instructor, es un usuario nuevo (opcional: podrías bloquearlo si solo quieres usuarios pre-registrados)
+        // Por ahora, permitimos que se registre como profesor por defecto
+        usuario = await this.prisma.usuario.create({
+          data: {
+            nombre: fullName || email.split('@')[0],
+            email: email,
+            googleId: googleId,
+            passwordHash: null,
+            rol: 'profesor',
+          },
+        });
       }
-    } else if (!usuario.googleId) {
-      // Si existía por email pero no tenía googleId, vincularlo
-      usuario = await this.prisma.usuario.update({
-        where: { id: usuario.id },
-        data: { googleId }
-      });
     }
 
-    // 3. Generar tokens
+    // Generar tokens
     const payload = {
       sub: usuario.id,
       email: usuario.email,
@@ -230,11 +239,16 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token inválido o expirado');
     }
 
-    // Revocar el viejo
-    await this.prisma.refreshToken.update({
-      where: { id: token.id },
-      data: { revocado: true },
-    });
+    // Revocar el viejo con seguridad
+    try {
+      await this.prisma.refreshToken.update({
+        where: { id: token.id },
+        data: { revocado: true },
+      });
+    } catch (error) {
+      // Si el registro desapareció en el intermedio, simplemente invalidamos
+      throw new UnauthorizedException('Sesión expirada');
+    }
 
     // Generar nuevos
     const payload = {

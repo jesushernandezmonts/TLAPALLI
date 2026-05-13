@@ -8,6 +8,7 @@ import Inscripciones from './pages/Inscripciones';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import AuthSuccess from './pages/AuthSuccess';
+import Pagos from './pages/Pagos';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -20,6 +21,13 @@ function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/auth/success" element={<AuthSuccess />} />
 
+      {/* Rutas compartidas (Admin y Profesor) */}
+      <Route element={<PrivateRoute allowedRoles={['admin', 'profesor']} />}>
+        <Route element={<Layout />}>
+          <Route path="/pagos" element={<Pagos />} />
+        </Route>
+      </Route>
+
       {/* Rutas del ADMIN */}
       <Route element={<PrivateRoute allowedRoles={['admin']} />}>
         <Route element={<Layout />}>
@@ -31,12 +39,11 @@ function App() {
         </Route>
       </Route>
 
-      {/* Rutas del PROFESOR (las crearemos después) */}
+      {/* Rutas del PROFESOR */}
       <Route element={<PrivateRoute allowedRoles={['profesor']} />}>
         <Route element={<Layout />}>
           <Route path="/mis-grupos" element={<div className="text-white p-8 text-center"><h2 className="text-2xl font-bold mb-2">Panel del Profesor</h2><p className="text-white/60">Próximamente</p></div>} />
           <Route path="/asistencia" element={<div className="text-white p-8 text-center"><h2 className="text-2xl font-bold mb-2">Pasar Lista</h2><p className="text-white/60">Próximamente</p></div>} />
-          <Route path="/pagos" element={<div className="text-white p-8 text-center"><h2 className="text-2xl font-bold mb-2">Pagos</h2><p className="text-white/60">Próximamente</p></div>} />
         </Route>
       </Route>
 
