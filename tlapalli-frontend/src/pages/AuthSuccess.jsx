@@ -1,49 +1,33 @@
 import { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { setAccessToken } from '../services/api';
 import { Loader2 } from 'lucide-react';
-import { jwtDecode } from 'jwt-decode';
 
 function AuthSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { loginWithToken } = useAuth();
 
   useEffect(() => {
     const token = searchParams.get('token');
     
     if (token) {
-      // 1. Guardar token en memoria
-      setAccessToken(token);
-
-      // 2. Decodificar para el estado global
-      try {
-        const payload = jwtDecode(token);
-        const userData = {
-          id: payload.sub,
-          email: payload.email,
-          rol: payload.rol,
-          nombre: payload.nombre,
-          instructorId: payload.instructorId,
-        };
-        
-        setUser(userData);
-
-        // 3. Redirigir según rol
-        if (payload.rol === 'admin') {
-          navigate('/dashboard');
+      const userData = loginWithToken(token);
+      
+      if (userData) {
+        // Redirigir según rol
+        if (userData.rol === 'admin') {
+          navigate('/dashboard', { replace: true });
         } else {
-          navigate('/mis-grupos');
+          navigate('/mis-grupos', { replace: true });
         }
-      } catch (error) {
-        console.error('Error decoding token', error);
-        navigate('/login');
+      } else {
+        navigate('/login', { replace: true });
       }
     } else {
-      navigate('/login');
+      navigate('/login', { replace: true });
     }
-  }, [searchParams, navigate, setUser]);
+  }, [searchParams, navigate, loginWithToken]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">

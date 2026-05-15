@@ -55,7 +55,7 @@ model Alumno {
 model Documento {
   id        Int      @id @default(autoincrement())
   nombre    String
-  tipo      String   // acta_nacimiento, curp, identificacion, foto, constancia_medica, otro
+  tipo      String   // acta_nacimiento, curp, comprobante_domicilio, identificacion, foto, constancia_medica, otro
   url       String
   alumnoId  Int      @map("alumno_id")
   alumno    Alumno   @relation(fields: [alumnoId], references: [id])
@@ -64,7 +64,7 @@ model Documento {
 
 model Taller {
   id                Int           @id @default(autoincrement())
-  nombreTaller      String        @map("nombre_taller")
+  nombreTaller      String        @unique @map("nombre_taller")
   descripcion       String?
   costoMensual      Decimal       @map("costo_mensual") @db.Decimal(10, 2)
   cupoMaximo        Int           @map("cupo_maximo")

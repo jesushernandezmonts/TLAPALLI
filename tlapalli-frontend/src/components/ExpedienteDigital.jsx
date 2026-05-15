@@ -59,6 +59,7 @@ function ExpedienteDigital({ alumnoId }) {
           className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-pink-500/50 transition">
           <option value="acta_nacimiento" className="text-black">Acta de Nacimiento</option>
           <option value="curp" className="text-black">CURP</option>
+          <option value="comprobante_domicilio" className="text-black">Comprobante de Domicilio</option>
           <option value="identificacion" className="text-black">Identificación</option>
           <option value="foto" className="text-black">Foto</option>
           <option value="constancia_medica" className="text-black">Constancia Médica</option>

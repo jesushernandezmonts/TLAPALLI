@@ -1,6 +1,7 @@
 import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api, { setAccessToken, clearAccessToken, setOnRefreshed } from '../services/api';
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
 
@@ -22,11 +23,19 @@ export function AuthProvider({ children }) {
   // Verificar si hay sesión activa al cargar
   useEffect(() => {
     const checkSession = async () => {
+      // Si estamos en la página de éxito de OAuth o hay un token en la URL, 
+      // dejamos que AuthSuccess maneje la sesión inicial para evitar conflictos.
+      const params = new URLSearchParams(window.location.search);
+      if (window.location.pathname.includes('/auth/success') || params.has('token')) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data } = await api.post('/auth/refresh');
         setAccessToken(data.accessToken);
-        // Decodificar el JWT para obtener datos del usuario
-        const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
+        // Decodificar el JWT usando jwt-decode
+        const payload = jwtDecode(data.accessToken);
         setUser({
           id: payload.sub,
           email: payload.email,
@@ -51,6 +60,7 @@ export function AuthProvider({ children }) {
       const { data } = await api.post('/auth/login', { email, password });
       setAccessToken(data.accessToken);
       setUser(data.usuario);
+      setLoading(false);
       return data.usuario;
     } catch (err) {
       // Manejar error de bloqueo
@@ -58,6 +68,29 @@ export function AuthProvider({ children }) {
         setBloqueoMsg(err.response.data.message);
       }
       throw err;
+    }
+  }, []);
+
+  const loginWithToken = useCallback((token) => {
+    if (!token) return null;
+    
+    setAccessToken(token);
+    try {
+      const payload = jwtDecode(token);
+      const userData = {
+        id: payload.sub,
+        email: payload.email,
+        rol: payload.rol,
+        nombre: payload.nombre,
+        instructorId: payload.instructorId,
+      };
+      setUser(userData);
+      setLoading(false);
+      return userData;
+    } catch (error) {
+      console.error('Error decoding token', error);
+      clearAccessToken();
+      return null;
     }
   }, []);
 
@@ -69,6 +102,7 @@ export function AuthProvider({ children }) {
     } finally {
       clearAccessToken();
       setUser(null);
+      setLoading(false);
       navigate('/login');
     }
   }, [navigate]);
@@ -80,6 +114,7 @@ export function AuthProvider({ children }) {
     bloqueoMsg,
     setBloqueoMsg,
     login,
+    loginWithToken,
     logout,
   };
 

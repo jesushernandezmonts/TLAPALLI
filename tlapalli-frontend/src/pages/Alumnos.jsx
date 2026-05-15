@@ -117,13 +117,13 @@ function Alumnos() {
                         {a.nombre[0]}
                       </div>
                       <div>
-                        <div className="font-bold text-white/90">{a.nombre} {a.apellidoPaterno} {a.apellidoMaterno}</div>
-                        <div className="text-[10px] text-white/30 uppercase tracking-widest">ID: #{a.id}</div>
+                        <div className="font-bold text-white/90 drop-shadow-sm">{a.nombre} {a.apellidoPaterno} {a.apellidoMaterno}</div>
+                        <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">ID: #{a.id}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="font-mono text-xs opacity-60">{a.curp}</td>
-                  <td className="text-sm opacity-60">{a.telefono || <span className="opacity-20">No registrado</span>}</td>
+                  <td className="font-mono text-xs text-white/80 font-medium">{a.curp}</td>
+                  <td className="text-sm text-white/80 font-medium">{a.telefono || <span className="opacity-40">No registrado</span>}</td>
                   <td className="text-center">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
                       a.estatusActivo 

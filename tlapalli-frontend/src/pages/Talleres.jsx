@@ -105,14 +105,14 @@ function Talleres() {
                     </div>
                   </td>
                   <td>
-                    <span className="text-emerald-400 font-bold">${Number(t.costoMensual).toFixed(2)}</span>
+                    <span className="text-emerald-300 font-bold drop-shadow-sm">${Number(t.costoMensual).toFixed(2)}</span>
                   </td>
                   <td>
-                    <span className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-white/60 font-mono text-xs">
+                    <span className="px-3 py-1 rounded-lg bg-white/10 border border-white/20 text-white font-mono text-xs shadow-sm">
                       {t.cupoMaximo} lugares
                     </span>
                   </td>
-                  <td className="text-sm text-white/40 max-w-xs truncate">{t.horarioDescripcion || 'Sin horario definido'}</td>
+                  <td className="text-sm text-white/90 font-medium max-w-xs truncate drop-shadow-sm">{t.horarioDescripcion || 'Sin horario definido'}</td>
                   <td className="text-right">
                     <div className="flex justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
                       <button onClick={() => handleEdit(t)} className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-xl transition" title="Editar">
