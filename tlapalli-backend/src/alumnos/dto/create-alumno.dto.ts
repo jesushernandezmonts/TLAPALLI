@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsDateString, Length } from 'class-validator';
+import { IsString, IsOptional, IsDateString, Length, IsBoolean } from 'class-validator';
 
 export class CreateAlumnoDto {
   @IsString()
@@ -11,9 +11,10 @@ export class CreateAlumnoDto {
   @IsString()
   apellidoMaterno?: string;
 
+  @IsOptional()
   @IsString()
   @Length(18, 18, { message: 'CURP debe tener 18 caracteres' })
-  curp: string;
+  curp?: string;
 
   @IsOptional()
   @IsDateString()
@@ -26,4 +27,12 @@ export class CreateAlumnoDto {
   @IsOptional()
   @IsString()
   fotoUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  padecimientos?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  estatusActivo?: boolean;
 }

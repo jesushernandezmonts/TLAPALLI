@@ -42,9 +42,10 @@ model Alumno {
   nombre           String
   apellidoPaterno  String        @map("apellido_paterno")
   apellidoMaterno  String?       @map("apellido_materno")
-  curp             String        @unique
+  curp             String?       @unique
   fechaNacimiento  DateTime?     @map("fecha_nacimiento")
   telefono         String?
+  padecimientos    String?
   estatusActivo    Boolean       @default(true) @map("estatus_activo")
   fotoUrl          String?       @map("foto_url")
   inscripciones    Inscripcion[]

@@ -3,6 +3,7 @@ import api from '../services/api';
 import Modal from '../components/Modal';
 import AlumnoForm from '../components/AlumnoForm';
 import ExpedienteDigital from '../components/ExpedienteDigital';
+import ConfirmModal from '../components/ConfirmModal';
 import { Plus, Search, Edit3, Trash2, Power } from 'lucide-react';
 
 function Alumnos() {
@@ -11,6 +12,8 @@ function Alumnos() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editAlumno, setEditAlumno] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [alumnoToDelete, setAlumnoToDelete] = useState(null);
 
   useEffect(() => {
     fetchAlumnos();
@@ -37,14 +40,18 @@ function Alumnos() {
     setModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Eliminar este alumno?')) {
-      try {
-        await api.delete(`/alumnos/${id}`);
-        fetchAlumnos();
-      } catch (err) {
-        console.error('Error al eliminar alumno', err);
-      }
+  const handleDelete = (id) => {
+    setAlumnoToDelete(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!alumnoToDelete) return;
+    try {
+      await api.delete(`/alumnos/${alumnoToDelete}`);
+      fetchAlumnos();
+    } catch (err) {
+      console.error('Error al eliminar alumno', err);
     }
   };
 
@@ -134,15 +141,31 @@ function Alumnos() {
                     </span>
                   </td>
                   <td className="text-right">
-                    <div className="flex justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleEdit(a)} className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-xl transition" title="Editar">
-                        <Edit3 size={18} />
+                    <div className="flex justify-end gap-1 sm:gap-2">
+                      <button 
+                        onClick={() => handleEdit(a)} 
+                        className="p-2.5 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-cyan-500/30" 
+                        title="Editar Datos y Expediente"
+                      >
+                        <Edit3 size={16} />
                       </button>
-                      <button onClick={() => handleToggleActivo(a)} className={`p-2 rounded-xl transition ${a.estatusActivo ? 'hover:bg-amber-500/10 hover:text-amber-400' : 'hover:bg-emerald-500/10 hover:text-emerald-400'}`} title={a.estatusActivo ? 'Desactivar' : 'Activar'}>
-                        <Power size={18} />
+                      <button 
+                        onClick={() => handleToggleActivo(a)} 
+                        className={`p-2.5 bg-white/5 rounded-xl transition-all duration-300 border border-white/5 ${
+                          a.estatusActivo 
+                            ? 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30' 
+                            : 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30'
+                        }`} 
+                        title={a.estatusActivo ? 'Desactivar Alumno' : 'Activar Alumno'}
+                      >
+                        <Power size={16} />
                       </button>
-                      <button onClick={() => handleDelete(a.id)} className="p-2 hover:bg-rose-500/10 hover:text-rose-400 rounded-xl transition" title="Eliminar">
-                        <Trash2 size={18} />
+                      <button 
+                        onClick={() => handleDelete(a.id)} 
+                        className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30" 
+                        title="Eliminar Permanente"
+                      >
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>
@@ -162,6 +185,15 @@ function Alumnos() {
           </div>
         )}
       </Modal>
+
+      <ConfirmModal 
+        isOpen={deleteConfirmOpen} 
+        onClose={() => setDeleteConfirmOpen(false)} 
+        onConfirm={confirmDelete}
+        title="¿Eliminar Alumno?"
+        message="Esta acción es permanente y eliminará todo el historial de pagos y documentos del estudiante. ¿Deseas continuar?"
+        confirmText="Sí, Eliminar"
+      />
     </div>
   );
 }

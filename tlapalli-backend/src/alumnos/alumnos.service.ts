@@ -8,10 +8,11 @@ export class AlumnosService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateAlumnoDto) {
-    const fecha = dto.fechaNacimiento ? new Date(dto.fechaNacimiento) : undefined;
+    const { fechaNacimiento, ...rest } = dto;
+    const fecha = fechaNacimiento ? new Date(fechaNacimiento) : undefined;
     return this.prisma.alumno.create({
       data: {
-        ...dto,
+        ...rest,
         fechaNacimiento: fecha,
       },
     });
@@ -35,9 +36,11 @@ export class AlumnosService {
   }
 
   async update(id: number, dto: UpdateAlumnoDto) {
-    await this.findOne(id); // verifica existencia
-    const data: any = { ...dto };
-    if (dto.fechaNacimiento) data.fechaNacimiento = new Date(dto.fechaNacimiento);
+    await this.findOne(id);
+    const { fechaNacimiento, ...rest } = dto;
+    const data: any = { ...rest };
+    if (fechaNacimiento) data.fechaNacimiento = new Date(fechaNacimiento);
+    
     return this.prisma.alumno.update({
       where: { id },
       data,
