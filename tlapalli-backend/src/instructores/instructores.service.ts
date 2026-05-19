@@ -3,10 +3,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInstructorDto } from './dto/create-instructor.dto';
 import { UpdateInstructorDto } from './dto/update-instructor.dto';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { MailerService } from '../mail/mailer.service';
 
 @Injectable()
 export class InstructoresService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailerService: MailerService,
+  ) {}
 
   async create(dto: CreateInstructorDto) {
     // 1. Verificar si ya existe un instructor o usuario con ese email
@@ -22,31 +27,43 @@ export class InstructoresService {
       if (existeUsuario) throw new BadRequestException('Ya existe un usuario con ese email');
     }
 
-    // 2. Crear el Instructor
+    // 2. Crear el Instructor con estado "Pendiente"
     const instructor = await this.prisma.instructor.create({
       data: {
         nombre: dto.nombre,
         email: dto.email,
         telefono: dto.telefono,
         tallerId: dto.tallerId,
-        activo: dto.activo ?? true,
+        estado: 'Pendiente',
+        activo: true,
       },
     });
 
-    // 3. Si se proporcionó password, crear el Usuario vinculado (Opción B)
-    if (dto.email && dto.password) {
-      const salt = await bcrypt.genSalt(12);
-      const passwordHash = await bcrypt.hash(dto.password, salt);
+    // 3. Si se proporcionó email, crear Usuario sin contraseña y enviar email de activación
+    if (dto.email) {
+      const token = crypto.randomBytes(32).toString('hex');
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
 
       await this.prisma.usuario.create({
         data: {
           nombre: dto.nombre,
           email: dto.email,
-          passwordHash: passwordHash,
+          passwordHash: null,
           rol: 'profesor',
           instructorId: instructor.id,
+          resetToken: token,
+          resetTokenExp: expires,
         },
       });
+
+      // Obtener el nombre del taller para incluirlo en el correo
+      let tallerNombre: string | undefined;
+      if (dto.tallerId) {
+        const taller = await this.prisma.taller.findUnique({ where: { id: dto.tallerId } });
+        tallerNombre = taller?.nombreTaller;
+      }
+
+      await this.mailerService.sendActivationEmail(dto.email, token, dto.nombre, tallerNombre);
     }
 
     return this.prisma.instructor.findUnique({
@@ -57,7 +74,7 @@ export class InstructoresService {
 
   findAll() {
     return this.prisma.instructor.findMany({
-      include: { taller: true },
+      include: { taller: true, usuario: { select: { id: true, email: true, passwordHash: false, googleId: true } } },
       orderBy: { nombre: 'asc' },
     });
   }
@@ -65,7 +82,7 @@ export class InstructoresService {
   async findOne(id: number) {
     const instructor = await this.prisma.instructor.findUnique({
       where: { id },
-      include: { taller: true },
+      include: { taller: true, usuario: { select: { id: true, email: true, googleId: true } } },
     });
     if (!instructor) throw new NotFoundException('Instructor no encontrado');
     return instructor;
@@ -82,16 +99,93 @@ export class InstructoresService {
 
   async remove(id: number) {
     await this.findOne(id);
+
+    // Borrar el Usuario vinculado primero
+    const usuario = await this.prisma.usuario.findUnique({ where: { instructorId: id } });
+    if (usuario) {
+      // 1. Desvincular de los pagos registrados por este usuario para evitar error FK
+      await this.prisma.pago.updateMany({
+        where: { registradoPor: usuario.id },
+        data: { registradoPor: null },
+      });
+
+      // 2. Borrar RefreshTokens
+      await this.prisma.refreshToken.deleteMany({ where: { usuarioId: usuario.id } });
+
+      // 3. Borrar el Usuario
+      await this.prisma.usuario.delete({ where: { id: usuario.id } });
+    }
+
     return this.prisma.instructor.delete({ where: { id } });
   }
 
   // Activar/Inactivar en lugar de eliminar
   async toggleActivo(id: number) {
     const instructor = await this.findOne(id);
+    const newActivo = !instructor.activo;
+    let newEstado = instructor.estado;
+    
+    // Si se desactiva, estado es Inactivo. Si se activa, regresa a Pendiente o Activo
+    if (!newActivo) {
+      newEstado = 'Inactivo';
+    } else {
+      // Verificar si el usuario ya tiene password o usó googleId
+      const usuario = await this.prisma.usuario.findUnique({ where: { instructorId: id } });
+      if (usuario && (usuario.passwordHash || usuario.googleId)) {
+        newEstado = 'Activo';
+      } else {
+        newEstado = 'Pendiente';
+      }
+    }
+
     return this.prisma.instructor.update({
       where: { id },
-      data: { activo: !instructor.activo },
+      data: { activo: newActivo, estado: newEstado },
       include: { taller: true },
     });
+  }
+
+  async reenviarActivacion(id: number) {
+    const instructor = await this.prisma.instructor.findUnique({
+      where: { id },
+      include: { taller: true },
+    });
+    if (!instructor) throw new NotFoundException('Instructor no encontrado');
+    if (!instructor.email) {
+      throw new BadRequestException('El instructor no tiene correo registrado');
+    }
+
+    const usuario = await this.prisma.usuario.findUnique({ where: { instructorId: id } });
+    if (!usuario) {
+      throw new BadRequestException('El instructor no tiene un usuario vinculado');
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+
+    // Si ya activó su cuenta, enviar enlace de restablecimiento (15 min)
+    // Si sigue pendiente, enviar enlace de activación (24 horas)
+    const isActivo = instructor.estado === 'Activo' || !!usuario.passwordHash || !!usuario.googleId;
+    const expires = isActivo
+      ? new Date(Date.now() + 15 * 60 * 1000) // 15 minutos para reset
+      : new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas para activación
+
+    await this.prisma.usuario.update({
+      where: { id: usuario.id },
+      data: {
+        resetToken: token,
+        resetTokenExp: expires,
+      },
+    });
+
+    if (isActivo) {
+      // Si ya estaba activo, es como un reseteo de password
+      await this.mailerService.sendResetPasswordEmail(instructor.email, token);
+    } else {
+      // Si sigue pendiente, reenviar activación
+      const tallerNombre = instructor.taller?.nombreTaller;
+      await this.mailerService.sendActivationEmail(instructor.email, token, instructor.nombre, tallerNombre);
+    }
+    
+    return { message: 'Enlace enviado exitosamente' };
   }
 }

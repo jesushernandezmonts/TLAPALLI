@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -22,6 +22,15 @@ function Login() {
   const [error, setError] = useState('');
   const { login, bloqueoMsg, setBloqueoMsg } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Capturar error de Google OAuth redirigido desde el backend
+  useEffect(() => {
+    const googleError = searchParams.get('error');
+    if (googleError) {
+      setError(decodeURIComponent(googleError));
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -93,7 +102,7 @@ function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-white/80 ml-1">Email</label>
+              <label className="text-sm font-semibold text-white/80 ml-1">Usuario</label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
                 <input

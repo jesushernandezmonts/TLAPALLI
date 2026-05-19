@@ -79,6 +79,7 @@ model Instructor {
   nombre    String
   email     String?  @unique
   telefono  String?
+  estado    String   @default("Pendiente") // Pendiente, Activo, Inactivo
   activo    Boolean  @default(true)
   tallerId  Int?     @map("taller_id")
   taller    Taller?  @relation(fields: [tallerId], references: [id])

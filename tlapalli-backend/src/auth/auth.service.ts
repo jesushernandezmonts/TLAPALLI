@@ -41,6 +41,17 @@ export class AuthService {
     const usuario = await this.prisma.usuario.findUnique({ where: { email } });
     if (!usuario) throw new UnauthorizedException('Credenciales inválidas');
 
+    // Verificar que el instructor esté activo (si es profesor)
+    if (usuario.instructorId) {
+      const instructor = await this.prisma.instructor.findUnique({ where: { id: usuario.instructorId } });
+      if (instructor && instructor.estado === 'Inactivo') {
+        throw new ForbiddenException('Tu cuenta ha sido desactivada. Contacta al administrador.');
+      }
+      if (instructor && instructor.estado === 'Pendiente' && !usuario.passwordHash) {
+        throw new UnauthorizedException('Tu cuenta aún no ha sido activada. Revisa tu correo electrónico para activarla.');
+      }
+    }
+
     // Verificar bloqueo
     if (usuario.bloqueadoHasta && usuario.bloqueadoHasta > new Date()) {
       const minutosRestantes = Math.ceil((usuario.bloqueadoHasta.getTime() - Date.now()) / 60000);
@@ -49,7 +60,7 @@ export class AuthService {
 
     // Verificar contraseña
     if (!usuario.passwordHash) {
-      throw new UnauthorizedException('Esta cuenta usa inicio de sesión con Google');
+      throw new UnauthorizedException('Tu cuenta aún no tiene contraseña. Revisa tu correo para activarla, o usa "Continuar con Google".');
     }
 
     const isMatch = await bcrypt.compare(password, usuario.passwordHash);
@@ -113,6 +124,23 @@ export class AuthService {
           data: { googleId },
         });
       }
+
+      // Si es profesor con instructor vinculado, activar el instructor automáticamente
+      if (usuario.instructorId) {
+        const instructor = await this.prisma.instructor.findUnique({ where: { id: usuario.instructorId } });
+        if (instructor) {
+          if (instructor.estado === 'Inactivo') {
+            throw new ForbiddenException('Tu cuenta ha sido desactivada. Contacta al administrador.');
+          }
+          // Activar si estaba pendiente
+          if (instructor.estado === 'Pendiente') {
+            await this.prisma.instructor.update({
+              where: { id: instructor.id },
+              data: { estado: 'Activo' },
+            });
+          }
+        }
+      }
     } else {
       // 2. Si NO existe el usuario, verificamos si es un instructor registrado por el Admin
       const instructor = await this.prisma.instructor.findFirst({
@@ -120,29 +148,31 @@ export class AuthService {
       });
 
       if (instructor) {
+        if (instructor.estado === 'Inactivo') {
+          throw new ForbiddenException('Tu cuenta ha sido desactivada. Contacta al administrador.');
+        }
+
         // El admin ya lo dio de alta como instructor, creamos su usuario automáticamente
         usuario = await this.prisma.usuario.create({
           data: {
             nombre: instructor.nombre,
             email: email,
             googleId: googleId,
-            passwordHash: null, // No tiene pass manual aún
+            passwordHash: null,
             rol: 'profesor',
             instructorId: instructor.id,
           },
         });
-      } else {
-        // 3. Si no existe ni como usuario ni como instructor, es un usuario nuevo (opcional: podrías bloquearlo si solo quieres usuarios pre-registrados)
-        // Por ahora, permitimos que se registre como profesor por defecto
-        usuario = await this.prisma.usuario.create({
-          data: {
-            nombre: fullName || email.split('@')[0],
-            email: email,
-            googleId: googleId,
-            passwordHash: null,
-            rol: 'profesor',
-          },
+
+        // Activar el instructor
+        await this.prisma.instructor.update({
+          where: { id: instructor.id },
+          data: { estado: 'Activo' },
         });
+      } else {
+        // 3. No existe ni como usuario ni como instructor
+        // BLOQUEAR: Solo usuarios pre-registrados por el admin pueden entrar
+        throw new UnauthorizedException('No tienes una cuenta registrada en el sistema. Contacta al administrador.');
       }
     }
 
@@ -174,6 +204,53 @@ export class AuthService {
     };
   }
 
+  // ========== ACTIVAR CUENTA (Opción B) ==========
+  async activateAccount(token: string, newPassword: string) {
+    const usuario = await this.prisma.usuario.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExp: { gt: new Date() },
+      },
+    });
+
+    if (!usuario) {
+      throw new BadRequestException('El enlace de activación es inválido o ha expirado. Solicita al administrador que te reenvíe uno nuevo.');
+    }
+
+    // Verificar que el instructor existe y no está ya activo
+    if (usuario.instructorId) {
+      const instructor = await this.prisma.instructor.findUnique({ where: { id: usuario.instructorId } });
+      if (instructor && instructor.estado === 'Inactivo') {
+        throw new BadRequestException('Esta cuenta ha sido desactivada por el administrador.');
+      }
+    }
+
+    const SALT_ROUNDS = 12;
+    const hash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    // Actualizar usuario: guardar contraseña, limpiar token
+    await this.prisma.usuario.update({
+      where: { id: usuario.id },
+      data: {
+        passwordHash: hash,
+        resetToken: null,
+        resetTokenExp: null,
+        intentosFallidos: 0,
+        bloqueadoHasta: null,
+      },
+    });
+
+    // Activar el instructor
+    if (usuario.instructorId) {
+      await this.prisma.instructor.update({
+        where: { id: usuario.instructorId },
+        data: { estado: 'Activo' },
+      });
+    }
+
+    return { message: 'Cuenta activada exitosamente. Ya puedes iniciar sesión.' };
+  }
+
   // ========== FORGOT PASSWORD ==========
   async forgotPassword(email: string) {
     const usuario = await this.prisma.usuario.findUnique({ where: { email } });
@@ -182,8 +259,16 @@ export class AuthService {
       return { message: 'Si el correo está registrado, recibirás un enlace de recuperación' };
     }
 
+    // Verificar que esté activo
+    if (usuario.instructorId) {
+      const instructor = await this.prisma.instructor.findUnique({ where: { id: usuario.instructorId } });
+      if (instructor && instructor.estado === 'Inactivo') {
+        return { message: 'Si el correo está registrado, recibirás un enlace de recuperación' };
+      }
+    }
+
     const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 3600000); // 1 hora
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
     await this.prisma.usuario.update({
       where: { id: usuario.id },
@@ -225,7 +310,7 @@ export class AuthService {
       }
     });
 
-    return { message: 'Contraseña actualizada exitosamente' };
+    return { message: 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión.' };
   }
 
   // ========== REFRESH TOKEN ==========

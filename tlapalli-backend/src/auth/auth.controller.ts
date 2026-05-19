@@ -94,21 +94,40 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
-    const result = await this.authService.googleLogin(req);
+    try {
+      const result = await this.authService.googleLogin(req);
 
-    // Guardar refresh token en cookie httpOnly
-    res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/',
-    });
+      // Guardar refresh token en cookie httpOnly
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
+      });
 
-    // Redirigir al frontend con el accessToken en la URL (o usar un mensaje postMessage)
-    // Para simplificar, redirigimos a una ruta que procese el login
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    return res.redirect(`${frontendUrl}/auth/success?token=${result.accessToken}`);
+      // Redirigir al frontend con el accessToken en la URL
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}/auth/success?token=${result.accessToken}`);
+    } catch (error) {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const errorMsg = encodeURIComponent(error.message || 'Error de autenticación');
+      return res.redirect(`${frontendUrl}/login?error=${errorMsg}`);
+    }
+  }
+
+  // ========== ACTIVAR CUENTA (Opción B) ==========
+  @Post('activate-account')
+  async activateAccount(
+    @Body('token') token: string,
+    @Body('password') password: string,
+  ) {
+    // Validar contraseña fuerte
+    const validacion = this.authService.validarFortalezaPassword(password);
+    if (!validacion.valida) {
+      throw new BadRequestException(validacion.mensaje);
+    }
+    return this.authService.activateAccount(token, password);
   }
 
   // ========== PASSWORD RECOVERY ==========

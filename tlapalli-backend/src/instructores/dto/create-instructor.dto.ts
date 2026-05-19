@@ -19,8 +19,4 @@ export class CreateInstructorDto {
   @IsOptional()
   @IsBoolean()
   activo?: boolean;
-
-  @IsOptional()
-  @IsString()
-  password?: string;
 }

@@ -61,7 +61,7 @@ function ResetPassword() {
         <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           <div className="mb-8">
             <h1 className="text-3xl font-black text-white mb-2 tracking-tight">Nueva Contraseña</h1>
-            <p className="text-white/60 text-sm">Crea una contraseña segura para tu cuenta.</p>
+            <p className="text-white/60 text-sm">Crea una contraseña segura. Este enlace expira en <span className="text-pink-400 font-semibold">15 minutos</span>.</p>
           </div>
 
           {!success ? (
@@ -137,7 +137,7 @@ function ResetPassword() {
               </div>
               <h2 className="text-xl font-bold text-white mb-2">¡Contraseña actualizada!</h2>
               <p className="text-white/60 text-sm mb-4">
-                Tu contraseña ha sido restablecida correctamente. Redirigiendo al login...
+                Tu contraseña ha sido restablecida correctamente. Ya puedes iniciar sesión. Redirigiendo...
               </p>
               <Link to="/login" className="text-pink-400 hover:text-pink-300 font-bold transition-colors">
                 Ir al inicio de sesión ahora

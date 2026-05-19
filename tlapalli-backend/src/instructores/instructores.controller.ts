@@ -36,4 +36,9 @@ export class InstructoresController {
   toggleActivo(@Param('id', ParseIntPipe) id: number) {
     return this.instructoresService.toggleActivo(id);
   }
+
+  @Post(':id/reenviar-activacion')
+  reenviarActivacion(@Param('id', ParseIntPipe) id: number) {
+    return this.instructoresService.reenviarActivacion(id);
+  }
 }
