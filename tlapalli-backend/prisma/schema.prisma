@@ -117,3 +117,13 @@ model Pago {
   alumno            Alumno    @relation(fields: [alumnoId], references: [id])
   usuario           Usuario?  @relation(fields: [registradoPor], references: [id])
 }
+
+model Actividad {
+  id          Int      @id @default(autoincrement())
+  titulo      String
+  descripcion String?
+  fecha       DateTime
+  tipo        String   // 'interna' | 'externa'
+  ubicacion   String   // 'galeria' | 'audioteca' | 'auditorio'
+  creadoEn    DateTime @default(now()) @map("creado_en")
+}

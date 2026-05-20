@@ -25,13 +25,6 @@ function App() {
       <Route path="/accept-invitation" element={<AcceptInvitation />} />
       <Route path="/auth/success" element={<AuthSuccess />} />
 
-      {/* Rutas compartidas (Admin y Profesor) */}
-      <Route element={<PrivateRoute allowedRoles={['admin', 'profesor']} />}>
-        <Route element={<Layout />}>
-          <Route path="/pagos" element={<Pagos />} />
-        </Route>
-      </Route>
-
       {/* Rutas del ADMIN */}
       <Route element={<PrivateRoute allowedRoles={['admin']} />}>
         <Route element={<Layout />}>
@@ -48,6 +41,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/mis-grupos" element={<div className="text-white p-8 text-center"><h2 className="text-2xl font-bold mb-2">Panel del Profesor</h2><p className="text-white/60">Próximamente</p></div>} />
           <Route path="/asistencia" element={<div className="text-white p-8 text-center"><h2 className="text-2xl font-bold mb-2">Pasar Lista</h2><p className="text-white/60">Próximamente</p></div>} />
+          <Route path="/pagos" element={<Pagos />} />
         </Route>
       </Route>
 

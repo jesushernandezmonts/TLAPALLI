@@ -88,12 +88,12 @@ function Sidebar({ isOpen, onClose }) {
                 <ClipboardList size={20} />
                 <span className="font-medium">Pasar Lista</span>
               </NavLink>
+              <NavLink to="/pagos" onClick={onClose} className={linkClass}>
+                <CreditCard size={20} />
+                <span className="font-medium">Pagos</span>
+              </NavLink>
             </>
           )}
-          <NavLink to="/pagos" onClick={onClose} className={linkClass}>
-            <CreditCard size={20} />
-            <span className="font-medium">Pagos</span>
-          </NavLink>
         </nav>
 
         {/* Información del usuario y logout */}

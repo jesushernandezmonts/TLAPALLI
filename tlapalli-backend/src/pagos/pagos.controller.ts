@@ -17,7 +17,7 @@ export class PagosController {
   }
 
   @Get()
-  @Roles('admin')
+  @Roles('admin', 'profesor')
   findAll() {
     return this.pagosService.findAll();
   }
@@ -29,7 +29,7 @@ export class PagosController {
   }
 
   @Delete(':id')
-  @Roles('admin')
+  @Roles('admin', 'profesor')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.pagosService.remove(id);
   }
