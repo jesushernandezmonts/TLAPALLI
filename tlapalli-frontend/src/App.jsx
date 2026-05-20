@@ -8,6 +8,7 @@ import Inscripciones from './pages/Inscripciones';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ActivarCuenta from './pages/ActivarCuenta';
+import AcceptInvitation from './pages/AcceptInvitation';
 import AuthSuccess from './pages/AuthSuccess';
 import Pagos from './pages/Pagos';
 import Layout from './components/Layout';
@@ -21,6 +22,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/activar-cuenta" element={<ActivarCuenta />} />
+      <Route path="/accept-invitation" element={<AcceptInvitation />} />
       <Route path="/auth/success" element={<AuthSuccess />} />
 
       {/* Rutas compartidas (Admin y Profesor) */}

@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Body, Req, Res, HttpCode, HttpStatus, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, Res, HttpCode, HttpStatus, BadRequestException, UseGuards, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import type { Request, Response } from 'express';
+import { GoogleAuthGuard } from './strategies/google-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -88,11 +89,11 @@ export class AuthController {
 
   // ========== GOOGLE AUTH ==========
   @Get('google')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleAuthGuard)
   async googleAuth(@Req() req) {}
 
   @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleAuthGuard)
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     try {
       const result = await this.authService.googleLogin(req);
@@ -114,6 +115,12 @@ export class AuthController {
       const errorMsg = encodeURIComponent(error.message || 'Error de autenticación');
       return res.redirect(`${frontendUrl}/login?error=${errorMsg}`);
     }
+  }
+
+  // ========== VALIDAR INVITACIÓN ==========
+  @Get('validate-invitation')
+  async validateInvitation(@Query('token') token: string) {
+    return this.authService.validateInvitation(token);
   }
 
   // ========== ACTIVAR CUENTA (Opción B) ==========

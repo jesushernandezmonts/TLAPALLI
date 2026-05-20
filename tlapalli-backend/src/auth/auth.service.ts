@@ -39,7 +39,9 @@ export class AuthService {
   async login(email: string, password: string) {
     // Buscar usuario
     const usuario = await this.prisma.usuario.findUnique({ where: { email } });
-    if (!usuario) throw new UnauthorizedException('Credenciales inválidas');
+    if (!usuario) {
+      throw new UnauthorizedException('Esta cuenta no está registrada en el sistema.');
+    }
 
     // Verificar que el instructor esté activo (si es profesor)
     if (usuario.instructorId) {
@@ -110,69 +112,101 @@ export class AuthService {
     }
 
     const { email, googleId, fullName } = req.user;
+    const invitationToken = req.query?.state;
 
-    // 1. Buscar usuario por email (Unificación automática)
-    let usuario = await this.prisma.usuario.findUnique({
-      where: { email },
-    });
+    let usuario;
 
-    if (usuario) {
-      // Si el usuario existe pero no tiene googleId, lo vinculamos ahora
-      if (!usuario.googleId) {
-        usuario = await this.prisma.usuario.update({
-          where: { id: usuario.id },
-          data: { googleId },
-        });
+    if (invitationToken) {
+      // 1. Validar el token de invitación
+      usuario = await this.prisma.usuario.findFirst({
+        where: {
+          resetToken: invitationToken,
+          resetTokenExp: { gt: new Date() },
+        },
+      });
+
+      if (!usuario) {
+        throw new BadRequestException('El enlace de invitación es inválido o ha expirado.');
       }
 
-      // Si es profesor con instructor vinculado, activar el instructor automáticamente
+      // 2. Verificar que el correo de Google coincida con el correo del usuario
+      if (usuario.email.toLowerCase() !== email.toLowerCase()) {
+        throw new BadRequestException('El correo de Google no coincide con el correo de la invitación.');
+      }
+
+      // 3. Vincular googleId, limpiar resetToken
+      usuario = await this.prisma.usuario.update({
+        where: { id: usuario.id },
+        data: {
+          googleId,
+          resetToken: null,
+          resetTokenExp: null,
+        },
+      });
+
+      // 4. Activar el instructor
       if (usuario.instructorId) {
-        const instructor = await this.prisma.instructor.findUnique({ where: { id: usuario.instructorId } });
+        await this.prisma.instructor.update({
+          where: { id: usuario.instructorId },
+          data: { estado: 'Activo' },
+        });
+      }
+    } else {
+      // Flujo de login tradicional con Google (sin token de invitación)
+      usuario = await this.prisma.usuario.findUnique({
+        where: { email },
+      });
+
+      if (usuario) {
+        // Si es profesor con instructor vinculado, verificar estado
+        if (usuario.instructorId) {
+          const instructor = await this.prisma.instructor.findUnique({ where: { id: usuario.instructorId } });
+          if (instructor) {
+            if (instructor.estado === 'Inactivo') {
+              throw new ForbiddenException('Tu cuenta ha sido desactivada. Contacta al administrador.');
+            }
+            if (instructor.estado === 'Pendiente') {
+              throw new UnauthorizedException('Tu cuenta aún no ha sido activada. Por favor, usa el enlace enviado a tu correo de invitación para activarla por primera vez con Google.');
+            }
+          }
+        }
+
+        // Si el usuario existe pero no tiene googleId, lo vinculamos ahora
+        if (!usuario.googleId) {
+          usuario = await this.prisma.usuario.update({
+            where: { id: usuario.id },
+            data: { googleId },
+          });
+        }
+      } else {
+        // Si NO existe el usuario, verificamos si es un instructor registrado
+        const instructor = await this.prisma.instructor.findFirst({
+          where: { email },
+        });
+
         if (instructor) {
           if (instructor.estado === 'Inactivo') {
             throw new ForbiddenException('Tu cuenta ha sido desactivada. Contacta al administrador.');
           }
-          // Activar si estaba pendiente
           if (instructor.estado === 'Pendiente') {
-            await this.prisma.instructor.update({
-              where: { id: instructor.id },
-              data: { estado: 'Activo' },
-            });
+            throw new UnauthorizedException('Tu cuenta aún no ha sido activada. Por favor, usa el enlace enviado a tu correo de invitación para activarla por primera vez con Google.');
           }
+
+          // El admin ya lo dio de alta como instructor, creamos su usuario automáticamente
+          usuario = await this.prisma.usuario.create({
+            data: {
+              nombre: instructor.nombre,
+              email: email,
+              googleId: googleId,
+              passwordHash: null,
+              rol: 'profesor',
+              instructorId: instructor.id,
+            },
+          });
+        } else {
+          // No existe ni como usuario ni como instructor
+          throw new UnauthorizedException('Esta cuenta no está registrada en el sistema.');
         }
-      }
-    } else {
-      // 2. Si NO existe el usuario, verificamos si es un instructor registrado por el Admin
-      const instructor = await this.prisma.instructor.findFirst({
-        where: { email },
-      });
-
-      if (instructor) {
-        if (instructor.estado === 'Inactivo') {
-          throw new ForbiddenException('Tu cuenta ha sido desactivada. Contacta al administrador.');
-        }
-
-        // El admin ya lo dio de alta como instructor, creamos su usuario automáticamente
-        usuario = await this.prisma.usuario.create({
-          data: {
-            nombre: instructor.nombre,
-            email: email,
-            googleId: googleId,
-            passwordHash: null,
-            rol: 'profesor',
-            instructorId: instructor.id,
-          },
-        });
-
-        // Activar el instructor
-        await this.prisma.instructor.update({
-          where: { id: instructor.id },
-          data: { estado: 'Activo' },
-        });
-      } else {
-        // 3. No existe ni como usuario ni como instructor
-        // BLOQUEAR: Solo usuarios pre-registrados por el admin pueden entrar
-        throw new UnauthorizedException('No tienes una cuenta registrada en el sistema. Contacta al administrador.');
       }
     }
 
@@ -251,19 +285,37 @@ export class AuthService {
     return { message: 'Cuenta activada exitosamente. Ya puedes iniciar sesión.' };
   }
 
+  // ========== VALIDAR INVITACIÓN ==========
+  async validateInvitation(token: string) {
+    const usuario = await this.prisma.usuario.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExp: { gt: new Date() },
+      },
+    });
+
+    if (!usuario) {
+      throw new BadRequestException('El enlace de invitación es inválido o ha expirado.');
+    }
+
+    return {
+      nombre: usuario.nombre,
+      email: usuario.email,
+    };
+  }
+
   // ========== FORGOT PASSWORD ==========
   async forgotPassword(email: string) {
     const usuario = await this.prisma.usuario.findUnique({ where: { email } });
     if (!usuario) {
-      // Por seguridad no decimos si el email existe o no
-      return { message: 'Si el correo está registrado, recibirás un enlace de recuperación' };
+      throw new BadRequestException('Esta cuenta no está registrada en el sistema.');
     }
 
     // Verificar que esté activo
     if (usuario.instructorId) {
       const instructor = await this.prisma.instructor.findUnique({ where: { id: usuario.instructorId } });
       if (instructor && instructor.estado === 'Inactivo') {
-        return { message: 'Si el correo está registrado, recibirás un enlace de recuperación' };
+        throw new BadRequestException('Tu cuenta ha sido desactivada. Contacta al administrador.');
       }
     }
 

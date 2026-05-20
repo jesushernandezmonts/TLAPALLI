@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
       // dejamos que AuthSuccess maneje la sesión inicial para evitar conflictos.
       const params = new URLSearchParams(window.location.search);
       if (window.location.pathname.includes('/auth/success') || params.has('token')) {
-        setLoading(false);
+        // Dejamos que loading continúe en true para evitar redirección prematura en PrivateRoute
         return;
       }
 
@@ -72,7 +72,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const loginWithToken = useCallback((token) => {
-    if (!token) return null;
+    if (!token) {
+      setLoading(false);
+      return null;
+    }
     
     setAccessToken(token);
     try {
@@ -90,6 +93,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error('Error decoding token', error);
       clearAccessToken();
+      setLoading(false);
       return null;
     }
   }, []);

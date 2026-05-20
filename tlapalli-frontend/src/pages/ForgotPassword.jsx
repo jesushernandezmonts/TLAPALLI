@@ -19,7 +19,7 @@ function ForgotPassword() {
       await api.post('/auth/forgot-password', { email });
       setSuccess(true);
     } catch (err) {
-      setError('Ocurrió un error. Intenta de nuevo.');
+      setError(err.response?.data?.message || 'Ocurrió un error. Intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -70,12 +70,16 @@ function ForgotPassword() {
               <AnimatePresence>
                 {error && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="flex items-center gap-2 text-red-400 bg-red-400/10 p-3 rounded-xl border border-red-400/20"
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl backdrop-blur-xl shadow-lg text-left"
                   >
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <p className="text-xs font-medium">{error}</p>
+                    <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-red-300">Error de Recuperación</h4>
+                      <p className="text-xs font-medium text-red-200/80 leading-relaxed">{error}</p>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

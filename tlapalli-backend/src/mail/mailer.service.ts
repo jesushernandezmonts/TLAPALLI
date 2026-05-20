@@ -79,7 +79,7 @@ export class MailerService {
 
   async sendActivationEmail(email: string, token: string, nombre: string, tallerNombre?: string) {
     const frontendUrl = this.configService.get('FRONTEND_URL');
-    const activationUrl = `${frontendUrl}/activar-cuenta?token=${token}`;
+    const activationUrl = `${frontendUrl}/accept-invitation?token=${token}`;
 
     const tallerText = tallerNombre
       ? ` como profesor de <strong>${tallerNombre}</strong>`
@@ -92,21 +92,21 @@ export class MailerService {
           <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 3px;">Centro Cultural Huamantla</p>
         </div>
         <div style="padding: 40px 30px; background: #fefefe;">
-          <h2 style="color: #1a1a2e; font-size: 22px; margin: 0 0 16px;">¡Bienvenido a Tlapalli!</h2>
-          <p style="color: #555; font-size: 15px; line-height: 1.6;">Hola <strong>${nombre}</strong>. Has sido registrado${tallerText} en el Centro Cultural Huamantla.</p>
-          <p style="color: #555; font-size: 15px; line-height: 1.6;">Para activar tu cuenta y crear tu contraseña, haz clic en el siguiente botón:</p>
+          <h2 style="color: #1a1a2e; font-size: 22px; margin: 0 0 16px;">¡Invitación de Profesor!</h2>
+          <p style="color: #555; font-size: 15px; line-height: 1.6;">¡Hola, <strong>${nombre}</strong>!</p>
+          <p style="color: #555; font-size: 15px; line-height: 1.6;">El administrador de Tlapalli te ha invitado a unirte${tallerText}. Para acceder a tu cuenta, haz clic en el siguiente enlace e inicia sesión con tu cuenta de Google:</p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${activationUrl}" style="background: linear-gradient(135deg, #db2777, #9333ea); color: white; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 15px; display: inline-block;">Activar mi cuenta</a>
+            <a href="${activationUrl}" style="background: linear-gradient(135deg, #db2777, #9333ea); color: white; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 15px; display: inline-block;">Aceptar Invitación y Vincular Google</a>
           </div>
           <p style="font-size: 12px; color: #999;">O copia y pega este enlace en tu navegador:</p>
           <p style="font-size: 12px; color: #db2777; word-break: break-all;">${activationUrl}</p>
         </div>
         <div style="background: #f8f4ff; padding: 20px 30px; border-top: 1px solid #f3e8ff;">
-          <p style="font-size: 11px; color: #999; margin: 0;">⏰ Este enlace expirará en 24 horas. Si no reconoces este registro, puedes ignorar este correo.</p>
+          <p style="font-size: 11px; color: #999; margin: 0;">⏰ Este enlace expirará en 24 horas. Si no reconoces esta invitación, puedes ignorar este correo.</p>
         </div>
       </div>
     `;
 
-    await this.sendMail(email, 'Activa tu cuenta en Tlapalli - Centro Cultural Huamantla', html);
+    await this.sendMail(email, 'Invitación a unirte como Profesor - TLAPALLI', html);
   }
 }

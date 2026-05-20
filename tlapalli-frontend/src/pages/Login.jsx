@@ -20,9 +20,20 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login, bloqueoMsg, setBloqueoMsg } = useAuth();
+  const { login, bloqueoMsg, setBloqueoMsg, user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // Redirigir si el usuario ya está autenticado
+  useEffect(() => {
+    if (user) {
+      if (user.rol === 'admin') {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate('/mis-grupos', { replace: true });
+      }
+    }
+  }, [user, navigate]);
 
   // Capturar error de Google OAuth redirigido desde el backend
   useEffect(() => {
@@ -47,10 +58,10 @@ function Login() {
       }
     } catch (err) {
       if (err.response?.status === 401) {
-        setError('Credenciales inválidas. Verifique su correo y contraseña.');
+        setError(err.response?.data?.message || 'Credenciales inválidas. Verifique su correo y contraseña.');
       } else if (err.response?.status === 403) {
         if (!bloqueoMsg) {
-          setError('Cuenta bloqueada temporalmente.');
+          setError(err.response?.data?.message || 'Cuenta bloqueada temporalmente.');
         }
       } else if (err.response?.status === 429) {
         setError('Demasiados intentos. Espere un minuto antes de intentar de nuevo.');
@@ -85,28 +96,28 @@ function Login() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative z-20 w-full max-w-lg px-4"
       >
-        <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
-          <div className="flex flex-col items-center mb-10">
+        <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2rem] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
+          <div className="flex flex-col items-center mb-6">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-24 h-24 mb-6 rounded-3xl overflow-hidden shadow-2xl border-2 border-white/30"
+              className="w-16 h-16 mb-2 rounded-2xl overflow-hidden shadow-2xl border border-white/30"
             >
               <img src="/tlapalli-logo.png" alt="Tlapalli Logo" className="w-full h-full object-cover" />
             </motion.div>
-            <h1 className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-100 to-zinc-400 drop-shadow-sm">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-100 to-zinc-400 drop-shadow-sm">
               TLAPALLI
             </h1>
-            <p className="text-white/60 mt-2 font-medium tracking-widest uppercase text-xs">Gestión Cultural & Educativa</p>
+            <p className="text-white/60 mt-1 font-medium tracking-widest uppercase text-[10px]">Gestión Cultural & Educativa</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-white/80 ml-1">Usuario</label>
+              <label className="text-sm font-semibold text-white/80 ml-1">Correo</label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
                 <input
-                  className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-4 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
+                  className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
                   type="email"
                   placeholder="admin@tlapalli.com"
                   value={email}
@@ -122,7 +133,7 @@ function Login() {
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
                 <input
-                  className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-4 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
+                  className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
@@ -168,13 +179,16 @@ function Login() {
             <AnimatePresence>
               {error && !bloqueoMsg && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="flex items-center gap-2 text-red-400 bg-red-400/10 p-3 rounded-xl border border-red-400/20"
+                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                  className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl backdrop-blur-xl shadow-lg text-left"
                 >
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <p className="text-xs font-medium">{error}</p>
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold text-red-300">Error de Acceso</h4>
+                    <p className="text-xs font-medium text-red-200/80 leading-relaxed">{error}</p>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -183,7 +197,7 @@ function Login() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               disabled={loading}
-              className="w-full relative group h-14 overflow-hidden rounded-2xl font-bold text-white transition-all shadow-lg disabled:opacity-60"
+              className="w-full relative group h-12 overflow-hidden rounded-2xl font-bold text-white transition-all shadow-lg disabled:opacity-60"
               type="submit"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-orange-600 to-pink-600 bg-[length:200%_auto] group-hover:bg-right transition-all duration-500" />
@@ -192,7 +206,7 @@ function Login() {
               </span>
             </motion.button>
 
-            <div className="relative py-4">
+            <div className="relative py-2">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-white/10"></div>
               </div>
@@ -202,14 +216,17 @@ function Login() {
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ 
+                scale: 1.02,
+                boxShadow: "0 0 20px rgba(236, 72, 153, 0.3)"
+              }}
               whileTap={{ scale: 0.98 }}
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 h-14 bg-white/5 border border-white/10 rounded-2xl font-bold text-white hover:bg-white/10 transition-all shadow-lg"
+              className="w-full flex items-center justify-center gap-3 h-12 bg-white/10 hover:bg-white/15 border border-white/20 hover:border-pink-500/50 rounded-2xl font-bold text-white transition-all shadow-lg"
             >
               <GoogleIcon className="w-5 h-5" />
-              Google
+              <span>Iniciar Sesión con Google</span>
             </motion.button>
           </form>
         </div>
