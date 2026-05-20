@@ -11,6 +11,7 @@ import ActivarCuenta from './pages/ActivarCuenta';
 import AcceptInvitation from './pages/AcceptInvitation';
 import AuthSuccess from './pages/AuthSuccess';
 import Pagos from './pages/Pagos';
+import Reportes from './pages/Reportes';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -33,6 +34,7 @@ function App() {
           <Route path="/instructores" element={<Instructores />} />
           <Route path="/talleres" element={<Talleres />} />
           <Route path="/inscripciones" element={<Inscripciones />} />
+          <Route path="/reportes" element={<Reportes />} />
         </Route>
       </Route>
 

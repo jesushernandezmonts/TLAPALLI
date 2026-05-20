@@ -10,7 +10,8 @@ import {
   BookOpen,
   LogOut,
   User,
-  X
+  X,
+  BarChart3
 } from 'lucide-react';
 
 function Sidebar({ isOpen, onClose }) {
@@ -76,6 +77,10 @@ function Sidebar({ isOpen, onClose }) {
               <NavLink to="/inscripciones" onClick={onClose} className={linkClass}>
                 <BookOpen size={20} />
                 <span className="font-medium">Inscripciones</span>
+              </NavLink>
+              <NavLink to="/reportes" onClick={onClose} className={linkClass}>
+                <BarChart3 size={20} />
+                <span className="font-medium">Reportes</span>
               </NavLink>
             </>
           ) : (

@@ -71,32 +71,43 @@ body {
 }
 
 @media print {
-  /* Ocultar todo lo demás de la página */
-  body * {
-    visibility: hidden;
+  #root {
+    display: none !important;
   }
-  /* Mostrar únicamente la sección imprimible */
-  #print-section, #print-section * {
-    visibility: visible;
+  
+  html, body {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    background-color: white !important;
+    background-image: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
+
   #print-section {
     display: block !important;
-    position: absolute;
-    left: 0;
-    top: 0;
+    position: relative !important;
     width: 100%;
     margin: 0;
     padding: 0;
     background-color: white !important;
     color: #1a1a1a !important;
   }
-  /* Remover fondos e imágenes corporativos del body al imprimir */
-  html, body {
-    background-image: none !important;
-    background-color: white !important;
-  }
+
   /* Asegurar saltos de línea elegantes en tablas grandes */
-  tr {
-    page-break-inside: avoid;
+  table { page-break-inside: auto; border-collapse: collapse; }
+  tr { page-break-inside: avoid; page-break-after: auto; }
+  td, th { page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+
+  /* Repetir marca de agua en todas las páginas */
+  .watermark-print {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: -1 !important;
   }
 }

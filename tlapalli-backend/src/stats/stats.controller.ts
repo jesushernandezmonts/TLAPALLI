@@ -14,4 +14,11 @@ export class StatsController {
   getDashboardStats() {
     return this.statsService.getDashboardStats();
   }
+
+  @Get('reportes')
+  @Roles('admin')
+  getReportesData() {
+    return this.statsService.getReportesData();
+  }
 }
+
