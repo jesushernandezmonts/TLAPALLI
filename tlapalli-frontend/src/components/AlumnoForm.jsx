@@ -55,7 +55,10 @@ function AlumnoForm({ alumno, onClose, onSave }) {
     const errors = {};
     if (!form.nombre.trim()) errors.nombre = 'El nombre es obligatorio.';
     if (!form.apellidoPaterno.trim()) errors.apellidoPaterno = 'El apellido paterno es obligatorio.';
-    if (form.telefono && !/^\d{10}$/.test(form.telefono.trim())) {
+    if (!form.apellidoMaterno.trim()) errors.apellidoMaterno = 'El apellido materno es obligatorio.';
+    if (!form.telefono.trim()) {
+      errors.telefono = 'El teléfono es obligatorio.';
+    } else if (!/^\d{10}$/.test(form.telefono.trim())) {
       errors.telefono = 'El teléfono debe tener exactamente 10 dígitos.';
     }
     if (form.curp && form.curp.trim().length !== 18) {
@@ -112,8 +115,6 @@ function AlumnoForm({ alumno, onClose, onSave }) {
       if (!cleanedForm.curp) delete cleanedForm.curp;
       if (!cleanedForm.fechaNacimiento) delete cleanedForm.fechaNacimiento;
       if (!cleanedForm.padecimientos) delete cleanedForm.padecimientos;
-      if (!cleanedForm.telefono) delete cleanedForm.telefono;
-      if (!cleanedForm.apellidoMaterno) delete cleanedForm.apellidoMaterno;
 
       let savedAlumno;
       if (alumno) {
@@ -185,17 +186,28 @@ function AlumnoForm({ alumno, onClose, onSave }) {
           )}
         </div>
         <div className="space-y-1">
-          <label className="text-[10px] text-white/40 uppercase font-black px-1">Apellido Materno</label>
+          <label className="text-[10px] text-white/40 uppercase font-black px-1">
+            Apellido Materno <span className="text-pink-500">*</span>
+          </label>
           <input
             name="apellidoMaterno"
             placeholder="Ej. García"
             value={form.apellidoMaterno}
             onChange={handleChange}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full focus:border-pink-500/50 outline-none transition"
+            className={`bg-white/5 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${
+              fieldErrors.apellidoMaterno ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+            }`}
           />
+          {fieldErrors.apellidoMaterno && (
+            <p className="text-[10px] text-rose-400 font-semibold px-1 flex items-center gap-1">
+              <span>⚠</span> {fieldErrors.apellidoMaterno}
+            </p>
+          )}
         </div>
         <div className="space-y-1 md:col-span-2">
-          <label className="text-[10px] text-white/40 uppercase font-black px-1">Teléfono</label>
+          <label className="text-[10px] text-white/40 uppercase font-black px-1">
+            Teléfono <span className="text-pink-500">*</span>
+          </label>
           <input
             name="telefono"
             placeholder="10 dígitos"
