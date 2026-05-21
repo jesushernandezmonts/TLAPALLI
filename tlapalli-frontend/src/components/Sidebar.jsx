@@ -37,7 +37,7 @@ function Sidebar({ isOpen, onClose }) {
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-black/80 lg:bg-black/40 backdrop-blur-2xl border-r border-white/10 flex flex-col p-6 transition-transform duration-300 transform
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:block
+        lg:translate-x-0 lg:static lg:flex
       `}>
         <div className="flex items-center justify-between mb-10 px-2">
           <div className="flex items-center gap-3">
