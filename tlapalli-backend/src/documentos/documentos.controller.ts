@@ -1,8 +1,9 @@
-import { Controller, Post, Get, Param, Delete, UseInterceptors, UploadedFile, Body, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Get, Param, Delete, UseInterceptors, UploadedFile, Body, ParseIntPipe, Res } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentosService } from './documentos.service';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import * as express from 'express';
 
 @Controller('documentos')
 export class DocumentosController {
@@ -27,6 +28,21 @@ export class DocumentosController {
     return this.documentosService.upload(alumnoId, file.originalname, tipo, url);
   }
 
+  @Post('scan')
+  async scan(
+    @Body('dialog') dialog: boolean = false,
+    @Res() res: express.Response,
+  ) {
+    const pdfBuffer = await this.documentosService.scanDocument(dialog);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename=documento_escaneado.pdf',
+      'Content-Length': pdfBuffer.length,
+    });
+    res.end(pdfBuffer);
+  }
+
+
   @Get('alumno/:alumnoId')
   findByAlumno(@Param('alumnoId', ParseIntPipe) alumnoId: number) {
     return this.documentosService.findByAlumno(alumnoId);
@@ -37,3 +53,4 @@ export class DocumentosController {
     return this.documentosService.remove(id);
   }
 }
+

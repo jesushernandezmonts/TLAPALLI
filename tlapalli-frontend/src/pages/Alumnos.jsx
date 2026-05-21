@@ -177,7 +177,8 @@ function Alumnos() {
       </div>
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}
-             title={editAlumno ? 'Editar Alumno' : 'Nuevo Alumno'}>
+             title={editAlumno ? 'Editar Alumno' : 'Nuevo Alumno'}
+             maxWidth="max-w-3xl">
         <AlumnoForm alumno={editAlumno} onClose={() => setModalOpen(false)} onSave={handleSave} />
         {editAlumno && (
           <div className="mt-8 border-t border-white/10 pt-6">
