@@ -48,7 +48,7 @@ function Talleres() {
   };
 
   const filtered = talleres.filter(t =>
-    t.nombreTaller.toLowerCase().includes(search.toLowerCase())
+    (t.nombreTaller || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (

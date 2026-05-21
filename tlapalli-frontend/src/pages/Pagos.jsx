@@ -61,10 +61,12 @@ function Pagos() {
     }
   };
 
-  const filteredPagos = pagos.filter(p => 
-    p.alumno?.nombre.toLowerCase().includes(search.toLowerCase()) ||
-    p.mesCorrespondiente.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredPagos = pagos.filter(p => {
+    const nombre = `${p.alumno?.nombre || ''} ${p.alumno?.apellidoPaterno || ''} ${p.alumno?.apellidoMaterno || ''}`.toLowerCase();
+    const mes = (p.mesCorrespondiente || '').toLowerCase();
+    const searchTerm = search.toLowerCase();
+    return nombre.includes(searchTerm) || mes.includes(searchTerm);
+  });
 
   return (
     <div className="space-y-6">

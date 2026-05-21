@@ -70,10 +70,12 @@ function Alumnos() {
     }
   };
 
-  const filtered = alumnos.filter(a =>
-    a.nombre.toLowerCase().includes(search.toLowerCase()) ||
-    a.curp.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = alumnos.filter(a => {
+    const nombreCompleto = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.toLowerCase();
+    const curp = (a.curp || '').toLowerCase();
+    const searchTerm = search.toLowerCase();
+    return nombreCompleto.includes(searchTerm) || curp.includes(searchTerm);
+  });
 
   return (
     <div className="space-y-6">
@@ -126,15 +128,19 @@ function Alumnos() {
                   <td>
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 font-bold">
-                        {a.nombre[0]}
+                        {a.nombre ? a.nombre[0].toUpperCase() : '?'}
                       </div>
                       <div>
-                        <div className="font-bold text-white/90 drop-shadow-sm">{a.nombre} {a.apellidoPaterno} {a.apellidoMaterno}</div>
+                        <div className="font-bold text-white/90 drop-shadow-sm">
+                          {`${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim() || 'Sin Nombre'}
+                        </div>
                         <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">ID: #{a.id}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="font-mono text-xs text-white/80 font-medium">{a.curp}</td>
+                  <td className="font-mono text-xs text-white/80 font-medium">
+                    {a.curp || <span className="opacity-40">No registrado</span>}
+                  </td>
                   <td className="text-sm text-white/80 font-medium">{a.telefono || <span className="opacity-40">No registrado</span>}</td>
                   <td className="text-center">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
