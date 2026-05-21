@@ -4,7 +4,8 @@ import Modal from '../components/Modal';
 import AlumnoForm from '../components/AlumnoForm';
 import ExpedienteDigital from '../components/ExpedienteDigital';
 import ConfirmModal from '../components/ConfirmModal';
-import { Plus, Search, Edit3, Trash2, Power } from 'lucide-react';
+import AlumnoDetail from '../components/AlumnoDetail';
+import { Plus, Search, Edit3, Trash2, Power, Eye } from 'lucide-react';
 
 function Alumnos() {
   const [alumnos, setAlumnos] = useState([]);
@@ -12,6 +13,7 @@ function Alumnos() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editAlumno, setEditAlumno] = useState(null);
+  const [viewAlumno, setViewAlumno] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [alumnoToDelete, setAlumnoToDelete] = useState(null);
 
@@ -80,23 +82,26 @@ function Alumnos() {
           <h1 className="text-2xl font-bold text-white/90">Gestión de Alumnos</h1>
           <p className="text-white/40 text-sm">Administra la base de datos de estudiantes</p>
         </div>
-        <button 
-          onClick={handleNew} 
-          className="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white font-bold px-6 py-3 rounded-2xl transition shadow-lg shadow-pink-600/20 flex items-center justify-center gap-2"
-        >
-          <Plus size={20} />
-          Nuevo Alumno
-        </button>
       </div>
       
-      <div className="relative w-full max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-        <input
-          className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-3 placeholder-white/20 text-white focus:outline-none focus:border-pink-500/50 backdrop-blur-sm transition-all"
-          placeholder="Buscar por nombre o CURP..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* Barra de Controles Unificada */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/5 border border-white/10 rounded-3xl p-4 backdrop-blur-md">
+        <div className="relative flex-1 max-w-md w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-pink-400" />
+          <input
+            className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-3 placeholder-white/30 text-white focus:outline-none focus:border-pink-500/50 focus:bg-white/10 focus:ring-2 focus:ring-pink-500/20 hover:border-white/20 transition-all text-sm"
+            placeholder="Buscar por nombre o CURP..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <button 
+          onClick={handleNew} 
+          className="w-full md:w-auto bg-pink-600 hover:bg-pink-700 text-white font-black uppercase tracking-wider text-xs px-6 py-3.5 rounded-2xl transition shadow-lg shadow-pink-600/20 flex items-center justify-center gap-2 cursor-pointer shrink-0"
+        >
+          <Plus size={16} />
+          Nuevo Alumno
+        </button>
       </div>
 
       <div className="responsive-table-container">
@@ -143,6 +148,13 @@ function Alumnos() {
                   <td className="text-right">
                     <div className="flex justify-end gap-1 sm:gap-2">
                       <button 
+                        onClick={() => setViewAlumno(a)} 
+                        className="p-2.5 bg-white/5 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-purple-500/30" 
+                        title="Ver Ficha y Expediente"
+                      >
+                        <Eye size={16} />
+                      </button>
+                      <button 
                         onClick={() => handleEdit(a)} 
                         className="p-2.5 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-cyan-500/30" 
                         title="Editar Datos y Expediente"
@@ -184,6 +196,14 @@ function Alumnos() {
           <div className="mt-8 border-t border-white/10 pt-6">
             <ExpedienteDigital alumnoId={editAlumno.id} />
           </div>
+        )}
+      </Modal>
+
+      <Modal isOpen={viewAlumno !== null} onClose={() => setViewAlumno(null)}
+             title="Detalles del Alumno"
+             maxWidth="max-w-2xl">
+        {viewAlumno && (
+          <AlumnoDetail alumno={viewAlumno} onClose={() => setViewAlumno(null)} />
         )}
       </Modal>
 
