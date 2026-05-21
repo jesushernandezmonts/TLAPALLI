@@ -24,6 +24,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [scanning, setScanning] = useState(null); // 'acta_nacimiento', 'curp', etc.
 
   useEffect(() => {
@@ -42,7 +43,25 @@ function AlumnoForm({ alumno, onClose, onSave }) {
   }, [alumno]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    // Limpiar error del campo cuando el usuario empieza a escribir
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validate = () => {
+    const errors = {};
+    if (!form.nombre.trim()) errors.nombre = 'El nombre es obligatorio.';
+    if (!form.apellidoPaterno.trim()) errors.apellidoPaterno = 'El apellido paterno es obligatorio.';
+    if (form.telefono && !/^\d{10}$/.test(form.telefono.trim())) {
+      errors.telefono = 'El teléfono debe tener exactamente 10 dígitos.';
+    }
+    if (form.curp && form.curp.trim().length !== 18) {
+      errors.curp = 'La CURP debe tener exactamente 18 caracteres.';
+    }
+    return errors;
   };
 
   const handleFileChange = (e, tipo) => {
@@ -80,6 +99,13 @@ function AlumnoForm({ alumno, onClose, onSave }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+    setFieldErrors({});
     setLoading(true);
     try {
       const cleanedForm = { ...form };
@@ -121,26 +147,42 @@ function AlumnoForm({ alumno, onClose, onSave }) {
       {/* Información Personal */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div className="space-y-1 md:col-span-2">
-          <label className="text-[10px] text-white/40 uppercase font-black px-1">Nombre(s)</label>
+          <label className="text-[10px] text-white/40 uppercase font-black px-1">
+            Nombre(s) <span className="text-pink-500">*</span>
+          </label>
           <input
             name="nombre"
             placeholder="Ej. Juan Carlos"
             value={form.nombre}
             onChange={handleChange}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full focus:border-pink-500/50 outline-none transition"
-            required
+            className={`bg-white/5 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${
+              fieldErrors.nombre ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+            }`}
           />
+          {fieldErrors.nombre && (
+            <p className="text-[10px] text-rose-400 font-semibold px-1 flex items-center gap-1">
+              <span>⚠</span> {fieldErrors.nombre}
+            </p>
+          )}
         </div>
         <div className="space-y-1">
-          <label className="text-[10px] text-white/40 uppercase font-black px-1">Apellido Paterno</label>
+          <label className="text-[10px] text-white/40 uppercase font-black px-1">
+            Apellido Paterno <span className="text-pink-500">*</span>
+          </label>
           <input
             name="apellidoPaterno"
             placeholder="Ej. Pérez"
             value={form.apellidoPaterno}
             onChange={handleChange}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full focus:border-pink-500/50 outline-none transition"
-            required
+            className={`bg-white/5 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${
+              fieldErrors.apellidoPaterno ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+            }`}
           />
+          {fieldErrors.apellidoPaterno && (
+            <p className="text-[10px] text-rose-400 font-semibold px-1 flex items-center gap-1">
+              <span>⚠</span> {fieldErrors.apellidoPaterno}
+            </p>
+          )}
         </div>
         <div className="space-y-1">
           <label className="text-[10px] text-white/40 uppercase font-black px-1">Apellido Materno</label>
@@ -159,8 +201,16 @@ function AlumnoForm({ alumno, onClose, onSave }) {
             placeholder="10 dígitos"
             value={form.telefono}
             onChange={handleChange}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full focus:border-pink-500/50 outline-none transition"
+            maxLength={10}
+            className={`bg-white/5 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${
+              fieldErrors.telefono ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+            }`}
           />
+          {fieldErrors.telefono && (
+            <p className="text-[10px] text-rose-400 font-semibold px-1 flex items-center gap-1">
+              <span>⚠</span> {fieldErrors.telefono}
+            </p>
+          )}
         </div>
         <div className="space-y-1 md:col-span-2">
           <label className="text-[10px] text-white/40 uppercase font-black px-1">Padecimientos o Notas Médicas (Opcional)</label>
@@ -214,6 +264,17 @@ function AlumnoForm({ alumno, onClose, onSave }) {
       {error && (
         <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-2.5 rounded-xl text-xs font-medium">
           {error}
+        </div>
+      )}
+
+      {/* Resumen de errores si los hay */}
+      {Object.keys(fieldErrors).length > 0 && (
+        <div className="bg-rose-500/10 border border-rose-500/25 rounded-xl p-3 flex items-start gap-2">
+          <span className="text-rose-400 text-base leading-none mt-0.5">⚠</span>
+          <div>
+            <p className="text-rose-400 text-xs font-black uppercase tracking-wide">Campos incompletos o incorrectos</p>
+            <p className="text-rose-300/70 text-[11px] mt-0.5">Revisa los campos marcados en rojo antes de continuar.</p>
+          </div>
         </div>
       )}
 
