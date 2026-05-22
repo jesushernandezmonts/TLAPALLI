@@ -85,7 +85,7 @@ function Alumnos() {
           <p className="text-white/40 text-sm">Administra la base de datos de estudiantes</p>
         </div>
       </div>
-      
+
       {/* Barra de Controles Unificada */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/5 border border-white/10 rounded-3xl p-4 backdrop-blur-md">
         <div className="relative flex-1 max-w-md w-full">
@@ -97,8 +97,8 @@ function Alumnos() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <button 
-          onClick={handleNew} 
+        <button
+          onClick={handleNew}
           className="w-full md:w-auto bg-pink-600 hover:bg-pink-700 text-white font-black uppercase tracking-wider text-xs px-6 py-3.5 rounded-2xl transition shadow-lg shadow-pink-600/20 flex items-center justify-center gap-2 cursor-pointer shrink-0"
         >
           <Plus size={16} />
@@ -111,7 +111,7 @@ function Alumnos() {
           <thead>
             <tr>
               <th>Nombre Completo</th>
-              <th>CURP</th>
+              <th>Padecimientos</th>
               <th>Teléfono</th>
               <th className="text-center">Estado</th>
               <th className="text-right">Acciones</th>
@@ -138,49 +138,54 @@ function Alumnos() {
                       </div>
                     </div>
                   </td>
-                  <td className="font-mono text-xs text-white/80 font-medium">
-                    {a.curp || <span className="opacity-40">No registrado</span>}
+                  <td className="text-xs text-white/80 font-medium">
+                    {a.padecimientos ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20 max-w-[180px] select-none" title={a.padecimientos}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>
+                        <span className="truncate">{a.padecimientos}</span>
+                      </span>
+                    ) : (
+                      <span className="opacity-40 italic">Ninguno</span>
+                    )}
                   </td>
                   <td className="text-sm text-white/80 font-medium">{a.telefono || <span className="opacity-40">No registrado</span>}</td>
                   <td className="text-center">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
-                      a.estatusActivo 
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${a.estatusActivo
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                         : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                    }`}>
+                      }`}>
                       {a.estatusActivo ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
                   <td className="text-right">
                     <div className="flex justify-end gap-1 sm:gap-2">
-                      <button 
-                        onClick={() => setViewAlumno(a)} 
-                        className="p-2.5 bg-white/5 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-purple-500/30" 
+                      <button
+                        onClick={() => setViewAlumno(a)}
+                        className="p-2.5 bg-white/5 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-purple-500/30"
                         title="Ver Ficha y Expediente"
                       >
                         <Eye size={16} />
                       </button>
-                      <button 
-                        onClick={() => handleEdit(a)} 
-                        className="p-2.5 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-cyan-500/30" 
+                      <button
+                        onClick={() => handleEdit(a)}
+                        className="p-2.5 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-cyan-500/30"
                         title="Editar Datos y Expediente"
                       >
                         <Edit3 size={16} />
                       </button>
-                      <button 
-                        onClick={() => handleToggleActivo(a)} 
-                        className={`p-2.5 bg-white/5 rounded-xl transition-all duration-300 border border-white/5 ${
-                          a.estatusActivo 
-                            ? 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30' 
+                      <button
+                        onClick={() => handleToggleActivo(a)}
+                        className={`p-2.5 bg-white/5 rounded-xl transition-all duration-300 border border-white/5 ${a.estatusActivo
+                            ? 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30'
                             : 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30'
-                        }`} 
+                          }`}
                         title={a.estatusActivo ? 'Desactivar Alumno' : 'Activar Alumno'}
                       >
                         <Power size={16} />
                       </button>
-                      <button 
-                        onClick={() => handleDelete(a.id)} 
-                        className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30" 
+                      <button
+                        onClick={() => handleDelete(a.id)}
+                        className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30"
                         title="Eliminar Permanente"
                       >
                         <Trash2 size={16} />
@@ -195,8 +200,8 @@ function Alumnos() {
       </div>
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}
-             title={editAlumno ? 'Editar Alumno' : 'Nuevo Alumno'}
-             maxWidth="max-w-3xl">
+        title={editAlumno ? 'Editar Alumno' : 'Nuevo Alumno'}
+        maxWidth="max-w-3xl">
         <AlumnoForm alumno={editAlumno} onClose={() => setModalOpen(false)} onSave={handleSave} />
         {editAlumno && (
           <div className="mt-8 border-t border-white/10 pt-6">
@@ -206,20 +211,20 @@ function Alumnos() {
       </Modal>
 
       <Modal isOpen={viewAlumno !== null} onClose={() => setViewAlumno(null)}
-             title="Detalles del Alumno"
-             maxWidth="max-w-2xl">
+        title="Detalles del Alumno"
+        maxWidth="max-w-2xl">
         {viewAlumno && (
           <AlumnoDetail alumno={viewAlumno} onClose={() => setViewAlumno(null)} />
         )}
       </Modal>
 
-      <ConfirmModal 
-        isOpen={deleteConfirmOpen} 
-        onClose={() => setDeleteConfirmOpen(false)} 
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
         onConfirm={confirmDelete}
         title="¿Eliminar Alumno?"
         message="Esta acción es permanente y eliminará todo el historial de pagos y documentos del estudiante. ¿Deseas continuar?"
-        confirmText="Sí, Eliminar"
+        confirmText="Sí, eliminar"
       />
     </div>
   );

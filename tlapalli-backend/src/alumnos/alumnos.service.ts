@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAlumnoDto } from './dto/create-alumno.dto';
 import { UpdateAlumnoDto } from './dto/update-alumno.dto';
+import * as fs from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class AlumnosService {
@@ -49,6 +51,20 @@ export class AlumnosService {
 
   async remove(id: number) {
     await this.findOne(id);
+
+    // Eliminar archivos físicos de documentos del alumno
+    const documentos = await this.prisma.documento.findMany({ where: { alumnoId: id } });
+    for (const doc of documentos) {
+      const physicalPath = join(process.cwd(), doc.url);
+      try {
+        if (fs.existsSync(physicalPath)) fs.unlinkSync(physicalPath);
+      } catch (e) {
+        console.error('No se pudo borrar archivo físico:', e);
+      }
+    }
+
+    // Gracias a onDelete: Cascade en el schema, Prisma borra
+    // inscripciones, asistencias, documentos y pagos automáticamente
     return this.prisma.alumno.delete({ where: { id } });
   }
 }

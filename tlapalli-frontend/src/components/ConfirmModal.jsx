@@ -45,7 +45,7 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText 
                     onConfirm();
                     onClose();
                   }}
-                  className="px-6 py-4 bg-rose-600 hover:bg-rose-700 text-white font-black uppercase tracking-widest rounded-2xl transition-all duration-300 shadow-lg shadow-rose-600/20"
+                  className="px-6 py-4 bg-rose-600 hover:bg-rose-700 text-white font-black tracking-widest rounded-2xl transition-all duration-300 shadow-lg shadow-rose-600/20"
                 >
                   {confirmText}
                 </button>

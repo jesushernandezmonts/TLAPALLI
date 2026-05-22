@@ -11,8 +11,8 @@ import rateLimit from 'express-rate-limit';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Servir archivos estáticos
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  // Servir archivos estáticos desde la raíz del proyecto
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads/',
   });
 
@@ -23,7 +23,8 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Helmet (cabeceras HTTP seguras)
-  app.use(helmet());
+  // crossOriginEmbedderPolicy se desactiva para permitir visualizar PDFs e imágenes estáticas
+  app.use(helmet({ crossOriginEmbedderPolicy: false }));
 
   // Rate limiting global (100 peticiones por minuto por IP)
   app.use(

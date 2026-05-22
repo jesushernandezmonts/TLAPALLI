@@ -59,7 +59,7 @@ model Documento {
   tipo      String   // acta_nacimiento, curp, comprobante_domicilio, identificacion, foto, constancia_medica, otro
   url       String
   alumnoId  Int      @map("alumno_id")
-  alumno    Alumno   @relation(fields: [alumnoId], references: [id])
+  alumno    Alumno   @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
   subidoEn  DateTime @default(now()) @map("subido_en")
 }
 
@@ -92,7 +92,7 @@ model Inscripcion {
   tallerId         Int          @map("taller_id")
   fechaInscripcion DateTime     @default(now()) @map("fecha_inscripcion")
   estatusPago      String       @default("pendiente") @map("estatus_pago") // pendiente, al_corriente, deudor
-  alumno           Alumno       @relation(fields: [alumnoId], references: [id])
+  alumno           Alumno       @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
   taller           Taller       @relation(fields: [tallerId], references: [id])
   asistencias      Asistencia[]
 }
@@ -103,7 +103,7 @@ model Asistencia {
   fecha          DateTime    @default(now())
   estado         String      // asistencia, falta, retardo, justificada
   observaciones  String?
-  inscripcion    Inscripcion @relation(fields: [inscripcionId], references: [id])
+  inscripcion    Inscripcion @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
 }
 
 model Pago {
@@ -114,7 +114,7 @@ model Pago {
   mesCorrespondiente String  @map("mes_correspondiente")
   metodoPago        String?   @map("metodo_pago") // efectivo, transferencia
   registradoPor     Int?      @map("registrado_por")
-  alumno            Alumno    @relation(fields: [alumnoId], references: [id])
+  alumno            Alumno    @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
   usuario           Usuario?  @relation(fields: [registradoPor], references: [id])
 }
 
