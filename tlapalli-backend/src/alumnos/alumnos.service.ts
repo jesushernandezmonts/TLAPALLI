@@ -41,7 +41,9 @@ export class AlumnosService {
     await this.findOne(id);
     const { fechaNacimiento, ...rest } = dto;
     const data: any = { ...rest };
-    if (fechaNacimiento) data.fechaNacimiento = new Date(fechaNacimiento);
+    if (fechaNacimiento !== undefined) {
+      data.fechaNacimiento = fechaNacimiento ? new Date(fechaNacimiento) : null;
+    }
     
     return this.prisma.alumno.update({
       where: { id },

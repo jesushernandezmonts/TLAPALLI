@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import AlumnoForm from '../components/AlumnoForm';
-import ExpedienteDigital from '../components/ExpedienteDigital';
 import ConfirmModal from '../components/ConfirmModal';
 import AlumnoDetail from '../components/AlumnoDetail';
 import { Plus, Search, Edit3, Trash2, Power, Eye } from 'lucide-react';
@@ -123,7 +122,7 @@ function Alumnos() {
             ) : filtered.length === 0 ? (
               <tr><td colSpan="5" className="p-20 text-center text-white/20 italic font-medium">No se encontraron registros.</td></tr>
             ) : (
-              filtered.map(a => (
+              filtered.map((a, index) => (
                 <tr key={a.id} className="hover:bg-white/5 transition group">
                   <td>
                     <div className="flex items-center gap-3">
@@ -134,7 +133,7 @@ function Alumnos() {
                         <div className="font-bold text-white/90 drop-shadow-sm">
                           {`${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim() || 'Sin Nombre'}
                         </div>
-                        <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">ID: #{a.id}</div>
+                        <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">ID: #{index + 1}</div>
                       </div>
                     </div>
                   </td>
@@ -203,11 +202,6 @@ function Alumnos() {
         title={editAlumno ? 'Editar Alumno' : 'Nuevo Alumno'}
         maxWidth="max-w-3xl">
         <AlumnoForm alumno={editAlumno} onClose={() => setModalOpen(false)} onSave={handleSave} />
-        {editAlumno && (
-          <div className="mt-8 border-t border-white/10 pt-6">
-            <ExpedienteDigital alumnoId={editAlumno.id} />
-          </div>
-        )}
       </Modal>
 
       <Modal isOpen={viewAlumno !== null} onClose={() => setViewAlumno(null)}

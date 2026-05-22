@@ -2,25 +2,29 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Scan } from 'lucide-react';
 
+const emptyForm = {
+  nombre: '',
+  apellidoPaterno: '',
+  apellidoMaterno: '',
+  curp: '',
+  fechaNacimiento: '',
+  telefono: '',
+  padecimientos: '',
+  estatusActivo: true,
+};
+
+const emptyArchivos = {
+  acta_nacimiento: null,
+  curp: null,
+  comprobante_domicilio: null,
+  foto: null,
+};
+
 function AlumnoForm({ alumno, onClose, onSave }) {
-  const [form, setForm] = useState({
-    nombre: '',
-    apellidoPaterno: '',
-    apellidoMaterno: '',
-    curp: '',
-    fechaNacimiento: '',
-    telefono: '',
-    padecimientos: '',
-    estatusActivo: true,
-  });
+  const [form, setForm] = useState(emptyForm);
   
   // Estados para archivos (solo creación)
-  const [archivos, setArchivos] = useState({
-    acta_nacimiento: null,
-    curp: null,
-    comprobante_domicilio: null,
-    foto: null,
-  });
+  const [archivos, setArchivos] = useState(emptyArchivos);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -39,7 +43,12 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         padecimientos: alumno.padecimientos || '',
         estatusActivo: alumno.estatusActivo ?? true,
       });
+    } else {
+      setForm(emptyForm);
+      setArchivos(emptyArchivos);
     }
+    setError('');
+    setFieldErrors({});
   }, [alumno]);
 
   const handleChange = (e) => {
@@ -111,10 +120,21 @@ function AlumnoForm({ alumno, onClose, onSave }) {
     setFieldErrors({});
     setLoading(true);
     try {
-      const cleanedForm = { ...form };
-      if (!cleanedForm.curp) delete cleanedForm.curp;
-      if (!cleanedForm.fechaNacimiento) delete cleanedForm.fechaNacimiento;
-      if (!cleanedForm.padecimientos) delete cleanedForm.padecimientos;
+      const cleanedForm = {
+        ...form,
+        nombre: form.nombre.trim(),
+        apellidoPaterno: form.apellidoPaterno.trim(),
+        apellidoMaterno: form.apellidoMaterno.trim(),
+        curp: form.curp.trim() || null,
+        fechaNacimiento: form.fechaNacimiento || null,
+        telefono: form.telefono.trim(),
+        padecimientos: form.padecimientos.trim() || null,
+      };
+      if (!alumno) {
+        if (!cleanedForm.curp) delete cleanedForm.curp;
+        if (!cleanedForm.fechaNacimiento) delete cleanedForm.fechaNacimiento;
+        if (!cleanedForm.padecimientos) delete cleanedForm.padecimientos;
+      }
 
       let savedAlumno;
       if (alumno) {
@@ -123,15 +143,14 @@ function AlumnoForm({ alumno, onClose, onSave }) {
       } else {
         const { data } = await api.post('/alumnos', cleanedForm);
         savedAlumno = data;
+      }
 
-        // Subir documentos si es nuevo
-        for (const [tipo, archivo] of Object.entries(archivos)) {
-          if (archivo) {
-            const formData = new FormData();
-            formData.append('archivo', archivo);
-            formData.append('tipo', tipo);
-            await api.post(`/documentos/upload/${savedAlumno.id}`, formData);
-          }
+      for (const [tipo, archivo] of Object.entries(archivos)) {
+        if (archivo) {
+          const formData = new FormData();
+          formData.append('archivo', archivo);
+          formData.append('tipo', tipo);
+          await api.post(`/documentos/upload/${savedAlumno.id}`, formData);
         }
       }
       onSave(savedAlumno);
@@ -225,6 +244,34 @@ function AlumnoForm({ alumno, onClose, onSave }) {
           )}
         </div>
         <div className="space-y-1 md:col-span-2">
+          <label className="text-[10px] text-white/40 uppercase font-black px-1">CURP (Opcional)</label>
+          <input
+            name="curp"
+            placeholder="18 caracteres"
+            value={form.curp}
+            onChange={handleChange}
+            maxLength={18}
+            className={`bg-white/5 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${
+              fieldErrors.curp ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+            }`}
+          />
+          {fieldErrors.curp && (
+            <p className="text-[10px] text-rose-400 font-semibold px-1 flex items-center gap-1">
+              <span>⚠</span> {fieldErrors.curp}
+            </p>
+          )}
+        </div>
+        <div className="space-y-1 md:col-span-2">
+          <label className="text-[10px] text-white/40 uppercase font-black px-1">Fecha de Nacimiento (Opcional)</label>
+          <input
+            type="date"
+            name="fechaNacimiento"
+            value={form.fechaNacimiento}
+            onChange={handleChange}
+            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full focus:border-pink-500/50 outline-none transition"
+          />
+        </div>
+        <div className="space-y-1 md:col-span-2">
           <label className="text-[10px] text-white/40 uppercase font-black px-1">Padecimientos o Notas Médicas (Opcional)</label>
           <input
             name="padecimientos"
@@ -237,41 +284,39 @@ function AlumnoForm({ alumno, onClose, onSave }) {
       </div>
 
       {/* Expediente Digital Inicial */}
-      {!alumno && (
-        <div className="bg-white/5 rounded-2xl p-4 border border-white/10 space-y-3">
-          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-pink-500">Expediente Digital Inicial</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <FileInput 
-              label="Acta de Nacimiento" 
-              onChange={(e) => handleFileChange(e, 'acta_nacimiento')}
-              onScan={() => handleScan('acta_nacimiento')}
-              fileName={archivos.acta_nacimiento?.name}
-              isScanning={scanning === 'acta_nacimiento'}
-            />
-            <FileInput 
-              label="CURP (Documento)" 
-              onChange={(e) => handleFileChange(e, 'curp')}
-              onScan={() => handleScan('curp')}
-              fileName={archivos.curp?.name}
-              isScanning={scanning === 'curp'}
-            />
-            <FileInput 
-              label="Comprobante Domicilio" 
-              onChange={(e) => handleFileChange(e, 'comprobante_domicilio')}
-              onScan={() => handleScan('comprobante_domicilio')}
-              fileName={archivos.comprobante_domicilio?.name}
-              isScanning={scanning === 'comprobante_domicilio'}
-            />
-            <FileInput 
-              label="Foto Infantil" 
-              onChange={(e) => handleFileChange(e, 'foto')}
-              onScan={() => handleScan('foto')}
-              fileName={archivos.foto?.name}
-              isScanning={scanning === 'foto'}
-            />
-          </div>
+      <div className="bg-white/5 rounded-2xl p-4 border border-white/10 space-y-3">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-pink-500">Expediente Digital Inicial</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <FileInput 
+            label="Acta de Nacimiento" 
+            onChange={(e) => handleFileChange(e, 'acta_nacimiento')}
+            onScan={() => handleScan('acta_nacimiento')}
+            fileName={archivos.acta_nacimiento?.name}
+            isScanning={scanning === 'acta_nacimiento'}
+          />
+          <FileInput 
+            label="CURP (Documento)" 
+            onChange={(e) => handleFileChange(e, 'curp')}
+            onScan={() => handleScan('curp')}
+            fileName={archivos.curp?.name}
+            isScanning={scanning === 'curp'}
+          />
+          <FileInput 
+            label="Comprobante Domicilio" 
+            onChange={(e) => handleFileChange(e, 'comprobante_domicilio')}
+            onScan={() => handleScan('comprobante_domicilio')}
+            fileName={archivos.comprobante_domicilio?.name}
+            isScanning={scanning === 'comprobante_domicilio'}
+          />
+          <FileInput 
+            label="Foto Infantil" 
+            onChange={(e) => handleFileChange(e, 'foto')}
+            onScan={() => handleScan('foto')}
+            fileName={archivos.foto?.name}
+            isScanning={scanning === 'foto'}
+          />
         </div>
-      )}
+      </div>
 
       {error && (
         <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-2.5 rounded-xl text-xs font-medium">
