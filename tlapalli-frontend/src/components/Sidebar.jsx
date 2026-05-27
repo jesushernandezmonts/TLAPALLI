@@ -1,5 +1,7 @@
 import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import ConfirmModal from './ConfirmModal';
 import { 
   LayoutDashboard, 
   Users, 
@@ -7,7 +9,6 @@ import {
   Palette, 
   CreditCard, 
   ClipboardList, 
-  BookOpen,
   LogOut,
   User,
   X,
@@ -16,6 +17,7 @@ import {
 
 function Sidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   
   const linkClass = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
@@ -74,10 +76,6 @@ function Sidebar({ isOpen, onClose }) {
                 <Palette size={20} />
                 <span className="font-medium">Talleres</span>
               </NavLink>
-              <NavLink to="/inscripciones" onClick={onClose} className={linkClass}>
-                <BookOpen size={20} />
-                <span className="font-medium">Inscripciones</span>
-              </NavLink>
               <NavLink to="/reportes" onClick={onClose} className={linkClass}>
                 <BarChart3 size={20} />
                 <span className="font-medium">Reportes</span>
@@ -115,7 +113,7 @@ function Sidebar({ isOpen, onClose }) {
             </div>
           </div>
           <button 
-            onClick={logout} 
+            onClick={() => setLogoutConfirmOpen(true)}
             className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-red-600/20 hover:text-red-400 text-white/50 py-3 rounded-2xl border border-white/5 transition-all duration-300 font-semibold"
           >
             <LogOut size={18} />
@@ -123,6 +121,15 @@ function Sidebar({ isOpen, onClose }) {
           </button>
         </div>
       </aside>
+      <ConfirmModal
+        isOpen={logoutConfirmOpen}
+        onClose={() => setLogoutConfirmOpen(false)}
+        onConfirm={logout}
+        title="¿Cerrar sesión?"
+        message="Tu sesión actual se cerrará y tendrás que iniciar sesión nuevamente para continuar. ¿Deseas salir?"
+        confirmText="Sí, cerrar"
+        cancelText="Cancelar"
+      />
     </>
   );
 }

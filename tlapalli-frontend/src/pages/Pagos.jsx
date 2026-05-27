@@ -10,6 +10,8 @@ function Pagos() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pagosPerPage = 8;
   const [form, setForm] = useState({
     alumnoId: '',
     monto: '',
@@ -67,13 +69,24 @@ function Pagos() {
     const searchTerm = search.toLowerCase();
     return nombre.includes(searchTerm) || mes.includes(searchTerm);
   });
+  const totalPages = Math.max(1, Math.ceil(filteredPagos.length / pagosPerPage));
+  const startIndex = (currentPage - 1) * pagosPerPage;
+  const paginatedPagos = filteredPagos.slice(startIndex, startIndex + pagosPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white/90">Registro de Pagos</h1>
-          <p className="text-white/40 text-sm">Gestiona los ingresos mensuales del centro</p>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.65)]">
+            Registro de Pagos
+          </h1>
+          <p className="mt-1 text-base font-semibold text-white/75 drop-shadow-[0_2px_5px_rgba(0,0,0,0.55)]">
+            Gestiona los ingresos mensuales del centro
+          </p>
         </div>
         <button 
           onClick={() => setModalOpen(true)}
@@ -113,7 +126,7 @@ function Pagos() {
               ) : filteredPagos.length === 0 ? (
                 <tr><td colSpan="6" className="p-20 text-center text-white/20 italic font-medium">No hay registros de pagos.</td></tr>
               ) : (
-                filteredPagos.map((p, idx) => (
+                paginatedPagos.map((p, idx) => (
                   <motion.tr 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -164,6 +177,33 @@ function Pagos() {
           </tbody>
         </table>
       </div>
+
+      {!loading && filteredPagos.length > pagosPerPage && (
+        <div className="mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-slate-950/80 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-white/80">
+            Mostrando {startIndex + 1}-{Math.min(startIndex + pagosPerPage, filteredPagos.length)} de {filteredPagos.length} pagos
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
+            >
+              Anterior
+            </button>
+            <span className="min-w-28 text-center text-xs font-black uppercase tracking-wider text-white/80">
+              Página <span className="text-emerald-400">{currentPage}</span> de {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Registrar Nuevo Pago">
         <form onSubmit={handleCreate} className="space-y-4">

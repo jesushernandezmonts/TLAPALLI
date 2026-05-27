@@ -12,6 +12,8 @@ function Instructores() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editInstructor, setEditInstructor] = useState(null);
   const [sendingEmail, setSendingEmail] = useState(null); // ID del instructor al que se le envía email
+  const [currentPage, setCurrentPage] = useState(1);
+  const instructoresPerPage = 8;
 
   useEffect(() => {
     fetchInstructores();
@@ -93,6 +95,13 @@ function Instructores() {
     (i.email && i.email.toLowerCase().includes(search.toLowerCase())) ||
     (i.telefono && i.telefono.includes(search))
   );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / instructoresPerPage));
+  const startIndex = (currentPage - 1) * instructoresPerPage;
+  const paginatedInstructores = filtered.slice(startIndex, startIndex + instructoresPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   const getEstadoBadge = (estado) => {
     switch (estado) {
@@ -127,8 +136,12 @@ function Instructores() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white/90">Gestión de Instructores</h1>
-          <p className="text-white/40 text-sm">Administra el cuerpo docente</p>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.65)]">
+            Gestión de Instructores
+          </h1>
+          <p className="mt-1 text-base font-semibold text-white/75 drop-shadow-[0_2px_5px_rgba(0,0,0,0.55)]">
+            Administra el cuerpo docente
+          </p>
         </div>
         <button 
           onClick={handleNew} 
@@ -167,7 +180,7 @@ function Instructores() {
             ) : filtered.length === 0 ? (
               <tr><td colSpan="6" className="p-20 text-center text-white/20 italic font-medium">No se encontraron registros.</td></tr>
             ) : (
-              filtered.map(i => {
+              paginatedInstructores.map((i, index) => {
                 const badge = getEstadoBadge(i.estado);
                 return (
                   <tr key={i.id} className="hover:bg-white/5 transition group">
@@ -178,7 +191,7 @@ function Instructores() {
                         </div>
                         <div>
                           <div className="font-bold text-white/90">{i.nombre}</div>
-                          <div className="text-[10px] text-white/30 uppercase tracking-widest">ID: #{i.id}</div>
+                          <div className="text-[10px] text-white/30 uppercase tracking-widest">ID: #{startIndex + index + 1}</div>
                         </div>
                       </div>
                     </td>
@@ -247,6 +260,33 @@ function Instructores() {
           </tbody>
         </table>
       </div>
+
+      {!loading && filtered.length > instructoresPerPage && (
+        <div className="mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-slate-950/80 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-white/80">
+            Mostrando {startIndex + 1}-{Math.min(startIndex + instructoresPerPage, filtered.length)} de {filtered.length} instructores
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
+            >
+              Anterior
+            </button>
+            <span className="min-w-28 text-center text-xs font-black uppercase tracking-wider text-white/80">
+              Página <span className="text-emerald-400">{currentPage}</span> de {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Leyenda de estados */}
       <div className="flex flex-wrap gap-4 text-[11px] text-white/40 pt-2">

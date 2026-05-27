@@ -265,8 +265,12 @@ export default function Reportes() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white/90">Reportes</h1>
-          <p className="text-white/40 text-sm mt-1">Genera y descarga reportes oficiales en PDF</p>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.65)]">
+            Reportes
+          </h1>
+          <p className="mt-1 text-base font-semibold text-white/75 drop-shadow-[0_2px_5px_rgba(0,0,0,0.55)]">
+            Genera y descarga reportes oficiales en PDF
+          </p>
         </div>
         <button
           onClick={fetchData}

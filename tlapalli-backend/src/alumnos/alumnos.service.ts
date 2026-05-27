@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAlumnoDto } from './dto/create-alumno.dto';
 import { UpdateAlumnoDto } from './dto/update-alumno.dto';
@@ -12,12 +12,19 @@ export class AlumnosService {
   async create(dto: CreateAlumnoDto) {
     const { fechaNacimiento, ...rest } = dto;
     const fecha = fechaNacimiento ? new Date(fechaNacimiento) : undefined;
-    return this.prisma.alumno.create({
-      data: {
-        ...rest,
-        fechaNacimiento: fecha,
-      },
-    });
+    try {
+      return await this.prisma.alumno.create({
+        data: {
+          ...rest,
+          fechaNacimiento: fecha,
+        },
+      });
+    } catch (error: any) {
+      if (error.code === 'P2002' && error.meta?.target?.includes('curp')) {
+        throw new BadRequestException('Ya existe un alumno registrado con esa CURP.');
+      }
+      throw error;
+    }
   }
 
   async findAll() {

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Phone, FileText, Activity, User, ExternalLink } from 'lucide-react';
+import { Phone, FileText, Activity, ExternalLink, User, Users, Palette } from 'lucide-react';
 
 function AlumnoDetail({ alumno, onClose }) {
   const [documentos, setDocumentos] = useState([]);
+  const [inscripciones, setInscripciones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingInscripciones, setLoadingInscripciones] = useState(true);
 
   useEffect(() => {
     const fetchDocumentos = async () => {
@@ -17,7 +19,18 @@ function AlumnoDetail({ alumno, onClose }) {
         setLoading(false);
       }
     };
+    const fetchInscripciones = async () => {
+      try {
+        const { data } = await api.get('/inscripciones', { params: { alumnoId: alumno.id } });
+        setInscripciones(data.filter(i => i.estatusPago !== 'baja'));
+      } catch (err) {
+        console.error('Error al cargar talleres del alumno:', err);
+      } finally {
+        setLoadingInscripciones(false);
+      }
+    };
     fetchDocumentos();
+    fetchInscripciones();
   }, [alumno.id]);
 
   const initials = alumno.nombre ? alumno.nombre[0].toUpperCase() : '?';
@@ -42,7 +55,7 @@ function AlumnoDetail({ alumno, onClose }) {
               {alumno.estatusActivo ? 'Activo' : 'Inactivo'}
             </span>
           </div>
-          <p className="text-[10px] text-white/40 uppercase tracking-widest font-black mt-1">ID del Estudiante: #{alumno.id}</p>
+          <p className="text-[10px] text-white/40 uppercase tracking-widest font-black mt-1">ID del Estudiante: #{alumno.displayId || alumno.id}</p>
         </div>
       </div>
 
@@ -56,8 +69,18 @@ function AlumnoDetail({ alumno, onClose }) {
             <div className="flex items-start gap-3">
               <User size={16} className="text-white/40 mt-0.5 shrink-0" />
               <div>
-                <span className="text-[9px] text-white/30 uppercase font-black block">CURP</span>
-                <span className="text-sm font-mono text-white/80 font-medium">{alumno.curp || <span className="opacity-40 italic">No registrada</span>}</span>
+                <span className="text-[9px] text-white/30 uppercase font-black block">Nombre(s)</span>
+                <span className="text-sm text-white/80 font-medium">{alumno.nombre || <span className="opacity-40 italic">No registrado</span>}</span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Users size={16} className="text-white/40 mt-0.5 shrink-0" />
+              <div>
+                <span className="text-[9px] text-white/30 uppercase font-black block">Apellidos</span>
+                <span className="text-sm text-white/80 font-medium">
+                  {`${alumno.apellidoPaterno || ''} ${alumno.apellidoMaterno || ''}`.trim() || <span className="opacity-40 italic">No registrados</span>}
+                </span>
               </div>
             </div>
 
@@ -76,6 +99,28 @@ function AlumnoDetail({ alumno, onClose }) {
                 <span className="text-sm text-white/80 font-medium">{alumno.padecimientos || <span className="opacity-40 italic">Ninguno</span>}</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col">
+          <h4 className="text-xs font-black uppercase tracking-widest text-pink-500 border-b border-white/5 pb-2 shrink-0">Talleres Inscritos</h4>
+          <div className="mt-3 space-y-2 max-h-40 overflow-y-auto pr-1">
+            {loadingInscripciones ? (
+              <p className="text-xs text-white/30 italic py-4">Cargando talleres...</p>
+            ) : inscripciones.length === 0 ? (
+              <p className="text-xs text-white/40 italic py-4 flex items-center gap-1.5 justify-center">
+                <Palette size={14} className="opacity-40" /> No tiene talleres seleccionados
+              </p>
+            ) : (
+              inscripciones.map(inscripcion => (
+                <div key={inscripcion.id} className="flex items-center gap-2 rounded-xl border border-pink-500/15 bg-pink-500/10 px-3 py-2">
+                  <Palette size={14} className="text-pink-400 shrink-0" />
+                  <span className="text-xs font-bold text-white/85">
+                    {inscripcion.taller?.nombreTaller || `Taller #${inscripcion.tallerId}`}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
