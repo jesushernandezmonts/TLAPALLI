@@ -177,7 +177,7 @@ function Alumnos() {
       .join(', ');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <AnimatePresence>
         {successToast && (
           <motion.div
@@ -211,7 +211,7 @@ function Alumnos() {
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.65)]">
             Gestión de Alumnos
@@ -223,7 +223,7 @@ function Alumnos() {
       </div>
 
       {/* Barra de Controles Unificada */}
-      <div className="relative z-30 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-4 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5">
+      <div className="relative z-30 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5">
         <div className="relative flex-1 max-w-md w-full">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-pink-400" />
           <input
@@ -291,7 +291,7 @@ function Alumnos() {
         </button>
       </div>
 
-      <div className="responsive-table-container relative z-10">
+      <div className="responsive-table-container relative z-10 mt-2">
         <table className="responsive-table">
           <thead>
             <tr>

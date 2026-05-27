@@ -62,8 +62,8 @@ function Inscripciones() {
   const paginatedInscripciones = inscripciones.slice(startIndex, startIndex + inscripcionesPerPage);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.65)]">
             Inscripciones
@@ -81,7 +81,7 @@ function Inscripciones() {
         </button>
       </div>
 
-      <div className="responsive-table-container">
+      <div className="responsive-table-container mt-2">
         <table className="responsive-table">
           <thead>
             <tr>

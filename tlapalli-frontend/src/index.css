@@ -24,8 +24,7 @@ body {
 
 @layer components {
   .responsive-table-container {
-    /* Darker, more blurred glass for better contrast */
-    @apply overflow-x-auto rounded-[2rem] border border-white/20 bg-black/40 backdrop-blur-2xl shadow-2xl;
+    @apply overflow-x-auto rounded-[2rem] border border-white/25 bg-black/50 backdrop-blur-2xl shadow-2xl;
   }
   
   .responsive-table {
@@ -33,13 +32,11 @@ body {
   }
   
   .responsive-table th {
-    /* Brighter headers, slightly more padding */
-    @apply p-6 text-[11px] font-black uppercase tracking-[0.2em] text-white bg-white/10;
+    @apply p-6 text-[12px] font-black uppercase tracking-[0.2em] text-white bg-white/10;
   }
   
   .responsive-table td {
-    /* Brighter text, clearer borders */
-    @apply p-6 text-[14px] text-white/90 border-t border-white/10 font-medium;
+    @apply p-6 text-[15px] text-white/90 border-t border-white/10 font-medium;
   }
 
   @media (max-width: 640px) {
@@ -48,7 +45,7 @@ body {
     }
 
     .responsive-table {
-      @apply min-w-0 border-separate border-spacing-y-4;
+      @apply min-w-0 border-separate border-spacing-y-6;
     }
 
     .responsive-table thead {
@@ -67,11 +64,11 @@ body {
     }
 
     .responsive-table tr {
-      @apply rounded-3xl border border-white/15 bg-slate-950/65 p-4 shadow-xl shadow-black/20 backdrop-blur-xl;
+      @apply rounded-3xl border border-white/20 bg-slate-950/80 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl;
     }
 
     .responsive-table td {
-      @apply flex items-center justify-between gap-4 border-t border-white/10 px-0 py-3 text-right text-sm;
+      @apply flex items-center justify-between gap-4 border-t border-white/10 px-0 py-4 text-right text-sm;
     }
 
     .responsive-table td:first-child {
@@ -100,7 +97,7 @@ body {
     }
 
     .responsive-table td[colspan] {
-      @apply block rounded-3xl border border-white/15 bg-slate-950/65 p-10 text-center;
+      @apply block rounded-3xl border border-white/20 bg-slate-950/80 p-16 text-center;
     }
 
     .responsive-table td[colspan]::before {
