@@ -201,18 +201,18 @@ function Dashboard() {
 
       {/* Calendario y Próximas Clases */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-8 shadow-xl flex flex-col">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-bold text-white/90">Calendario de Actividades</h2>
-            <span className="text-xs text-white/40 uppercase tracking-[0.2em] font-black">
+        <div className="lg:col-span-2 bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-4 md:p-8 shadow-xl flex flex-col">
+          <div className="flex items-center justify-between mb-4 md:mb-8">
+            <h2 className="text-lg md:text-xl font-bold text-white/90">Calendario de Actividades</h2>
+            <span className="text-[10px] md:text-xs text-white/40 uppercase tracking-[0.2em] font-black">
               {new Date().toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}
             </span>
           </div>
           
           {/* Visual Calendar Grid */}
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-7 gap-1 md:gap-2">
             {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => (
-              <div key={d} className="text-center text-[10px] font-black text-white/20 uppercase py-2">{d}</div>
+              <div key={d} className="text-center text-[8px] md:text-[10px] font-black text-white/20 uppercase py-1 md:py-2">{d}</div>
             ))}
             
             {padding.map((_, i) => (
@@ -233,25 +233,25 @@ function Dashboard() {
                 <div 
                   key={day} 
                   onClick={() => handleDayClick(day)}
-                  className={`aspect-square rounded-xl border flex flex-col items-center justify-center relative transition-all duration-300 group cursor-pointer pb-2
+                  className={`aspect-square rounded-lg md:rounded-xl border flex flex-col items-center justify-center relative transition-all duration-300 group cursor-pointer pb-1 md:pb-2
                     ${isToday 
                       ? 'bg-pink-600 border-pink-500 shadow-lg shadow-pink-600/20 scale-105 z-10' 
                       : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'}`}
                 >
-                  <span className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white/60'}`}>{day}</span>
+                  <span className={`text-[10px] md:text-sm font-bold ${isToday ? 'text-white' : 'text-white/60'}`}>{day}</span>
                   
                   {/* Indicators for scheduled activities */}
                   {dayActividades.length > 0 && (
-                    <div className="absolute bottom-1.5 flex gap-1 justify-center w-full">
+                    <div className="absolute bottom-0.5 md:bottom-1.5 flex gap-0.5 md:gap-1 justify-center w-full">
                       {dayActividades.slice(0, 3).map((act, idx) => (
                         <span 
                           key={act.id || idx} 
-                          className={`w-1.5 h-1.5 rounded-full ${locationColors[act.ubicacion] || 'bg-white/40'}`}
+                          className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${locationColors[act.ubicacion] || 'bg-white/40'}`}
                           title={`${act.titulo} (${act.tipo})`}
                         />
                       ))}
                       {dayActividades.length > 3 && (
-                        <span className="text-[8px] text-white/50 leading-none font-bold">+</span>
+                        <span className="text-[6px] md:text-[8px] text-white/50 leading-none font-bold">+</span>
                       )}
                     </div>
                   )}
@@ -261,10 +261,10 @@ function Dashboard() {
           </div>
         </div>
         
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-8 shadow-xl flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-white/90">Clases de Hoy</h2>
-            <span className="px-2 py-1 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-400 text-[10px] font-black uppercase">
+        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-4 md:p-8 shadow-xl flex flex-col">
+          <div className="flex justify-between items-center mb-4 md:mb-6">
+            <h2 className="text-lg md:text-xl font-bold text-white/90">Clases de Hoy</h2>
+            <span className="px-2 py-1 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-400 text-[9px] md:text-[10px] font-black uppercase">
               {new Date().toLocaleDateString('es-MX', { weekday: 'short' })}
             </span>
           </div>

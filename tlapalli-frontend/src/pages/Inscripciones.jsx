@@ -100,7 +100,7 @@ function Inscripciones() {
             ) : (
               paginatedInscripciones.map(i => (
                 <tr key={i.id} className="hover:bg-white/5 transition group">
-                  <td>
+                  <td data-label="Alumno">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 font-bold">
                         {i.alumno?.nombre[0]}
@@ -108,16 +108,16 @@ function Inscripciones() {
                       <span className="font-bold text-white/90">{i.alumno?.nombre} {i.alumno?.apellidoPaterno}</span>
                     </div>
                   </td>
-                  <td>
+                  <td data-label="Taller">
                     <span className="text-sm text-white/60 font-medium">{i.taller?.nombreTaller}</span>
                   </td>
-                  <td className="text-sm text-white/30 font-mono">
+                  <td data-label="Fecha" className="text-sm text-white/30 font-mono">
                     <div className="flex items-center gap-2">
                       <Calendar size={14} />
                       {new Date(i.fechaInscripcion).toLocaleDateString()}
                     </div>
                   </td>
-                  <td className="text-center">
+                  <td data-label="Estatus" className="text-center">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
                       i.estatusPago === 'al_corriente' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
                       i.estatusPago === 'baja' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
@@ -126,7 +126,7 @@ function Inscripciones() {
                       {i.estatusPago.replace('_', ' ')}
                     </span>
                   </td>
-                  <td className="text-right">
+                  <td data-label="Acciones" className="text-right">
                     {i.estatusPago !== 'baja' && (
                       <button onClick={() => handleBaja(i.id)} className="p-2 text-white/20 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition" title="Dar de baja">
                         <Trash2 size={18} />

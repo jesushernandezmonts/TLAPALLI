@@ -284,7 +284,7 @@ function Alumnos() {
         </div>
         <button
           onClick={handleNew}
-          className="w-full md:w-auto bg-pink-600 hover:bg-pink-700 text-white font-black uppercase tracking-wider text-xs px-6 py-3.5 rounded-2xl transition shadow-xl shadow-pink-600/30 flex items-center justify-center gap-2 cursor-pointer shrink-0 ring-1 ring-pink-300/20"
+          className="w-full md:w-auto bg-pink-600 hover:bg-pink-700 text-white font-black uppercase tracking-wider text-xs px-6 py-3.5 rounded-2xl transition flex items-center justify-center gap-2 cursor-pointer shrink-0 ring-1 ring-pink-300/20"
         >
           <Plus size={16} />
           Nuevo Alumno
@@ -310,7 +310,7 @@ function Alumnos() {
             ) : (
               paginatedAlumnos.map((a, index) => (
                 <tr key={a.id} className="hover:bg-white/5 transition group">
-                  <td>
+                  <td data-label="Alumno">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 font-bold">
                         {a.nombre ? a.nombre[0].toUpperCase() : '?'}
@@ -323,7 +323,7 @@ function Alumnos() {
                       </div>
                     </div>
                   </td>
-                  <td className="text-xs text-white/80 font-medium">
+                  <td data-label="Padecimientos" className="text-xs text-white/80 font-medium">
                     {a.padecimientos ? (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20 max-w-[180px] select-none" title={a.padecimientos}>
                         <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>
@@ -333,8 +333,8 @@ function Alumnos() {
                       <span className="opacity-40 italic">Ninguno</span>
                     )}
                   </td>
-                  <td className="text-sm text-white/80 font-medium">{a.telefono || <span className="opacity-40">No registrado</span>}</td>
-                  <td className="text-center">
+                  <td data-label="Teléfono" className="text-sm text-white/80 font-medium">{a.telefono || <span className="opacity-40">No registrado</span>}</td>
+                  <td data-label="Estado" className="text-center">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${a.estatusActivo
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                         : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
@@ -342,7 +342,7 @@ function Alumnos() {
                       {a.estatusActivo ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
-                  <td className="text-right">
+                  <td data-label="Acciones" className="text-right">
                     <div className="flex justify-end gap-1 sm:gap-2">
                       <button
                         onClick={() => setViewAlumno({ ...a, displayId: startIndex + index + 1 })}

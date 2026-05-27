@@ -134,7 +134,7 @@ function Pagos() {
                     key={p.id} 
                     className="hover:bg-white/5 transition-colors group"
                   >
-                    <td>
+                    <td data-label="Alumno">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
                           <User size={20} />
@@ -145,24 +145,24 @@ function Pagos() {
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Mes">
                       <span className="text-white/70 font-medium capitalize">{p.mesCorrespondiente}</span>
                     </td>
-                    <td>
+                    <td data-label="Monto">
                       <span className="text-emerald-400 font-black text-lg">${p.monto}</span>
                     </td>
-                    <td>
+                    <td data-label="Método">
                       <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/60 text-[10px] font-bold uppercase tracking-widest">
                         {p.metodoPago}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Fecha">
                       <div className="flex items-center gap-2 text-white/40 text-sm">
                         <Calendar size={14} />
                         {new Date(p.fechaPago).toLocaleDateString()}
                       </div>
                     </td>
-                    <td className="text-right">
+                    <td data-label="Acciones" className="text-right">
                       <button 
                         onClick={() => handleDelete(p.id)}
                         className="p-2 text-white/20 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all"

@@ -184,7 +184,7 @@ function Instructores() {
                 const badge = getEstadoBadge(i.estado);
                 return (
                   <tr key={i.id} className="hover:bg-white/5 transition group">
-                    <td>
+                    <td data-label="Instructor">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
                           <UserSquare2 size={20} />
@@ -195,26 +195,26 @@ function Instructores() {
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Correo">
                       <div className="flex items-center gap-2 text-sm">
                         <Mail size={14} className="text-pink-500/40" />
                         <span className="text-white/60">{i.email || <span className="opacity-20 italic">Sin correo</span>}</span>
                       </div>
                     </td>
-                    <td className="text-sm opacity-60">{i.telefono || <span className="opacity-20">N/A</span>}</td>
-                    <td>
+                    <td data-label="Teléfono" className="text-sm opacity-60">{i.telefono || <span className="opacity-20">N/A</span>}</td>
+                    <td data-label="Taller">
                       <div className="flex items-center gap-2 text-sm text-white/60">
                         <Palette size={14} className="text-pink-500/50" />
                         {i.taller?.nombreTaller || <span className="opacity-20 italic">Sin taller</span>}
                       </div>
                     </td>
-                    <td className="text-center">
+                    <td data-label="Estado" className="text-center">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${badge.classes}`}>
                         <span>{badge.icon}</span>
                         {badge.label}
                       </span>
                     </td>
-                    <td className="text-right">
+                    <td data-label="Acciones" className="text-right">
                       <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
                         {/* Reenviar activación / reset */}
                         {i.email && i.estado !== 'Inactivo' && (

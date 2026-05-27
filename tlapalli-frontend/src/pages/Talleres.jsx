@@ -109,7 +109,7 @@ function Talleres() {
             ) : (
               paginatedTalleres.map(t => (
                 <tr key={t.id} className="hover:bg-white/5 transition group">
-                  <td>
+                  <td data-label="Taller">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
                         <Calendar size={20} />
@@ -117,16 +117,16 @@ function Talleres() {
                       <span className="font-bold text-white/90">{t.nombreTaller}</span>
                     </div>
                   </td>
-                  <td>
+                  <td data-label="Costo">
                     <span className="text-emerald-300 font-bold drop-shadow-sm">${Number(t.costoMensual).toFixed(2)}</span>
                   </td>
-                  <td>
+                  <td data-label="Cupo">
                     <span className="px-3 py-1 rounded-lg bg-white/10 border border-white/20 text-white font-mono text-xs shadow-sm">
                       {t.cupoMaximo} lugares
                     </span>
                   </td>
-                  <td className="text-sm text-white/90 font-medium max-w-xs truncate drop-shadow-sm">{t.horarioDescripcion || 'Sin horario definido'}</td>
-                  <td className="text-right">
+                  <td data-label="Horario" className="text-sm text-white/90 font-medium max-w-xs truncate drop-shadow-sm">{t.horarioDescripcion || 'Sin horario definido'}</td>
+                  <td data-label="Acciones" className="text-right">
                     <div className="flex justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
                       <button onClick={() => handleEdit(t)} className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-xl transition" title="Editar">
                         <Edit3 size={18} />
