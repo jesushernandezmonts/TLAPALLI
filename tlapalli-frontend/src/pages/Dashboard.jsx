@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import { Loader2, Plus, Trash2, Edit3, Clock, MapPin, Download } from 'lucide-react';
+import { Loader2, Plus, Trash2, Edit3, Clock, MapPin, Download, ChevronDown, AlertTriangle } from 'lucide-react';
 import Modal from '../components/Modal';
+import ConfirmModal from '../components/ConfirmModal';
 
 function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -20,6 +21,22 @@ function Dashboard() {
   const [formTipo, setFormTipo] = useState('interna');
   const [formUbicacion, setFormUbicacion] = useState('galeria');
   const [editingActividadId, setEditingActividadId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [saveSuccess, setSaveSuccess] = useState(null);
+  const [openFormDropdown, setOpenFormDropdown] = useState(null); // 'ubicacion' | 'tipo' | null
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [actividadToDelete, setActividadToDelete] = useState(null);
+
+  useEffect(() => {
+    const closeDropdowns = (event) => {
+      if (!event.target.closest('[data-filter-dropdown]')) {
+        setOpenFormDropdown(null);
+      }
+    };
+    document.addEventListener('click', closeDropdowns);
+    return () => document.removeEventListener('click', closeDropdowns);
+  }, []);
 
   // Lógica para el calendario
   const now = new Date();
@@ -88,22 +105,46 @@ function Dashboard() {
     setFormDescripcion(act.descripcion || '');
     setFormTipo(act.tipo);
     setFormUbicacion(act.ubicacion);
+    setSaveError(null);
+    setSaveSuccess(null);
   };
 
-  const handleDeleteActividad = async (id) => {
-    if (!window.confirm('¿Seguro que deseas eliminar esta actividad?')) return;
+  const handleDeleteActividad = (id) => {
+    setActividadToDelete(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteActividad = async () => {
+    if (!actividadToDelete) return;
     try {
-      await api.delete(`/actividades/${id}`);
+      await api.delete(`/actividades/${actividadToDelete}`);
       await fetchActividades();
       resetForm();
     } catch (err) {
       console.error('Error deleting activity', err);
+    } finally {
+      setActividadToDelete(null);
     }
   };
 
   const handleSaveActividad = async (e) => {
     e.preventDefault();
-    if (!formTitulo.trim() || !selectedDay) return;
+    
+    const missing = [];
+    if (!formTitulo.trim()) missing.push('Título');
+    if (!formHora) missing.push('Hora');
+    if (!formUbicacion) missing.push('Ubicación');
+    if (!formTipo) missing.push('Tipo');
+    if (!selectedDay) missing.push('Día');
+    
+    if (missing.length > 0) {
+      setSaveError(`Completa los campos: ${missing.join(', ')}`);
+      return;
+    }
+
+    setSaving(true);
+    setSaveError(null);
+    setSaveSuccess(null);
 
     const [hours, minutes] = formHora.split(':');
     const actDate = new Date(selectedDay.date);
@@ -123,20 +164,26 @@ function Dashboard() {
     try {
       if (editingActividadId) {
         await api.patch(`/actividades/${editingActividadId}`, payload);
+        setSaveSuccess('Actividad actualizada correctamente');
       } else {
         await api.post('/actividades', payload);
+        setSaveSuccess('Actividad creada correctamente');
       }
       resetForm();
       await fetchActividades();
+      setTimeout(() => setSaveSuccess(null), 3000);
     } catch (err) {
       console.error('Error saving activity', err);
+      setSaveError(err.response?.data?.message || 'Error al guardar la actividad');
+    } finally {
+      setSaving(false);
     }
   };
 
   const locationColors = {
-    galeria: 'bg-pink-500',
-    audioteca: 'bg-cyan-500',
-    auditorio: 'bg-amber-500',
+    galeria: 'bg-rose-500',
+    audioteca: 'bg-sky-400',
+    auditorio: 'bg-amber-400',
   };
 
   // Filter activities for the selected day in real-time
@@ -207,6 +254,24 @@ function Dashboard() {
             <span className="text-[10px] md:text-xs text-white/40 uppercase tracking-[0.2em] font-black">
               {new Date().toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}
             </span>
+          </div>
+
+          {/* Legend */}
+          <div className="mb-4 bg-black/30 border border-white/10 rounded-2xl p-3">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="flex items-center justify-center gap-2 bg-white/5 rounded-xl px-2 py-2 border border-rose-500/20">
+                <span className="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]" />
+                <span className="text-xs font-bold text-white/80">Galería</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 bg-white/5 rounded-xl px-2 py-2 border border-sky-400/20">
+                <span className="w-3 h-3 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.5)]" />
+                <span className="text-xs font-bold text-white/80">Audioteca</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 bg-white/5 rounded-xl px-2 py-2 border border-amber-400/20">
+                <span className="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                <span className="text-xs font-bold text-white/80">Auditorio</span>
+              </div>
+            </div>
           </div>
           
           {/* Visual Calendar Grid */}
@@ -282,6 +347,20 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => {
+          setDeleteConfirmOpen(false);
+          setActividadToDelete(null);
+        }}
+        onConfirm={confirmDeleteActividad}
+        title="Eliminar Actividad"
+        message="¿Seguro que deseas eliminar esta actividad? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+      />
+
       {/* Modal for Day Activities management */}
       <Modal 
         isOpen={modalOpen} 
@@ -290,22 +369,23 @@ function Dashboard() {
           resetForm();
         }} 
         title={selectedDay ? `Actividades - ${selectedDay.day} de ${new Date(year, month, selectedDay.day).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}` : ''}
+        maxWidth="max-w-xl"
       >
-        <div className="space-y-6 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar text-left">
+        <div className="space-y-4 text-left">
           {/* List of current activities */}
           <div>
-            <h3 className="text-xs font-black text-white/40 uppercase tracking-widest mb-3">Actividades Programadas</h3>
+            <h3 className="text-xs font-black text-white/40 uppercase tracking-widest mb-2">Actividades Programadas</h3>
             {modalActividades.length === 0 ? (
-              <p className="text-sm text-white/40 italic py-2">No hay actividades para este día.</p>
+              <p className="text-sm text-white/40 italic py-1">No hay actividades para este día.</p>
             ) : (
               <div className="space-y-3">
                 {modalActividades.map((act) => {
                   const actTime = new Date(act.fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
                   const borderCol = act.ubicacion === 'galeria' 
-                    ? 'border-pink-500/50' 
+                    ? 'border-rose-500/50' 
                     : act.ubicacion === 'audioteca' 
-                    ? 'border-cyan-500/50' 
-                    : 'border-amber-500/50';
+                    ? 'border-sky-400/50' 
+                    : 'border-amber-400/50';
 
                   const typeCol = act.tipo === 'interna'
                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
@@ -355,87 +435,110 @@ function Dashboard() {
           <div className="border-t border-white/10 my-4" />
 
           {/* Form to Create/Edit */}
-          <form onSubmit={handleSaveActividad} className="space-y-4">
+          <form onSubmit={handleSaveActividad} className="space-y-3">
+            {saveSuccess && (
+              <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold text-center">
+                {saveSuccess}
+              </div>
+            )}
+            {saveError && (
+              <div className="flex items-center gap-3 rounded-xl bg-rose-950/60 border border-rose-500/30 p-3">
+                <AlertTriangle size={18} className="text-rose-400 shrink-0" />
+                <p className="text-xs font-bold text-rose-300">{saveError}</p>
+              </div>
+            )}
             <h3 className="text-xs font-black text-white/40 uppercase tracking-widest">
               {editingActividadId ? 'Editar Actividad' : 'Nueva Actividad'}
             </h3>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5 block">Título</label>
+                <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-1 block">Título *</label>
                 <input 
                   type="text" 
                   value={formTitulo} 
                   onChange={(e) => setFormTitulo(e.target.value)} 
-                  required
                   placeholder="Ej. Exposición Fotográfica"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-pink-500/50 transition-all placeholder-white/20"
+                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all placeholder-white/30"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5 block">Hora</label>
+                <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-1 block">Hora *</label>
                 <input 
                   type="time" 
                   value={formHora} 
                   onChange={(e) => setFormHora(e.target.value)} 
                   required
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-pink-500/50 transition-all"
+                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all"
                 />
               </div>
 
-              <div>
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5 block">Ubicación</label>
-                <select 
-                  value={formUbicacion} 
-                  onChange={(e) => setFormUbicacion(e.target.value)}
-                  className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-pink-500/50 transition-all cursor-pointer"
-                >
-                  <option value="galeria">Galería</option>
-                  <option value="audioteca">Audioteca</option>
-                  <option value="auditorio">Auditorio</option>
-                </select>
-              </div>
+              <FormDropdown
+                label="Ubicación *"
+                value={formUbicacion}
+                options={[
+                  { value: 'galeria', label: '🎨 Galería' },
+                  { value: 'audioteca', label: '🎧 Audioteca' },
+                  { value: 'auditorio', label: '🎭 Auditorio' },
+                ]}
+                isOpen={openFormDropdown === 'ubicacion'}
+                onToggle={() => setOpenFormDropdown(openFormDropdown === 'ubicacion' ? null : 'ubicacion')}
+                onChange={(value) => {
+                  setFormUbicacion(value);
+                  setOpenFormDropdown(null);
+                }}
+              />
 
-              <div>
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5 block">Tipo</label>
-                <select 
-                  value={formTipo} 
-                  onChange={(e) => setFormTipo(e.target.value)}
-                  className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-pink-500/50 transition-all cursor-pointer"
-                >
-                  <option value="interna">Interna</option>
-                  <option value="externa">Externa</option>
-                </select>
-              </div>
+              <FormDropdown
+                label="Tipo *"
+                value={formTipo}
+                options={[
+                  { value: 'interna', label: '🏢 Interna' },
+                  { value: 'externa', label: '🌍 Externa' },
+                ]}
+                isOpen={openFormDropdown === 'tipo'}
+                onToggle={() => setOpenFormDropdown(openFormDropdown === 'tipo' ? null : 'tipo')}
+                onChange={(value) => {
+                  setFormTipo(value);
+                  setOpenFormDropdown(null);
+                }}
+              />
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5 block">Descripción (Opcional)</label>
+              <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-1 block">Descripción (Opcional)</label>
               <textarea 
                 value={formDescripcion} 
                 onChange={(e) => setFormDescripcion(e.target.value)} 
                 placeholder="Detalles sobre el evento..."
                 rows="2"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-pink-500/50 transition-all resize-none placeholder-white/20"
+                className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all resize-none placeholder-white/30"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-2 pt-1">
               {editingActividadId && (
                 <button 
                   type="button" 
                   onClick={resetForm}
-                  className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition text-xs border border-white/5"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition text-xs border border-white/10 hover:border-white/20"
                 >
-                  Cancelar Edición
+                  Cancelar
                 </button>
               )}
               <button 
-                type="submit" 
-                className="px-6 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-xl transition text-xs shadow-lg shadow-pink-600/20"
+                type="submit"
+                disabled={saving}
+                className="px-5 py-2 bg-pink-600 hover:bg-pink-700 disabled:bg-pink-500/50 disabled:cursor-not-allowed text-white font-black uppercase tracking-wider text-xs rounded-xl transition shadow-lg shadow-pink-600/20 flex items-center gap-2"
               >
-                {editingActividadId ? 'Actualizar' : 'Crear'}
+                {saving ? (
+                  <><Loader2 size={14} className="animate-spin" /> Guardando...</>
+                ) : editingActividadId ? (
+                  <><Edit3 size={14} /> Actualizar</>
+                ) : (
+                  <><Plus size={14} /> Guardar</>
+                )}
               </button>
             </div>
           </form>
@@ -606,6 +709,42 @@ function ClaseItem({ name, instructor }) {
         </div>
       </div>
     </motion.div>
+  );
+}
+
+function FormDropdown({ label, value, options, isOpen, onToggle, onChange }) {
+  const selected = options.find(option => option.value === value) || options[0];
+
+  return (
+    <div data-filter-dropdown className="relative w-full">
+      <label className="text-[11px] font-bold text-white/60 uppercase tracking-wider mb-2 block">{label}</label>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/15 bg-black/25 px-5 py-3 text-left text-sm text-white shadow-inner shadow-black/20 outline-none transition hover:border-white/30 hover:bg-black/35 focus:border-pink-500/50"
+      >
+        <span className="truncate">{selected?.label}</span>
+        <ChevronDown size={14} className={`shrink-0 text-white/40 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      {isOpen && (
+        <div className="absolute left-0 top-full z-[999] mt-2 max-h-72 w-full overflow-y-auto rounded-2xl border border-pink-500/25 bg-slate-950 p-1.5 shadow-2xl shadow-black/60">
+          {options.map(option => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onChange(option.value)}
+              className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition ${
+                option.value === value
+                  ? 'bg-pink-500/15 text-pink-400'
+                  : 'text-white/70 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
