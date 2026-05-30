@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import { Loader2, Plus, Trash2, Edit3, Clock, MapPin, Download, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Loader2, Plus, Trash2, Edit3, Clock, MapPin, Download, ChevronDown, ChevronLeft, ChevronRight, AlertTriangle, CalendarX } from 'lucide-react';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -28,6 +28,11 @@ function Dashboard() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [actividadToDelete, setActividadToDelete] = useState(null);
 
+  // Calendar navigation state
+  const today = new Date();
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+
   useEffect(() => {
     const closeDropdowns = (event) => {
       if (!event.target.closest('[data-filter-dropdown]')) {
@@ -39,13 +44,50 @@ function Dashboard() {
   }, []);
 
   // Lógica para el calendario
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Dom, 1 = Lun, etc.
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0 = Dom, 1 = Lun, etc.
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const padding = Array.from({ length: firstDayOfMonth }, (_, i) => null);
+
+  const prevMonth = () => {
+    setCurrentMonth(m => {
+      if (m === 0) {
+        setCurrentYear(y => y - 1);
+        return 11;
+      }
+      return m - 1;
+    });
+  };
+
+  const nextMonth = () => {
+    setCurrentMonth(m => {
+      if (m === 11) {
+        setCurrentYear(y => y + 1);
+        return 0;
+      }
+      return m + 1;
+    });
+  };
+
+  const goToToday = () => {
+    setCurrentYear(today.getFullYear());
+    setCurrentMonth(today.getMonth());
+  };
+
+  // Keyboard navigation for calendar
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevMonth();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextMonth();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentMonth, currentYear]);
 
   const fetchActividades = async () => {
     try {
@@ -74,8 +116,8 @@ function Dashboard() {
   }, []);
 
   const handleDayClick = (day) => {
-    const clickedDate = new Date(year, month, day);
-    const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const clickedDate = new Date(currentYear, currentMonth, day);
+    const dayStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     
     setSelectedDay({
       day,
@@ -251,9 +293,34 @@ function Dashboard() {
         <div className="lg:col-span-2 bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-4 md:p-8 shadow-xl flex flex-col">
           <div className="flex items-center justify-between mb-4 md:mb-8">
             <h2 className="text-lg md:text-xl font-bold text-white/90">Calendario de Actividades</h2>
-            <span className="text-[10px] md:text-xs text-white/40 uppercase tracking-[0.2em] font-black">
-              {new Date().toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}
-            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={prevMonth}
+                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/60 hover:text-white transition-all"
+                title="Mes anterior (←)"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="text-[10px] md:text-xs text-white/40 uppercase tracking-[0.2em] font-black min-w-[110px] text-center">
+                {new Date(currentYear, currentMonth).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}
+              </span>
+              <button
+                onClick={nextMonth}
+                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/60 hover:text-white transition-all"
+                title="Mes siguiente (→)"
+              >
+                <ChevronRight size={16} />
+              </button>
+              {(currentMonth !== today.getMonth() || currentYear !== today.getFullYear()) && (
+                <button
+                  onClick={goToToday}
+                  className="ml-1 px-2.5 py-1 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/20 text-pink-400 text-[10px] font-black uppercase transition-all"
+                  title="Ir al mes actual"
+                >
+                  Hoy
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Legend */}
@@ -285,8 +352,9 @@ function Dashboard() {
             ))}
 
             {days.map((day) => {
-              const isToday = day === new Date().getDate();
-              const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              const isToday = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+              const isSelected = selectedDay?.day === day && selectedDay?.dateString === `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              const dayStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
               
               const dayActividades = actividades.filter(act => {
                 const actDate = new Date(act.fecha);
@@ -298,25 +366,38 @@ function Dashboard() {
                 <div 
                   key={day} 
                   onClick={() => handleDayClick(day)}
+                  title={dayActividades.length > 0 ? dayActividades.map(a => `${a.titulo} — ${a.ubicacion}`).join('\n') : undefined}
                   className={`aspect-square rounded-lg md:rounded-xl border flex flex-col items-center justify-center relative transition-all duration-300 group cursor-pointer pb-1 md:pb-2
                     ${isToday 
                       ? 'bg-pink-600 border-pink-500 shadow-lg shadow-pink-600/20 scale-105 z-10' 
+                      : isSelected
+                      ? 'bg-white/15 border-white/40 shadow-lg shadow-white/10 scale-105 z-10'
                       : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'}`}
                 >
-                  <span className={`text-[10px] md:text-sm font-bold ${isToday ? 'text-white' : 'text-white/60'}`}>{day}</span>
+                  {/* Selected indicator ring */}
+                  {isSelected && (
+                    <span className="absolute top-0.5 md:top-1 w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.6)]" />
+                  )}
+                  <span className={`text-[10px] md:text-sm font-bold ${isToday || isSelected ? 'text-white' : 'text-white/60'}`}>{day}</span>
                   
                   {/* Indicators for scheduled activities */}
                   {dayActividades.length > 0 && (
-                    <div className="absolute bottom-0.5 md:bottom-1.5 flex gap-0.5 md:gap-1 justify-center w-full">
-                      {dayActividades.slice(0, 3).map((act, idx) => (
+                    <div className="absolute bottom-0.5 md:bottom-1.5 flex gap-0.5 md:gap-1 justify-center w-full items-center">
+                      {dayActividades.length === 1 ? (
                         <span 
-                          key={act.id || idx} 
-                          className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${locationColors[act.ubicacion] || 'bg-white/40'}`}
-                          title={`${act.titulo} (${act.tipo})`}
+                          className={`w-1.5 h-1.5 md:w-2.5 md:h-2.5 rounded-full ${locationColors[dayActividades[0].ubicacion] || 'bg-white/40'}`}
                         />
-                      ))}
-                      {dayActividades.length > 3 && (
-                        <span className="text-[6px] md:text-[8px] text-white/50 leading-none font-bold">+</span>
+                      ) : dayActividades.length <= 3 ? (
+                        dayActividades.map((act, idx) => (
+                          <span 
+                            key={act.id || idx} 
+                            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${locationColors[act.ubicacion] || 'bg-white/40'}`}
+                          />
+                        ))
+                      ) : (
+                        <span className={`text-[7px] md:text-[9px] font-black px-1 rounded-full ${locationColors[dayActividades[0].ubicacion] || 'bg-white/40'} text-black/80 leading-none`}>
+                          {dayActividades.length}
+                        </span>
                       )}
                     </div>
                   )}
@@ -339,8 +420,9 @@ function Dashboard() {
                 <ClaseItem key={clase.id} name={clase.nombre} instructor={clase.instructor} />
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center h-full py-10 opacity-20 italic">
-                <p className="text-sm">No hay clases hoy</p>
+              <div className="flex flex-col items-center justify-center h-full py-10">
+                <CalendarX size={32} className="text-white/20 mb-3" />
+                <p className="text-sm text-white/30 font-bold">No hay clases hoy</p>
               </div>
             )}
           </div>
@@ -368,7 +450,7 @@ function Dashboard() {
           setModalOpen(false);
           resetForm();
         }} 
-        title={selectedDay ? `Actividades - ${selectedDay.day} de ${new Date(year, month, selectedDay.day).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}` : ''}
+        title={selectedDay ? `Actividades - ${selectedDay.day} de ${new Date(currentYear, currentMonth, selectedDay.day).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}` : ''}
         maxWidth="max-w-xl"
       >
         <div className="space-y-4 text-left">
