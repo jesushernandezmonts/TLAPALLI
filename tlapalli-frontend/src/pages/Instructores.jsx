@@ -220,18 +220,18 @@ function Instructores() {
       </div>
 
       {/* KPIs Resumen */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total', value: instructores.length, icon: Users, accent: 'text-white/80' },
-          { label: 'Activos', value: instructores.filter(i => i.estado === 'Activo').length, icon: CheckCircle2, accent: 'text-emerald-400' },
-          { label: 'Pendientes', value: instructores.filter(i => i.estado === 'Pendiente').length, icon: Clock, accent: 'text-amber-400' },
-          { label: 'Inactivos', value: instructores.filter(i => i.estado === 'Inactivo').length, icon: Ban, accent: 'text-rose-400' },
+          { label: 'Total', value: instructores.length, icon: Users, color: 'bg-white/5 border-white/10 text-white/80' },
+          { label: 'Activos', value: instructores.filter(i => i.estado === 'Activo').length, icon: CheckCircle2, color: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' },
+          { label: 'Pendientes', value: instructores.filter(i => i.estado === 'Pendiente').length, icon: Clock, color: 'bg-amber-500/10 border-amber-500/20 text-amber-400' },
+          { label: 'Inactivos', value: instructores.filter(i => i.estado === 'Inactivo').length, icon: Ban, color: 'bg-rose-500/10 border-rose-500/20 text-rose-400' },
         ].map(kpi => (
-          <div key={kpi.label} className="rounded-2xl p-4 border border-white/8 bg-[#111111] flex items-center gap-3 shadow-lg shadow-black/20">
-            <kpi.icon size={20} className={`shrink-0 ${kpi.accent}`} />
+          <div key={kpi.label} className={`rounded-2xl p-4 border backdrop-blur-xl ${kpi.color} flex items-center gap-3 shadow-lg transition hover:scale-[1.02]`}>
+            <kpi.icon size={20} className="opacity-60" />
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/40">{kpi.label}</p>
-              <p className="text-xl font-black tracking-tighter text-white">{kpi.value}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest opacity-50">{kpi.label}</p>
+              <p className="text-xl font-black tracking-tighter">{kpi.value}</p>
             </div>
           </div>
         ))}
@@ -289,34 +289,19 @@ function Instructores() {
         </div>
       </div>
 
-      <div className="bg-[#111111] border border-white/8 rounded-2xl overflow-hidden shadow-lg shadow-black/20">
-        <table className="w-full text-left">
+      <div className="responsive-table-container relative z-10 mt-2">
+        <table className="responsive-table">
           <thead>
-            <tr className="border-b border-white/8">
-              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 cursor-pointer hover:text-white/60 transition select-none" onClick={() => handleSort('nombre')}>
-                <span className="flex items-center gap-1.5">
-                  Instructor
-                  {sortBy === 'nombre' ? (sortDir === 'asc' ? <ArrowUp size={12} className="text-pink-400" /> : <ArrowDown size={12} className="text-pink-400" />) : <ArrowUpDown size={12} className="opacity-30" />}
-                </span>
-              </th>
-              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 hidden md:table-cell">Correo</th>
-              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 hidden lg:table-cell">Teléfono</th>
-              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 cursor-pointer hover:text-white/60 transition select-none hidden sm:table-cell" onClick={() => handleSort('taller')}>
-                <span className="flex items-center gap-1.5">
-                  Taller Asignado
-                  {sortBy === 'taller' ? (sortDir === 'asc' ? <ArrowUp size={12} className="text-pink-400" /> : <ArrowDown size={12} className="text-pink-400" />) : <ArrowUpDown size={12} className="opacity-30" />}
-                </span>
-              </th>
-              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 text-center cursor-pointer hover:text-white/60 transition select-none" onClick={() => handleSort('estado')}>
-                <span className="flex items-center justify-center gap-1.5">
-                  Estado
-                  {sortBy === 'estado' ? (sortDir === 'asc' ? <ArrowUp size={12} className="text-pink-400" /> : <ArrowDown size={12} className="text-pink-400" />) : <ArrowUpDown size={12} className="opacity-30" />}
-                </span>
-              </th>
-              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 text-right">Acciones</th>
+            <tr>
+              <th>Instructor</th>
+              <th className="hidden md:table-cell">Correo</th>
+              <th className="hidden lg:table-cell">Teléfono</th>
+              <th className="hidden sm:table-cell">Taller Asignado</th>
+              <th className="text-center">Estado</th>
+              <th className="text-right">Acciones</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-white/5">
             {loading ? (
               <tr><td colSpan="6" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando instructores...</td></tr>
             ) : filtered.length === 0 ? (
@@ -325,63 +310,78 @@ function Instructores() {
               paginatedInstructores.map((i, index) => {
                 const badge = getEstadoBadge(i.estado);
                 return (
-                  <tr key={i.id} className="border-b border-white/5 hover:bg-white/3 transition group">
-                    <td className="p-4">
+                  <tr key={i.id} className="hover:bg-white/5 transition group">
+                    <td data-label="Instructor">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 shrink-0">
-                          <UserSquare2 size={18} />
+                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 shrink-0 font-bold">
+                          {i.nombre ? i.nombre[0].toUpperCase() : '?'}
                         </div>
                         <div>
-                          <div className="font-bold text-sm text-white/90">{i.nombre}</div>
-                          <div className="text-[9px] text-white/25 uppercase tracking-widest">ID: #{startIndex + index + 1}</div>
+                          <div className="font-bold text-white/90 drop-shadow-sm">{i.nombre}</div>
+                          <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">ID: #{startIndex + index + 1}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 hidden md:table-cell">
-                      <div className="flex items-center gap-2 text-sm text-white/50">
-                        <Mail size={13} className="text-pink-500/30 shrink-0" />
-                        {i.email || <span className="opacity-20 italic text-xs">Sin correo</span>}
+                    <td data-label="Correo" className="hidden md:table-cell">
+                      <div className="flex items-center gap-2 text-sm text-white/80 font-medium">
+                        <Mail size={14} className="text-pink-500/40 shrink-0" />
+                        {i.email || <span className="opacity-20 italic">Sin correo</span>}
                       </div>
                     </td>
-                    <td className="p-4 text-sm text-white/50 hidden lg:table-cell">{i.telefono || <span className="opacity-20 text-xs">N/A</span>}</td>
-                    <td className="p-4 hidden sm:table-cell">
-                      <div className="flex items-center gap-2 text-sm text-white/50">
-                        <Palette size={13} className="text-pink-500/30 shrink-0" />
-                        {i.taller?.nombreTaller || <span className="opacity-20 italic text-xs">Sin taller</span>}
+                    <td data-label="Teléfono" className="text-sm text-white/80 font-medium hidden lg:table-cell">{i.telefono || <span className="opacity-20">N/A</span>}</td>
+                    <td data-label="Taller" className="hidden sm:table-cell">
+                      <div className="flex items-center gap-2 text-sm text-white/80 font-medium">
+                        <Palette size={14} className="text-pink-500/50 shrink-0" />
+                        {i.taller?.nombreTaller || <span className="opacity-20 italic">Sin taller</span>}
                       </div>
                     </td>
-                    <td className="p-4 text-center">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${badge.classes}`}>
-                        {badge.icon}
+                    <td data-label="Estado" className="text-center">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${badge.classes}`}>
                         {badge.label}
                       </span>
                     </td>
-                    <td className="p-4 text-right">
-                      <div className="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleViewDetail(i)} className="p-2 hover:bg-white/10 hover:text-white rounded-xl transition text-white/50" title="Ver detalle">
+                    <td data-label="Acciones" className="text-right">
+                      <div className="flex justify-end gap-1 sm:gap-2">
+                        <button 
+                          onClick={() => handleViewDetail(i)} 
+                          className="p-2.5 bg-white/5 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-purple-500/30 text-white/60" 
+                          title="Ver detalle"
+                        >
                           <Eye size={16} />
                         </button>
                         {i.email && i.estado !== 'Inactivo' && (
                           <button 
                             onClick={() => handleReenviarActivacion(i.id)} 
                             disabled={sendingEmail === i.id}
-                            className="p-2 hover:bg-blue-500/10 hover:text-blue-400 rounded-xl transition text-white/50 disabled:opacity-30" 
+                            className="p-2.5 bg-white/5 hover:bg-blue-500/20 hover:text-blue-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-blue-500/30 text-white/60 disabled:opacity-30" 
                             title={i.estado === 'Activo' ? 'Reenviar enlace de restablecimiento' : 'Reenviar activación'}
                           >
                             {sendingEmail === i.id ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
                           </button>
                         )}
-                        <button onClick={() => handleEdit(i)} className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-xl transition text-white/50" title="Editar">
+                        <button 
+                          onClick={() => handleEdit(i)} 
+                          className="p-2.5 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-cyan-500/30 text-white/60" 
+                          title="Editar"
+                        >
                           <Edit3 size={16} />
                         </button>
                         <button 
                           onClick={() => handleToggleActivo(i.id, i.estado)} 
-                          className={`p-2 rounded-xl transition text-white/50 ${i.estado === 'Inactivo' ? 'hover:bg-emerald-500/10 hover:text-emerald-400' : 'hover:bg-amber-500/10 hover:text-amber-400'}`}
+                          className={`p-2.5 bg-white/5 rounded-xl transition-all duration-300 border border-white/5 text-white/60 ${
+                            i.estado === 'Inactivo' 
+                              ? 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30' 
+                              : 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30'
+                          }`}
                           title={i.estado === 'Inactivo' ? 'Reactivar' : 'Desactivar'}
                         >
                           <Power size={16} />
                         </button>
-                        <button onClick={() => handleDelete(i.id)} className="p-2 hover:bg-rose-500/10 hover:text-rose-400 rounded-xl transition text-white/50" title="Eliminar">
+                        <button 
+                          onClick={() => handleDelete(i.id)} 
+                          className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30 text-white/60" 
+                          title="Eliminar"
+                        >
                           <Trash2 size={16} />
                         </button>
                       </div>
