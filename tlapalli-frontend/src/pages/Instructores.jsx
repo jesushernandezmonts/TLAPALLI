@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import InstructorForm from '../components/InstructorForm';
-import { Plus, Search, Edit3, Trash2, UserSquare2, Palette, Mail, Send, Power, RefreshCw, AlertTriangle, CheckCircle, X, ChevronDown, Loader2, Users, CheckCircle2, Clock, Ban, Filter } from 'lucide-react';
+import { Plus, Search, Edit3, Trash2, UserSquare2, Palette, Mail, Send, Power, RefreshCw, AlertTriangle, CheckCircle, X, ChevronDown, Loader2, Users, CheckCircle2, Clock, Ban, Filter, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
 function Instructores() {
@@ -12,14 +12,17 @@ function Instructores() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editInstructor, setEditInstructor] = useState(null);
-  const [sendingEmail, setSendingEmail] = useState(null); // ID del instructor al que se le envía email
+  const [detailInstructor, setDetailInstructor] = useState(null);
+  const [sendingEmail, setSendingEmail] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const instructoresPerPage = 8;
   const [estadoFilter, setEstadoFilter] = useState('todos');
   const [openDropdown, setOpenDropdown] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmConfig, setConfirmConfig] = useState({ title: '', message: '', onConfirm: () => {}, confirmText: 'Eliminar' });
-  const [toast, setToast] = useState(null); // { message, type: 'success' | 'error' }
+  const [toast, setToast] = useState(null);
+  const [sortBy, setSortBy] = useState(null);
+  const [sortDir, setSortDir] = useState('asc');
 
   useEffect(() => {
     fetchInstructores();
@@ -54,6 +57,10 @@ function Instructores() {
   const handleNew = () => {
     setEditInstructor(null);
     setModalOpen(true);
+  };
+
+  const handleViewDetail = (instructor) => {
+    setDetailInstructor(instructor);
   };
 
   const showToast = (message, type = 'success') => {
@@ -123,6 +130,15 @@ function Instructores() {
     fetchInstructores();
   };
 
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortDir('asc');
+    }
+  };
+
   const filtered = instructores.filter(i => {
     const matchesSearch =
       i.nombre.toLowerCase().includes(search.toLowerCase()) ||
@@ -131,6 +147,21 @@ function Instructores() {
     const matchesEstado = estadoFilter === 'todos' || i.estado.toLowerCase() === estadoFilter.toLowerCase();
     return matchesSearch && matchesEstado;
   });
+
+  if (sortBy) {
+    filtered.sort((a, b) => {
+      let valA, valB;
+      switch (sortBy) {
+        case 'nombre': valA = a.nombre.toLowerCase(); valB = b.nombre.toLowerCase(); break;
+        case 'estado': valA = a.estado; valB = b.estado; break;
+        case 'taller': valA = a.taller?.nombreTaller || ''; valB = b.taller?.nombreTaller || ''; break;
+        default: return 0;
+      }
+      if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
   const totalPages = Math.max(1, Math.ceil(filtered.length / instructoresPerPage));
   const startIndex = (currentPage - 1) * instructoresPerPage;
   const paginatedInstructores = filtered.slice(startIndex, startIndex + instructoresPerPage);
@@ -143,25 +174,25 @@ function Instructores() {
     switch (estado) {
       case 'Activo':
         return {
-          icon: '✅',
+          icon: <CheckCircle2 size={10} />,
           classes: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
           label: 'Activo',
         };
       case 'Pendiente':
         return {
-          icon: '⏳',
+          icon: <Clock size={10} />,
           classes: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
           label: 'Pendiente',
         };
       case 'Inactivo':
         return {
-          icon: '🚫',
+          icon: <Ban size={10} />,
           classes: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
           label: 'Inactivo',
         };
       default:
         return {
-          icon: '❓',
+          icon: null,
           classes: 'bg-white/5 text-white/40 border-white/10',
           label: estado,
         };
@@ -189,18 +220,18 @@ function Instructores() {
       </div>
 
       {/* KPIs Resumen */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Total', value: instructores.length, icon: Users, color: 'bg-white/5 border-white/10 text-white/80' },
-          { label: 'Activos', value: instructores.filter(i => i.estado === 'Activo').length, icon: CheckCircle2, color: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' },
-          { label: 'Pendientes', value: instructores.filter(i => i.estado === 'Pendiente').length, icon: Clock, color: 'bg-amber-500/10 border-amber-500/20 text-amber-400' },
-          { label: 'Inactivos', value: instructores.filter(i => i.estado === 'Inactivo').length, icon: Ban, color: 'bg-rose-500/10 border-rose-500/20 text-rose-400' },
+          { label: 'Total', value: instructores.length, icon: Users, accent: 'text-white/80' },
+          { label: 'Activos', value: instructores.filter(i => i.estado === 'Activo').length, icon: CheckCircle2, accent: 'text-emerald-400' },
+          { label: 'Pendientes', value: instructores.filter(i => i.estado === 'Pendiente').length, icon: Clock, accent: 'text-amber-400' },
+          { label: 'Inactivos', value: instructores.filter(i => i.estado === 'Inactivo').length, icon: Ban, accent: 'text-rose-400' },
         ].map(kpi => (
-          <div key={kpi.label} className={`rounded-2xl p-4 border backdrop-blur-md ${kpi.color} flex items-center gap-3`}>
-            <kpi.icon size={20} className="opacity-60" />
+          <div key={kpi.label} className="rounded-2xl p-4 border border-white/8 bg-[#111111] flex items-center gap-3 shadow-lg shadow-black/20">
+            <kpi.icon size={20} className={`shrink-0 ${kpi.accent}`} />
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{kpi.label}</p>
-              <p className="text-xl font-black tracking-tighter">{kpi.value}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/40">{kpi.label}</p>
+              <p className="text-xl font-black tracking-tighter text-white">{kpi.value}</p>
             </div>
           </div>
         ))}
@@ -258,19 +289,34 @@ function Instructores() {
         </div>
       </div>
 
-      <div className="responsive-table-container mt-2">
-        <table className="responsive-table">
+      <div className="bg-[#111111] border border-white/8 rounded-2xl overflow-hidden shadow-lg shadow-black/20">
+        <table className="w-full text-left">
           <thead>
-            <tr>
-              <th>Instructor</th>
-              <th>Correo</th>
-              <th>Teléfono</th>
-              <th>Taller Asignado</th>
-              <th className="text-center">Estado</th>
-              <th className="text-right">Acciones</th>
+            <tr className="border-b border-white/8">
+              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 cursor-pointer hover:text-white/60 transition select-none" onClick={() => handleSort('nombre')}>
+                <span className="flex items-center gap-1.5">
+                  Instructor
+                  {sortBy === 'nombre' ? (sortDir === 'asc' ? <ArrowUp size={12} className="text-pink-400" /> : <ArrowDown size={12} className="text-pink-400" />) : <ArrowUpDown size={12} className="opacity-30" />}
+                </span>
+              </th>
+              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 hidden md:table-cell">Correo</th>
+              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 hidden lg:table-cell">Teléfono</th>
+              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 cursor-pointer hover:text-white/60 transition select-none hidden sm:table-cell" onClick={() => handleSort('taller')}>
+                <span className="flex items-center gap-1.5">
+                  Taller Asignado
+                  {sortBy === 'taller' ? (sortDir === 'asc' ? <ArrowUp size={12} className="text-pink-400" /> : <ArrowDown size={12} className="text-pink-400" />) : <ArrowUpDown size={12} className="opacity-30" />}
+                </span>
+              </th>
+              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 text-center cursor-pointer hover:text-white/60 transition select-none" onClick={() => handleSort('estado')}>
+                <span className="flex items-center justify-center gap-1.5">
+                  Estado
+                  {sortBy === 'estado' ? (sortDir === 'asc' ? <ArrowUp size={12} className="text-pink-400" /> : <ArrowDown size={12} className="text-pink-400" />) : <ArrowUpDown size={12} className="opacity-30" />}
+                </span>
+              </th>
+              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-white/40 text-right">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody>
             {loading ? (
               <tr><td colSpan="6" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando instructores...</td></tr>
             ) : filtered.length === 0 ? (
@@ -279,72 +325,63 @@ function Instructores() {
               paginatedInstructores.map((i, index) => {
                 const badge = getEstadoBadge(i.estado);
                 return (
-                  <tr key={i.id} className="hover:bg-white/5 transition group">
-                    <td data-label="Instructor">
+                  <tr key={i.id} className="border-b border-white/5 hover:bg-white/3 transition group">
+                    <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
-                          <UserSquare2 size={20} />
+                        <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 shrink-0">
+                          <UserSquare2 size={18} />
                         </div>
                         <div>
-                          <div className="font-bold text-white/90">{i.nombre}</div>
-                          <div className="text-[10px] text-white/30 uppercase tracking-widest">ID: #{startIndex + index + 1}</div>
+                          <div className="font-bold text-sm text-white/90">{i.nombre}</div>
+                          <div className="text-[9px] text-white/25 uppercase tracking-widest">ID: #{startIndex + index + 1}</div>
                         </div>
                       </div>
                     </td>
-                    <td data-label="Correo">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Mail size={14} className="text-pink-500/40" />
-                        <span className="text-white/60">{i.email || <span className="opacity-20 italic">Sin correo</span>}</span>
+                    <td className="p-4 hidden md:table-cell">
+                      <div className="flex items-center gap-2 text-sm text-white/50">
+                        <Mail size={13} className="text-pink-500/30 shrink-0" />
+                        {i.email || <span className="opacity-20 italic text-xs">Sin correo</span>}
                       </div>
                     </td>
-                    <td data-label="Teléfono" className="text-sm opacity-60">{i.telefono || <span className="opacity-20">N/A</span>}</td>
-                    <td data-label="Taller">
-                      <div className="flex items-center gap-2 text-sm text-white/60">
-                        <Palette size={14} className="text-pink-500/50" />
-                        {i.taller?.nombreTaller || <span className="opacity-20 italic">Sin taller</span>}
+                    <td className="p-4 text-sm text-white/50 hidden lg:table-cell">{i.telefono || <span className="opacity-20 text-xs">N/A</span>}</td>
+                    <td className="p-4 hidden sm:table-cell">
+                      <div className="flex items-center gap-2 text-sm text-white/50">
+                        <Palette size={13} className="text-pink-500/30 shrink-0" />
+                        {i.taller?.nombreTaller || <span className="opacity-20 italic text-xs">Sin taller</span>}
                       </div>
                     </td>
-                    <td data-label="Estado" className="text-center">
+                    <td className="p-4 text-center">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${badge.classes}`}>
-                        <span>{badge.icon}</span>
+                        {badge.icon}
                         {badge.label}
                       </span>
                     </td>
-                    <td data-label="Acciones" className="text-right">
-                      <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
-                        {/* Reenviar activación / reset */}
+                    <td className="p-4 text-right">
+                      <div className="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => handleViewDetail(i)} className="p-2 hover:bg-white/10 hover:text-white rounded-xl transition text-white/50" title="Ver detalle">
+                          <Eye size={16} />
+                        </button>
                         {i.email && i.estado !== 'Inactivo' && (
                           <button 
                             onClick={() => handleReenviarActivacion(i.id)} 
                             disabled={sendingEmail === i.id}
-                            className="p-2 hover:bg-blue-500/10 hover:text-blue-400 rounded-xl transition text-white/60 disabled:opacity-30" 
+                            className="p-2 hover:bg-blue-500/10 hover:text-blue-400 rounded-xl transition text-white/50 disabled:opacity-30" 
                             title={i.estado === 'Activo' ? 'Reenviar enlace de restablecimiento' : 'Reenviar activación'}
                           >
-                            {sendingEmail === i.id ? (
-                              <RefreshCw size={16} className="animate-spin" />
-                            ) : (
-                              <Send size={16} />
-                            )}
+                            {sendingEmail === i.id ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
                           </button>
                         )}
-                        {/* Editar */}
-                        <button onClick={() => handleEdit(i)} className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-xl transition" title="Editar">
+                        <button onClick={() => handleEdit(i)} className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-xl transition text-white/50" title="Editar">
                           <Edit3 size={16} />
                         </button>
-                        {/* Activar/Desactivar */}
                         <button 
                           onClick={() => handleToggleActivo(i.id, i.estado)} 
-                          className={`p-2 rounded-xl transition ${
-                            i.estado === 'Inactivo' 
-                              ? 'hover:bg-emerald-500/10 hover:text-emerald-400' 
-                              : 'hover:bg-amber-500/10 hover:text-amber-400'
-                          }`}
+                          className={`p-2 rounded-xl transition text-white/50 ${i.estado === 'Inactivo' ? 'hover:bg-emerald-500/10 hover:text-emerald-400' : 'hover:bg-amber-500/10 hover:text-amber-400'}`}
                           title={i.estado === 'Inactivo' ? 'Reactivar' : 'Desactivar'}
                         >
                           <Power size={16} />
                         </button>
-                        {/* Eliminar */}
-                        <button onClick={() => handleDelete(i.id)} className="p-2 hover:bg-rose-500/10 hover:text-rose-400 rounded-xl transition" title="Eliminar">
+                        <button onClick={() => handleDelete(i.id)} className="p-2 hover:bg-rose-500/10 hover:text-rose-400 rounded-xl transition text-white/50" title="Eliminar">
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -408,6 +445,69 @@ function Instructores() {
             <X size={16} />
           </button>
         </div>
+      )}
+
+      {/* Modal Detalle Instructor */}
+      {detailInstructor && (
+        <Modal isOpen={!!detailInstructor} onClose={() => setDetailInstructor(null)} title="Detalle del Instructor">
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400">
+                <UserSquare2 size={32} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white">{detailInstructor.nombre}</h3>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border mt-1 ${getEstadoBadge(detailInstructor.estado).classes}`}>
+                  {getEstadoBadge(detailInstructor.estado).icon}
+                  {getEstadoBadge(detailInstructor.estado).label}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Correo Electrónico</p>
+                <div className="flex items-center gap-2 text-sm text-white/80">
+                  <Mail size={14} className="text-pink-400/60 shrink-0" />
+                  {detailInstructor.email || <span className="opacity-30 italic">Sin correo</span>}
+                </div>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Teléfono</p>
+                <p className="text-sm text-white/80">{detailInstructor.telefono || <span className="opacity-30 italic">No registrado</span>}</p>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Taller Asignado</p>
+                <div className="flex items-center gap-2 text-sm text-white/80">
+                  <Palette size={14} className="text-pink-400/60 shrink-0" />
+                  {detailInstructor.taller?.nombreTaller || <span className="opacity-30 italic">Sin taller asignado</span>}
+                </div>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Estado de Cuenta</p>
+                <p className="text-sm text-white/80">{detailInstructor.estado === 'Activo' ? 'Cuenta activada y operativa' : detailInstructor.estado === 'Pendiente' ? 'Esperando activación por correo' : 'Cuenta desactivada por administrador'}</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDetailInstructor(null)}
+                className="px-5 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-bold transition"
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                onClick={() => { setDetailInstructor(null); handleEdit(detailInstructor); }}
+                className="px-5 py-2.5 bg-pink-600 hover:bg-pink-700 rounded-xl text-white text-sm font-bold transition shadow-lg shadow-pink-600/20 flex items-center gap-2"
+              >
+                <Edit3 size={16} />
+                Editar
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}
