@@ -208,9 +208,9 @@ function Instructores() {
 
       <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
         <div className="relative w-full max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60" />
           <input
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-3 placeholder-white/20 text-white focus:outline-none focus:border-pink-500/50 backdrop-blur-sm transition-all"
+            className="w-full bg-black/30 border border-white/20 rounded-2xl px-12 py-3.5 placeholder-white/40 text-white text-sm focus:outline-none focus:border-pink-400/60 focus:bg-black/40 focus:shadow-[0_0_16px_rgba(236,72,153,0.15)] backdrop-blur-md transition-all"
             placeholder="Buscar por nombre, correo o teléfono..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -373,13 +373,6 @@ function Instructores() {
           </div>
         </div>
       )}
-
-      {/* Leyenda de estados */}
-      <div className="flex flex-wrap gap-4 text-[11px] text-white/40 pt-2">
-        <span className="flex items-center gap-1.5">✅ <strong className="text-emerald-400/60">Activo</strong> — Cuenta activada</span>
-        <span className="flex items-center gap-1.5">⏳ <strong className="text-amber-400/60">Pendiente</strong> — Esperando activación</span>
-        <span className="flex items-center gap-1.5">🚫 <strong className="text-rose-400/60">Inactivo</strong> — Desactivado por admin</span>
-      </div>
 
       {/* ConfirmModal */}
       <ConfirmModal
