@@ -6,15 +6,30 @@ export class StatsService {
   constructor(private prisma: PrismaService) {}
 
   async getDashboardStats() {
-    const [alumnosCount, talleresCount, inscripcionesCount, totalPagos] = await Promise.all([
+    const now = new Date();
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+
+    const [
+      alumnosCount,
+      talleresCount,
+      inscripcionesCount,
+      totalPagos,
+      pagosMes,
+      pagosMesPasado,
+      inscripcionesMes,
+      inscripcionesMesPasado,
+    ] = await Promise.all([
       this.prisma.alumno.count({ where: { estatusActivo: true } }),
       this.prisma.taller.count(),
       this.prisma.inscripcion.count({ where: { estatusPago: { not: 'baja' } } }),
-      this.prisma.pago.aggregate({
-        _sum: {
-          monto: true,
-        },
-      }),
+      this.prisma.pago.aggregate({ _sum: { monto: true } }),
+      this.prisma.pago.aggregate({ _sum: { monto: true }, where: { fechaPago: { gte: startOfCurrentMonth, lte: endOfCurrentMonth } } }),
+      this.prisma.pago.aggregate({ _sum: { monto: true }, where: { fechaPago: { gte: startOfLastMonth, lte: endOfLastMonth } } }),
+      this.prisma.inscripcion.count({ where: { fechaInscripcion: { gte: startOfCurrentMonth, lte: endOfCurrentMonth } } }),
+      this.prisma.inscripcion.count({ where: { fechaInscripcion: { gte: startOfLastMonth, lte: endOfLastMonth } } }),
     ]);
 
     // Obtener día actual en español
@@ -59,6 +74,16 @@ export class StatsService {
       ingresosTotales: totalPagos._sum.monto || 0,
       diaDetectado: diaActual,
       proximasClases,
+      comparativas: {
+        ingresosMes: {
+          actual: Number(pagosMes._sum.monto) || 0,
+          anterior: Number(pagosMesPasado._sum.monto) || 0,
+        },
+        inscripcionesNuevas: {
+          actual: inscripcionesMes,
+          anterior: inscripcionesMesPasado,
+        },
+      },
     };
   }
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import { Loader2, Plus, Trash2, Edit3, Clock, MapPin, Download, ChevronDown, ChevronLeft, ChevronRight, AlertTriangle, CalendarX } from 'lucide-react';
+import { Loader2, Plus, Trash2, Edit3, Clock, MapPin, Download, ChevronDown, ChevronLeft, ChevronRight, AlertTriangle, CalendarX, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -283,9 +283,26 @@ function Dashboard() {
       
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <KpiCard title="Alumnos Activos" value={stats?.alumnosInscritos || 0} color="pink" />
-        <KpiCard title="Ingresos Totales" value={`$${stats?.ingresosTotales || 0}`} color="emerald" />
-        <KpiCard title="Talleres Activos" value={stats?.talleresActivos || 0} color="cyan" />
+        <KpiCard 
+          title="Alumnos Activos" 
+          value={stats?.alumnosInscritos || 0} 
+          color="pink"
+        />
+        <KpiCard 
+          title="Ingresos del Mes" 
+          value={`$${Number(stats?.comparativas?.ingresosMes?.actual || 0).toLocaleString('es-MX')}`} 
+          color="emerald"
+          trend={stats?.comparativas?.ingresosMes}
+          trendLabel="vs mes pasado"
+          isCurrency
+        />
+        <KpiCard 
+          title="Inscripciones Nuevas" 
+          value={stats?.comparativas?.inscripcionesNuevas?.actual || 0} 
+          color="cyan"
+          trend={stats?.comparativas?.inscripcionesNuevas}
+          trendLabel="vs mes pasado"
+        />
       </div>
 
       {/* Calendario y Próximas Clases */}
@@ -407,24 +424,71 @@ function Dashboard() {
           </div>
         </div>
         
+        {/* Panel de Actividades del Día Seleccionado */}
         <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-4 md:p-8 shadow-xl flex flex-col">
           <div className="flex justify-between items-center mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl font-bold text-white/90">Clases de Hoy</h2>
+            <h2 className="text-lg md:text-xl font-bold text-white/90">
+              {selectedDay ? `Actividades del ${selectedDay.day}` : 'Actividades de Hoy'}
+            </h2>
             <span className="px-2 py-1 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-400 text-[9px] md:text-[10px] font-black uppercase">
-              {new Date().toLocaleDateString('es-MX', { weekday: 'short' })}
+              {selectedDay 
+                ? new Date(selectedDay.date).toLocaleDateString('es-MX', { weekday: 'short' })
+                : new Date().toLocaleDateString('es-MX', { weekday: 'short' })
+              }
             </span>
           </div>
           <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {stats?.proximasClases && stats.proximasClases.length > 0 ? (
-              stats.proximasClases.map(clase => (
-                <ClaseItem key={clase.id} name={clase.nombre} instructor={clase.instructor} />
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full py-10">
-                <CalendarX size={32} className="text-white/20 mb-3" />
-                <p className="text-sm text-white/30 font-bold">No hay clases hoy</p>
-              </div>
-            )}
+            {(() => {
+              const targetDayStr = selectedDay 
+                ? selectedDay.dateString 
+                : `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+              const panelActs = actividades.filter(act => {
+                const actDate = new Date(act.fecha);
+                const actStr = `${actDate.getFullYear()}-${String(actDate.getMonth() + 1).padStart(2, '0')}-${String(actDate.getDate()).padStart(2, '0')}`;
+                return actStr === targetDayStr;
+              });
+              
+              if (panelActs.length > 0) {
+                return panelActs.map((act) => {
+                  const actTime = new Date(act.fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
+                  const borderCol = act.ubicacion === 'galeria' 
+                    ? 'border-l-rose-500/60' 
+                    : act.ubicacion === 'audioteca' 
+                    ? 'border-l-sky-400/60' 
+                    : 'border-l-amber-400/60';
+                  const typeLabel = act.tipo === 'interna' ? 'Interna' : 'Externa';
+                  const typeBadge = act.tipo === 'interna'
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    : 'bg-violet-500/10 text-violet-400 border-violet-500/20';
+
+                  return (
+                    <div key={act.id} className={`flex flex-col gap-1 bg-white/5 p-4 rounded-2xl border border-white/5 border-l-4 ${borderCol} hover:bg-white/10 transition-all duration-300`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border ${typeBadge}`}>
+                          {typeLabel}
+                        </span>
+                        <span className="text-[10px] text-white/40 font-bold flex items-center gap-1">
+                          <Clock size={10} /> {actTime} hrs
+                        </span>
+                      </div>
+                      <p className="font-bold text-white/90 text-sm mt-1">{act.titulo}</p>
+                      <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest flex items-center gap-1">
+                        <MapPin size={10} /> {act.ubicacion}
+                      </p>
+                    </div>
+                  );
+                });
+              }
+              
+              return (
+                <div className="flex flex-col items-center justify-center h-full py-10">
+                  <CalendarX size={32} className="text-white/20 mb-3" />
+                  <p className="text-sm text-white/30 font-bold">
+                    {selectedDay ? 'No hay actividades este día' : 'No hay actividades hoy'}
+                  </p>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -756,12 +820,20 @@ function Dashboard() {
   );
 }
 
-function KpiCard({ title, value, color }) {
+function KpiCard({ title, value, color, trend, trendLabel, isCurrency }) {
   const colorClasses = {
     pink: 'bg-pink-500/20 border-pink-500/30 text-pink-100 hover:shadow-pink-500/20',
     emerald: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-100 hover:shadow-emerald-500/20',
     cyan: 'bg-cyan-500/20 border-cyan-500/30 text-cyan-100 hover:shadow-cyan-500/20'
   };
+
+  const trendValue = trend ? trend.actual - trend.anterior : 0;
+  const trendPercent = trend && trend.anterior > 0 
+    ? Math.round((trend.actual / trend.anterior - 1) * 100)
+    : trend && trend.actual > 0
+    ? 100
+    : 0;
+  const isPositive = trendValue >= 0;
 
   return (
     <motion.div 
@@ -771,6 +843,19 @@ function KpiCard({ title, value, color }) {
       <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all" />
       <p className="text-sm opacity-60 font-medium uppercase tracking-wider">{title}</p>
       <p className="text-3xl font-black mt-2 tracking-tighter">{value}</p>
+      {trend && (
+        <div className={`flex items-center gap-1 mt-2 text-xs font-bold ${isPositive ? 'text-emerald-400' : trendValue === 0 ? 'text-white/40' : 'text-rose-400'}`}>
+          {isPositive ? <TrendingUp size={14} /> : trendValue === 0 ? <Minus size={14} /> : <TrendingDown size={14} />}
+          <span>
+            {isCurrency 
+              ? `$${Math.abs(trendValue).toLocaleString('es-MX')}` 
+              : `${Math.abs(trendValue)}`}
+            {trend.anterior > 0 && ` (${isPositive ? '+' : ''}${trendPercent}%)`}
+            {' '}
+            {trendLabel}
+          </span>
+        </div>
+      )}
     </motion.div>
   );
 }
