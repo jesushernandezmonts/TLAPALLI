@@ -465,25 +465,25 @@ function Instructores() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2 overflow-hidden">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Correo Electrónico</p>
-                <div className="flex items-center gap-2 text-sm text-white/80">
+                <div className="flex items-center gap-2 text-sm text-white/80 truncate">
                   <Mail size={14} className="text-pink-400/60 shrink-0" />
-                  {detailInstructor.email || <span className="opacity-30 italic">Sin correo</span>}
+                  <span className="truncate select-all">{detailInstructor.email || <span className="opacity-30 italic">Sin correo</span>}</span>
                 </div>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Teléfono</p>
-                <p className="text-sm text-white/80">{detailInstructor.telefono || <span className="opacity-30 italic">No registrado</span>}</p>
+                <p className="text-sm text-white/80 truncate">{detailInstructor.telefono || <span className="opacity-30 italic">No registrado</span>}</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Taller Asignado</p>
-                <div className="flex items-center gap-2 text-sm text-white/80">
+                <div className="flex items-center gap-2 text-sm text-white/80 truncate">
                   <Palette size={14} className="text-pink-400/60 shrink-0" />
-                  {detailInstructor.taller?.nombreTaller || <span className="opacity-30 italic">Sin taller asignado</span>}
+                  <span className="truncate">{detailInstructor.taller?.nombreTaller || <span className="opacity-30 italic">Sin taller asignado</span>}</span>
                 </div>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Estado de Cuenta</p>
                 <p className="text-sm text-white/80">{detailInstructor.estado === 'Activo' ? 'Cuenta activada y operativa' : detailInstructor.estado === 'Pendiente' ? 'Esperando activación por correo' : 'Cuenta desactivada por administrador'}</p>
               </div>
