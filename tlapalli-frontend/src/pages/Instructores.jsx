@@ -235,13 +235,6 @@ function Instructores() {
             Administra el cuerpo docente
           </p>
         </div>
-        <button 
-          onClick={handleNew} 
-          className="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white font-bold px-6 py-3 rounded-2xl transition shadow-lg shadow-pink-600/20 flex items-center justify-center gap-2"
-        >
-          <Plus size={20} />
-          Nuevo Instructor
-        </button>
       </div>
 
       {/* KPIs Resumen */}
@@ -274,44 +267,55 @@ function Instructores() {
           />
         </div>
 
-        {/* Filtro por Estado */}
-        <div className="relative" ref={dropdownRef}>
-          <button
-            type="button"
-            onClick={() => setOpenDropdown(!openDropdown)}
-            className="w-full sm:w-auto flex items-center justify-between gap-4 rounded-2xl border border-white/15 bg-black/25 px-5 py-3 text-left text-sm font-medium text-white shadow-inner shadow-black/20 transition hover:border-white/30 hover:bg-black/35 focus:outline-none focus:ring-2 focus:ring-pink-500/25 min-w-44"
-          >
-            <span className="flex items-center gap-2">
-              <Filter size={16} strokeWidth={1.5} className="text-white/50" />
-              <span className="truncate">
-                {estadoFilter === 'todos' ? 'Todos los Estados' : estadoFilter}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          {/* Filtro por Estado */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setOpenDropdown(!openDropdown)}
+              className="w-full sm:w-auto flex items-center justify-between gap-4 rounded-2xl border border-white/15 bg-black/25 px-5 py-3 text-left text-sm font-medium text-white shadow-inner shadow-black/20 transition hover:border-white/30 hover:bg-black/35 focus:outline-none focus:ring-2 focus:ring-pink-500/25 min-w-44"
+            >
+              <span className="flex items-center gap-2">
+                <Filter size={16} strokeWidth={1.5} className="text-white/50" />
+                <span className="truncate">
+                  {estadoFilter === 'todos' ? 'Todos los Estados' : estadoFilter}
+                </span>
               </span>
-            </span>
-            <ChevronDown size={14} strokeWidth={1.5} className={`shrink-0 text-white/40 transition-transform ${openDropdown ? 'rotate-180' : ''}`} />
+              <ChevronDown size={14} strokeWidth={1.5} className={`shrink-0 text-white/40 transition-transform ${openDropdown ? 'rotate-180' : ''}`} />
+            </button>
+            {openDropdown && (
+              <div className="absolute left-0 sm:right-0 sm:left-auto top-full z-999 mt-2 w-full sm:w-48 overflow-hidden rounded-2xl border border-pink-500/25 bg-slate-950 p-1.5 shadow-2xl shadow-black/60 backdrop-blur-xl">
+                {[
+                  { value: 'todos', label: 'Todos' },
+                  { value: 'Activo', label: 'Activos' },
+                  { value: 'Pendiente', label: 'Pendientes' },
+                  { value: 'Inactivo', label: 'Inactivos' },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => { setEstadoFilter(opt.value); setOpenDropdown(false); setCurrentPage(1); }}
+                    className={`w-full text-left px-4 py-2 text-xs font-bold rounded-xl transition ${
+                      estadoFilter === opt.value 
+                        ? 'bg-pink-600 text-white' 
+                        : 'text-white/70 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Botón Nuevo Instructor */}
+          <button 
+            onClick={handleNew} 
+            className="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white font-black uppercase tracking-wider text-xs px-6 py-3.5 rounded-2xl transition flex items-center justify-center gap-2 cursor-pointer shrink-0 ring-1 ring-pink-300/20"
+          >
+            <Plus size={16} />
+            <span className="whitespace-nowrap">Nuevo Instructor</span>
           </button>
-          {openDropdown && (
-            <div className="absolute left-0 sm:right-0 sm:left-auto top-full z-999 mt-2 w-full sm:w-48 overflow-hidden rounded-2xl border border-pink-500/25 bg-slate-950 p-1.5 shadow-2xl shadow-black/60 backdrop-blur-xl">
-              {[
-                { value: 'todos', label: 'Todos' },
-                { value: 'Activo', label: 'Activos' },
-                { value: 'Pendiente', label: 'Pendientes' },
-                { value: 'Inactivo', label: 'Inactivos' },
-              ].map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => { setEstadoFilter(opt.value); setOpenDropdown(false); setCurrentPage(1); }}
-                  className={`w-full text-left px-4 py-2 text-xs font-bold rounded-xl transition ${
-                    estadoFilter === opt.value 
-                      ? 'bg-pink-600 text-white' 
-                      : 'text-white/70 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
