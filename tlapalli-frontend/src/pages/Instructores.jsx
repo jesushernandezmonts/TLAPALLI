@@ -237,13 +237,12 @@ function Instructores() {
         ))}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-        <div className="relative w-full sm:max-w-xl">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full border border-pink-500/50 flex items-center justify-center z-10 pointer-events-none">
-            <Search size={14} strokeWidth={1.5} className="text-pink-400" />
-          </div>
+      {/* Barra de Controles Unificada en Glassmorphic */}
+      <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5 mt-2">
+        <div className="relative flex-1 sm:max-w-xl w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-pink-400" />
           <input
-            className="w-full bg-[#111111] border border-white/8 rounded-2xl pl-14 pr-5 py-3 placeholder-white/35 text-white/90 text-sm focus:outline-none focus:border-pink-500/30 focus:ring-1 focus:ring-pink-500/10 transition-all shadow-lg shadow-black/20"
+            className="w-full rounded-2xl border border-white/15 bg-black/25 pl-12 pr-5 py-3 text-sm text-white shadow-inner shadow-black/20 placeholder-white/45 transition-all hover:border-white/30 hover:bg-black/35 focus:border-pink-400/70 focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-pink-500/25"
             placeholder="Buscar por nombre o teléfono..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -255,18 +254,18 @@ function Instructores() {
           <button
             type="button"
             onClick={() => setOpenDropdown(!openDropdown)}
-            className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-[#111111] px-5 py-3 text-left text-sm font-medium text-white outline-none transition hover:border-white/20 focus:border-pink-500/30 min-w-40 shadow-lg shadow-black/20"
+            className="w-full sm:w-auto flex items-center justify-between gap-4 rounded-2xl border border-white/15 bg-black/25 px-5 py-3 text-left text-sm font-medium text-white shadow-inner shadow-black/20 transition hover:border-white/30 hover:bg-black/35 focus:outline-none focus:ring-2 focus:ring-pink-500/25 min-w-44"
           >
             <span className="flex items-center gap-2">
               <Filter size={16} strokeWidth={1.5} className="text-white/50" />
               <span className="truncate">
-                {estadoFilter === 'todos' ? 'Todos' : estadoFilter}
+                {estadoFilter === 'todos' ? 'Todos los Estados' : estadoFilter}
               </span>
             </span>
             <ChevronDown size={14} strokeWidth={1.5} className={`shrink-0 text-white/40 transition-transform ${openDropdown ? 'rotate-180' : ''}`} />
           </button>
           {openDropdown && (
-            <div className="absolute left-0 top-full z-999 mt-2 w-full overflow-hidden rounded-2xl border border-pink-500/25 bg-slate-950 p-1.5 shadow-2xl shadow-black/60">
+            <div className="absolute left-0 sm:right-0 sm:left-auto top-full z-999 mt-2 w-full sm:w-48 overflow-hidden rounded-2xl border border-pink-500/25 bg-slate-950 p-1.5 shadow-2xl shadow-black/60 backdrop-blur-xl">
               {[
                 { value: 'todos', label: 'Todos' },
                 { value: 'Activo', label: 'Activos' },
@@ -277,8 +276,10 @@ function Instructores() {
                   key={opt.value}
                   type="button"
                   onClick={() => { setEstadoFilter(opt.value); setOpenDropdown(false); setCurrentPage(1); }}
-                  className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition ${
-                    estadoFilter === opt.value ? 'bg-pink-500/15 text-pink-400' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  className={`w-full text-left px-4 py-2 text-xs font-bold rounded-xl transition ${
+                    estadoFilter === opt.value 
+                      ? 'bg-pink-600 text-white' 
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   {opt.label}
