@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import InstructorForm from '../components/InstructorForm';
@@ -18,6 +18,7 @@ function Instructores() {
   const instructoresPerPage = 8;
   const [estadoFilter, setEstadoFilter] = useState('todos');
   const [openDropdown, setOpenDropdown] = useState(false);
+  const dropdownRef = useRef(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmConfig, setConfirmConfig] = useState({ title: '', message: '', onConfirm: () => {}, confirmText: 'Eliminar' });
   const [toast, setToast] = useState(null);
@@ -27,6 +28,18 @@ function Instructores() {
   useEffect(() => {
     fetchInstructores();
     fetchTalleres();
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const fetchInstructores = async () => {
@@ -251,7 +264,7 @@ function Instructores() {
         </div>
 
         {/* Filtro por Estado */}
-        <div className="relative" data-filter-dropdown>
+        <div className="relative" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => setOpenDropdown(!openDropdown)}
