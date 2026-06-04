@@ -4,6 +4,7 @@ import Modal from '../components/Modal';
 import InstructorForm from '../components/InstructorForm';
 import { Plus, Search, Edit3, Trash2, UserSquare2, Palette, Mail, Send, Power, RefreshCw, AlertTriangle, CheckCircle, X, ChevronDown, Loader2, Users, CheckCircle2, Clock, Ban, Filter, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
+import { AnimatePresence, motion } from 'framer-motion';
 
 function Instructores() {
   const [instructores, setInstructores] = useState([]);
@@ -76,8 +77,8 @@ function Instructores() {
     setDetailInstructor(instructor);
   };
 
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
+  const showToast = (title, message = '', type = 'success') => {
+    setToast({ title, message, type });
     setTimeout(() => setToast(null), 3500);
   };
 
@@ -88,16 +89,16 @@ function Instructores() {
 
   const handleDelete = (id) => {
     openConfirm({
-      title: 'Eliminar Instructor',
-      message: '¿Seguro que deseas eliminar este instructor? Esta acción no se puede deshacer.',
-      confirmText: 'Eliminar',
+      title: '¿Eliminar Instructor?',
+      message: 'Esta acción es permanente y eliminará la cuenta del profesor de la base de datos, accesos de inicio de sesión y todo su historial de talleres asignados. ¿Deseas continuar?',
+      confirmText: 'Sí, eliminar',
       onConfirm: async () => {
         try {
           await api.delete(`/instructores/${id}`);
-          showToast('Instructor eliminado correctamente');
+          showToast('Instructor eliminado', 'El instructor se eliminó correctamente.', 'delete');
           fetchInstructores();
         } catch (err) {
-          showToast('Error al eliminar instructor', 'error');
+          showToast('Error al eliminar', 'No se pudo eliminar al instructor.', 'error');
         } finally {
           setConfirmOpen(false);
         }
@@ -106,19 +107,24 @@ function Instructores() {
   };
 
   const handleToggleActivo = (id, currentEstado) => {
-    const action = currentEstado === 'Inactivo' ? 'reactivar' : 'desactivar';
-    const confirmText = currentEstado === 'Inactivo' ? 'Reactivar' : 'Desactivar';
+    const isActivating = currentEstado === 'Inactivo';
     openConfirm({
-      title: `${confirmText} Instructor`,
-      message: `¿Deseas ${action} a este instructor?`,
-      confirmText,
+      title: isActivating ? '¿Activar Instructor?' : '¿Desactivar Instructor?',
+      message: isActivating
+        ? 'El instructor volverá a quedar marcado como activo y recuperará todos los accesos al sistema. ¿Deseas continuar?'
+        : 'El instructor quedará marcado como inactivo y no podrá iniciar sesión en su cuenta ni gestionar pases de lista. ¿Deseas continuar?',
+      confirmText: isActivating ? 'Sí, activar' : 'Sí, desactivar',
       onConfirm: async () => {
         try {
           await api.patch(`/instructores/${id}/toggle-activo`);
-          showToast(`Instructor ${action === 'reactivar' ? 'reactivado' : 'desactivado'} correctamente`);
+          showToast(
+            isActivating ? 'Instructor activado' : 'Instructor desactivado',
+            'La información del instructor se actualizó correctamente.',
+            'success'
+          );
           fetchInstructores();
         } catch (err) {
-          showToast('Error al cambiar estado', 'error');
+          showToast('Error', 'No se pudo actualizar el estado del instructor.', 'error');
         } finally {
           setConfirmOpen(false);
         }
@@ -130,9 +136,9 @@ function Instructores() {
     setSendingEmail(id);
     try {
       await api.post(`/instructores/${id}/reenviar-activacion`);
-      showToast('Enlace enviado exitosamente al correo del instructor');
+      showToast('Enlace enviado', 'Enlace enviado exitosamente al correo del instructor.', 'success');
     } catch (err) {
-      showToast('Error al enviar: ' + (err.response?.data?.message || 'Intente de nuevo'), 'error');
+      showToast('Error al enviar', err.response?.data?.message || 'Intente de nuevo', 'error');
     } finally {
       setSendingEmail(null);
     }
@@ -141,6 +147,11 @@ function Instructores() {
   const handleSave = () => {
     setModalOpen(false);
     fetchInstructores();
+    if (editInstructor) {
+      showToast('Cambios guardados', 'La información del instructor se actualizó correctamente.', 'success');
+    } else {
+      showToast('Instructor registrado', 'El instructor se registró y se envió el correo de activación.', 'success');
+    }
   };
 
   const handleSort = (field) => {
@@ -457,19 +468,33 @@ function Instructores() {
       />
 
       {/* Toast Notification */}
-      {toast && (
-        <div className={`fixed bottom-6 right-6 z-200 flex items-center gap-3 px-5 py-3 rounded-2xl border shadow-2xl backdrop-blur-md transition-all animate-bounce-in ${
-          toast.type === 'error'
-            ? 'bg-rose-950/80 border-rose-500/30 text-rose-300'
-            : 'bg-emerald-950/80 border-emerald-500/30 text-emerald-300'
-        }`}>
-          {toast.type === 'error' ? <AlertTriangle size={18} /> : <CheckCircle size={18} />}
-          <p className="text-sm font-bold">{toast.message}</p>
-          <button onClick={() => setToast(null)} className="opacity-60 hover:opacity-100 transition">
-            <X size={16} />
-          </button>
-        </div>
-      )}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, x: -80 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 80 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className={`fixed right-6 top-6 z-200 flex items-center gap-3 rounded-2xl bg-slate-950/90 px-5 py-4 text-white shadow-2xl backdrop-blur-xl ${
+              toast.type === 'delete' || toast.type === 'error'
+                ? 'border border-rose-500/25 shadow-rose-500/10'
+                : 'border border-emerald-500/20 shadow-emerald-500/10'
+            }`}
+          >
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${
+              toast.type === 'delete' || toast.type === 'error'
+                ? 'border-rose-500/25 bg-rose-500/10 text-rose-400'
+                : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
+            }`}>
+              {toast.type === 'delete' || toast.type === 'error' ? <AlertTriangle size={22} /> : <CheckCircle size={22} />}
+            </div>
+            <div>
+              <p className="text-sm font-black">{toast.title}</p>
+              <p className="text-xs font-medium text-white/50">{toast.message}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal Detalle Instructor */}
       {detailInstructor && (
