@@ -143,7 +143,8 @@ function Instructores() {
     const matchesSearch =
       i.nombre.toLowerCase().includes(search.toLowerCase()) ||
       (i.email && i.email.toLowerCase().includes(search.toLowerCase())) ||
-      (i.telefono && i.telefono.includes(search));
+      (i.telefono && i.telefono.includes(search)) ||
+      (i.taller?.nombreTaller && i.taller.nombreTaller.toLowerCase().includes(search.toLowerCase()));
     const matchesEstado = estadoFilter === 'todos' || i.estado.toLowerCase() === estadoFilter.toLowerCase();
     return matchesSearch && matchesEstado;
   });
@@ -332,8 +333,17 @@ function Instructores() {
                     <td data-label="Teléfono" className="text-sm text-white/80 font-medium hidden lg:table-cell">{i.telefono || <span className="opacity-20">N/A</span>}</td>
                     <td data-label="Taller" className="hidden sm:table-cell">
                       <div className="flex items-center gap-2 text-sm text-white/80 font-medium">
-                        <Palette size={14} className="text-pink-500/50 shrink-0" />
-                        {i.taller?.nombreTaller || <span className="opacity-20 italic">Sin taller</span>}
+                        {i.taller?.nombreTaller ? (
+                          <>
+                            <Palette size={14} className="text-pink-500/50 shrink-0" />
+                            {i.taller.nombreTaller}
+                          </>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                            Disponible / Sin Taller
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td data-label="Estado" className="text-center">
