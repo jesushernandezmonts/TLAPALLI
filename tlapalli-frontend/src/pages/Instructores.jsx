@@ -522,7 +522,8 @@ function Instructores() {
       )}
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}
-             title={editInstructor ? 'Editar Instructor' : 'Nuevo Instructor'}>
+             title={editInstructor ? 'Editar Instructor' : 'Nuevo Instructor'}
+             maxWidth="max-w-3xl">
         <InstructorForm instructor={editInstructor} talleres={talleres} onClose={() => setModalOpen(false)} onSave={handleSave} />
       </Modal>
     </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Send, ChevronDown, Loader2, CheckCircle, AlertTriangle, Lock, Unlock } from 'lucide-react';
+import { Mail, Send, ChevronDown, Loader2, CheckCircle, AlertTriangle, Lock, Unlock, Check } from 'lucide-react';
 import api from '../services/api';
 
 function InstructorForm({ instructor, talleres, onClose, onSave }) {
@@ -87,7 +87,7 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
             placeholder="Ej. Juan García"
             value={form.nombre}
             onChange={handleChange}
-            className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
+            className="bg-white/10 border border-white/20 rounded-xl px-3 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 text-sm h-11"
             required
           />
         </div>
@@ -100,7 +100,7 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
               placeholder="profesor@gmail.com"
               value={form.email}
               onChange={handleChange}
-              className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 disabled:opacity-50"
+              className="bg-white/10 border border-white/20 rounded-xl px-3 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 disabled:opacity-50 text-sm h-11"
               required
               disabled={!!instructor && !isEmailUnlocked}
             />
@@ -108,14 +108,14 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
               <button
                 type="button"
                 onClick={() => setIsEmailUnlocked(!isEmailUnlocked)}
-                className={`px-3 flex items-center justify-center rounded-xl border transition duration-300 ${
+                className={`w-11 h-11 flex items-center justify-center rounded-xl border transition-all duration-300 shrink-0 ${
                   isEmailUnlocked 
                     ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20' 
                     : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/60'
                 }`}
                 title={isEmailUnlocked ? "Bloquear edición de correo" : "Desbloquear edición de correo"}
               >
-                {isEmailUnlocked ? <Unlock size={16} /> : <Lock size={16} />}
+                {isEmailUnlocked ? <Unlock size={18} /> : <Lock size={18} />}
               </button>
             )}
           </div>
@@ -143,7 +143,7 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
             placeholder="Ej. 5512345678"
             value={form.telefono}
             onChange={handleChange}
-            className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
+            className="bg-white/10 border border-white/20 rounded-xl px-3 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 text-sm h-11"
           />
         </div>
 
@@ -152,7 +152,7 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
           <button
             type="button"
             onClick={() => setOpenDropdown(!openDropdown)}
-            className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/15 bg-black/25 px-3 py-2 text-left text-sm text-white shadow-inner shadow-black/20 outline-none transition hover:border-white/30 hover:bg-black/35 focus:border-pink-500/50"
+            className="flex h-11 w-full items-center justify-between gap-3 rounded-xl border border-white/15 bg-black/25 px-3 text-left text-sm text-white shadow-inner shadow-black/20 outline-none transition hover:border-white/30 hover:bg-black/35 focus:border-pink-500/50"
           >
             <span className="truncate">
               {form.tallerId 
@@ -162,28 +162,53 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
             <ChevronDown size={14} className={`shrink-0 text-white/40 transition-transform ${openDropdown ? 'rotate-180' : ''}`} />
           </button>
           {openDropdown && (
-            <div className="absolute left-0 top-full z-999 mt-2 max-h-60 w-full overflow-y-auto rounded-2xl border border-pink-500/25 bg-slate-950 p-1.5 shadow-2xl shadow-black/60">
-              <button
-                type="button"
-                onClick={() => handleSelectTaller('')}
-                className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition ${
-                  !form.tallerId ? 'bg-pink-500/15 text-pink-400' : 'text-white/70 hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                Sin taller asignado
-              </button>
-              {talleres.map(t => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => handleSelectTaller(String(t.id))}
-                  className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition ${
-                    String(form.tallerId) === String(t.id) ? 'bg-pink-500/15 text-pink-400' : 'text-white/70 hover:bg-white/5 hover:text-white'
+            <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-white/10 bg-slate-950/95 shadow-2xl backdrop-blur-md">
+              <div className="max-h-48 overflow-y-auto p-1.5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
+                {/* Opción Sin Taller */}
+                <div
+                  onClick={() => handleSelectTaller('')}
+                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition ${
+                    !form.tallerId ? 'bg-pink-500/20 text-pink-300' : 'text-white/70 hover:bg-white/5'
                   }`}
                 >
-                  {t.nombreTaller}
+                  <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition shrink-0 ${
+                    !form.tallerId ? 'bg-pink-500 border-pink-500' : 'border-white/30'
+                  }`}>
+                    {!form.tallerId && <Check size={10} className="text-white" />}
+                  </div>
+                  <span className="text-[11px] font-semibold">Sin taller asignado</span>
+                </div>
+
+                {/* Lista de Talleres */}
+                {talleres.map((taller) => {
+                  const isSelected = String(form.tallerId) === String(taller.id);
+                  return (
+                    <div
+                      key={taller.id}
+                      onClick={() => handleSelectTaller(String(taller.id))}
+                      className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition ${
+                        isSelected ? 'bg-pink-500/20 text-pink-300' : 'text-white/70 hover:bg-white/5'
+                      }`}
+                    >
+                      <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition shrink-0 ${
+                        isSelected ? 'bg-pink-500 border-pink-500' : 'border-white/30'
+                      }`}>
+                        {isSelected && <Check size={10} className="text-white" />}
+                      </div>
+                      <span className="text-[11px] font-semibold">{taller.nombreTaller}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex justify-end border-t border-white/10 bg-slate-950/95 px-2.5 py-1.5">
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown(false)}
+                  className="rounded-full bg-pink-600 px-5 py-1.5 text-[11px] font-black text-white transition hover:bg-pink-700 shadow-lg shadow-pink-600/20"
+                >
+                  Listo
                 </button>
-              ))}
+              </div>
             </div>
           )}
         </div>
