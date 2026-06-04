@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Send, ChevronDown, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Mail, Send, ChevronDown, Loader2, CheckCircle, AlertTriangle, Lock, Unlock } from 'lucide-react';
 import api from '../services/api';
 
 function InstructorForm({ instructor, talleres, onClose, onSave }) {
@@ -13,6 +13,7 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
+  const [isEmailUnlocked, setIsEmailUnlocked] = useState(false);
 
   useEffect(() => {
     if (instructor) {
@@ -92,18 +93,44 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
         </div>
         <div className="space-y-1">
           <label className="text-sm text-white/60 ml-1">Correo Electrónico</label>
-          <input
-            name="email"
-            type="email"
-            placeholder="profesor@gmail.com"
-            value={form.email}
-            onChange={handleChange}
-            className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
-            required
-            disabled={!!instructor}
-          />
+          <div className="flex gap-2">
+            <input
+              name="email"
+              type="email"
+              placeholder="profesor@gmail.com"
+              value={form.email}
+              onChange={handleChange}
+              className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 disabled:opacity-50"
+              required
+              disabled={!!instructor && !isEmailUnlocked}
+            />
+            {!!instructor && (
+              <button
+                type="button"
+                onClick={() => setIsEmailUnlocked(!isEmailUnlocked)}
+                className={`px-3 flex items-center justify-center rounded-xl border transition duration-300 ${
+                  isEmailUnlocked 
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20' 
+                    : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/60'
+                }`}
+                title={isEmailUnlocked ? "Bloquear edición de correo" : "Desbloquear edición de correo"}
+              >
+                {isEmailUnlocked ? <Unlock size={16} /> : <Lock size={16} />}
+              </button>
+            )}
+          </div>
           {!!instructor && (
-            <p className="text-[10px] text-white/30 italic ml-1">El correo no se puede cambiar</p>
+            <p className="text-[10px] ml-1">
+              {isEmailUnlocked ? (
+                <span className="text-amber-400/80 font-bold">
+                  ⚠️ Cuidado: Cambiar el correo cambiará su usuario de inicio de sesión.
+                </span>
+              ) : (
+                <span className="text-white/30 italic">
+                  El correo está bloqueado. Haz clic en el candado para cambiarlo.
+                </span>
+              )}
+            </p>
           )}
         </div>
       </div>

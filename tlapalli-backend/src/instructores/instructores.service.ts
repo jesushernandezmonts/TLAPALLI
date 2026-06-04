@@ -89,12 +89,84 @@ export class InstructoresService {
   }
 
   async update(id: number, dto: UpdateInstructorDto) {
-    await this.findOne(id);
-    return this.prisma.instructor.update({
+    const existing = await this.findOne(id);
+
+    // 1. Validar si el email ha cambiado y si el nuevo ya existe
+    if (dto.email && dto.email !== existing.email) {
+      const existeInstructor = await this.prisma.instructor.findFirst({
+        where: {
+          email: dto.email,
+          id: { not: id },
+        },
+      });
+      if (existeInstructor) {
+        throw new BadRequestException('Ya existe un instructor registrado con ese email.');
+      }
+
+      const existeUsuario = await this.prisma.usuario.findFirst({
+        where: {
+          email: dto.email,
+          instructorId: { not: id },
+        },
+      });
+      if (existeUsuario) {
+        throw new BadRequestException('Ya existe un usuario registrado con ese email.');
+      }
+    }
+
+    // 2. Actualizar el Instructor
+    const updatedInstructor = await this.prisma.instructor.update({
       where: { id },
-      data: dto,
+      data: {
+        nombre: dto.nombre,
+        email: dto.email,
+        telefono: dto.telefono,
+        tallerId: dto.tallerId,
+        activo: dto.activo,
+      },
       include: { taller: true },
     });
+
+    // 3. Sincronizar con el Usuario vinculado si existe
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { instructorId: id },
+    });
+
+    if (usuario) {
+      const usuarioUpdateData: any = {};
+      if (dto.nombre) usuarioUpdateData.nombre = dto.nombre;
+      if (dto.email) usuarioUpdateData.email = dto.email;
+
+      await this.prisma.usuario.update({
+        where: { id: usuario.id },
+        data: usuarioUpdateData,
+      });
+
+      // 4. Si el instructor sigue Pendiente y se cambió el correo, re-generar token de activación y enviar correo nuevo
+      if (existing.estado === 'Pendiente' && dto.email && dto.email !== existing.email) {
+        const token = crypto.randomBytes(32).toString('hex');
+        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+
+        await this.prisma.usuario.update({
+          where: { id: usuario.id },
+          data: {
+            resetToken: token,
+            resetTokenExp: expires,
+          },
+        });
+
+        let tallerNombre: string | undefined;
+        const tallerIdToUse = dto.tallerId !== undefined ? dto.tallerId : existing.tallerId;
+        if (tallerIdToUse) {
+          const taller = await this.prisma.taller.findUnique({ where: { id: tallerIdToUse } });
+          tallerNombre = taller?.nombreTaller;
+        }
+
+        await this.mailerService.sendActivationEmail(dto.email, token, dto.nombre || existing.nombre, tallerNombre);
+      }
+    }
+
+    return updatedInstructor;
   }
 
   async remove(id: number) {
