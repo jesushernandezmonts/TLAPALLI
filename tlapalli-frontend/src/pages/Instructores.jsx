@@ -244,7 +244,7 @@ function Instructores() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-pink-400" />
           <input
             className="w-full rounded-2xl border border-white/15 bg-black/25 pl-12 pr-5 py-3 text-sm text-white shadow-inner shadow-black/20 placeholder-white/45 transition-all hover:border-white/30 hover:bg-black/35 focus:border-pink-400/70 focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-pink-500/25"
-            placeholder="Buscar por nombre o teléfono..."
+            placeholder="Buscar por nombre, teléfono o taller..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
