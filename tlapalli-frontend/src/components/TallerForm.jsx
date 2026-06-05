@@ -49,23 +49,92 @@ function TallerForm({ taller, onClose, onSave }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <input name="nombreTaller" placeholder="Nombre del taller" value={form.nombreTaller}
-        onChange={handleChange} className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full placeholder-white/50" required />
-      <textarea name="descripcion" placeholder="Descripción" value={form.descripcion}
-        onChange={handleChange} className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full placeholder-white/50" rows="2" />
-      <div className="grid grid-cols-2 gap-4">
-        <input name="costoMensual" type="number" step="0.01" placeholder="Costo mensual" value={form.costoMensual}
-          onChange={handleChange} className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 placeholder-white/50" required />
-        <input name="cupoMaximo" type="number" placeholder="Cupo máximo" value={form.cupoMaximo}
-          onChange={handleChange} className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 placeholder-white/50" required />
+    <form onSubmit={handleSubmit} className="space-y-4 text-left">
+      <div className="space-y-1">
+        <label className="text-sm text-white/60 ml-1">Nombre del Taller</label>
+        <input
+          name="nombreTaller"
+          placeholder="Ej. Violín, Pintura, Teatro"
+          value={form.nombreTaller}
+          onChange={handleChange}
+          className="bg-white/10 border border-white/20 rounded-xl px-3 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 text-sm h-11"
+          required
+        />
       </div>
-      <input name="horarioDescripcion" placeholder="Horario (ej: Lunes y Miércoles 16:00-18:00)" value={form.horarioDescripcion}
-        onChange={handleChange} className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 w-full placeholder-white/50" />
-      {error && <p className="text-red-400 text-sm">{error}</p>}
-      <div className="flex justify-end gap-3">
-        <button type="button" onClick={onClose} className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl">Cancelar</button>
-        <button type="submit" className="px-4 py-2 bg-pink-600 hover:bg-pink-700 rounded-xl font-bold">Guardar</button>
+
+      <div className="space-y-1">
+        <label className="text-sm text-white/60 ml-1">Descripción</label>
+        <textarea
+          name="descripcion"
+          placeholder="Breve descripción de los temas o el taller..."
+          value={form.descripcion}
+          onChange={handleChange}
+          className="bg-white/10 border border-white/20 rounded-xl p-3 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 text-sm"
+          rows="2"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <label className="text-sm text-white/60 ml-1">Costo Mensual ($)</label>
+          <input
+            name="costoMensual"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="Ej. 350.00"
+            value={form.costoMensual}
+            onChange={handleChange}
+            className="bg-white/10 border border-white/20 rounded-xl px-3 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 text-sm h-11"
+            required
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm text-white/60 ml-1">Cupo Máximo</label>
+          <input
+            name="cupoMaximo"
+            type="number"
+            min="1"
+            placeholder="Ej. 15"
+            value={form.cupoMaximo}
+            onChange={handleChange}
+            className="bg-white/10 border border-white/20 rounded-xl px-3 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 text-sm h-11"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-sm text-white/60 ml-1">Horario del Taller</label>
+        <input
+          name="horarioDescripcion"
+          placeholder="Ej. Lunes y Miércoles 16:00-18:00"
+          value={form.horarioDescripcion}
+          onChange={handleChange}
+          className="bg-white/10 border border-white/20 rounded-xl px-3 w-full text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 text-sm h-11"
+        />
+      </div>
+
+      {error && (
+        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs px-3.5 py-2 rounded-xl">
+          ⚠️ {error}
+        </div>
+      )}
+
+      <div className="flex justify-end gap-3 pt-2">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-5 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-bold transition"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          className="px-5 py-2.5 bg-pink-600 hover:bg-pink-700 rounded-xl text-white text-sm font-black transition shadow-lg shadow-pink-600/20"
+        >
+          Guardar Cambios
+        </button>
       </div>
     </form>
   );

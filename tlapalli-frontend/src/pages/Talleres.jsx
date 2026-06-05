@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import TallerForm from '../components/TallerForm';
-import { Plus, Search, Edit3, Trash2, Calendar } from 'lucide-react';
+import { Plus, Search, Edit3, Trash2, Calendar, AlertTriangle, CheckCircle } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
+import { AnimatePresence, motion } from 'framer-motion';
 
 function Talleres() {
   const [talleres, setTalleres] = useState([]);
@@ -12,6 +14,10 @@ function Talleres() {
   const [editTaller, setEditTaller] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const talleresPerPage = 8;
+
+  const [toast, setToast] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState({ title: '', message: '', onConfirm: () => {}, confirmText: 'Eliminar' });
 
   useEffect(() => {
     fetchTalleres();
@@ -28,6 +34,16 @@ function Talleres() {
     }
   };
 
+  const showToast = (title, message = '', type = 'success') => {
+    setToast({ title, message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const openConfirm = (config) => {
+    setConfirmConfig(config);
+    setConfirmOpen(true);
+  };
+
   const handleEdit = (taller) => {
     setEditTaller(taller);
     setModalOpen(true);
@@ -38,19 +54,39 @@ function Talleres() {
     setModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Eliminar este taller?')) {
-      try {
-        await api.delete(`/talleres/${id}`);
-        fetchTalleres();
-      } catch (err) {
-        alert('No se puede eliminar: tiene inscripciones activas');
-      }
+  const handleDelete = (id) => {
+    openConfirm({
+      title: '¿Eliminar Taller?',
+      message: 'Esta acción es permanente y eliminará este taller de la oferta académica. Asegúrate de que no haya alumnos inscritos activos. ¿Deseas continuar?',
+      confirmText: 'Sí, eliminar',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/talleres/${id}`);
+          showToast('Taller eliminado', 'El taller se eliminó correctamente.', 'delete');
+          fetchTalleres();
+        } catch (err) {
+          showToast('Error al eliminar', err.response?.data?.message || 'No se puede eliminar: tiene inscripciones activas.', 'error');
+        } finally {
+          setConfirmOpen(false);
+        }
+      },
+    });
+  };
+
+  const handleSave = () => {
+    setModalOpen(false);
+    fetchTalleres();
+    if (editTaller) {
+      showToast('Cambios guardados', 'La información del taller se actualizó correctamente.', 'success');
+    } else {
+      showToast('Taller registrado', 'El taller se registró correctamente en la oferta académica.', 'success');
     }
   };
 
   const filtered = talleres.filter(t =>
-    (t.nombreTaller || '').toLowerCase().includes(search.toLowerCase())
+    (t.nombreTaller || '').toLowerCase().includes(search.toLowerCase()) ||
+    (t.descripcion || '').toLowerCase().includes(search.toLowerCase()) ||
+    (t.horarioDescripcion || '').toLowerCase().includes(search.toLowerCase())
   );
   const totalPages = Math.max(1, Math.ceil(filtered.length / talleresPerPage));
   const startIndex = (currentPage - 1) * talleresPerPage;
@@ -71,23 +107,27 @@ function Talleres() {
             Administra la oferta académica
           </p>
         </div>
-        <button 
-          onClick={handleNew} 
-          className="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white font-bold px-6 py-3 rounded-2xl transition shadow-lg shadow-pink-600/20 flex items-center justify-center gap-2"
-        >
-          <Plus size={20} />
-          Nuevo Taller
-        </button>
       </div>
 
-      <div className="relative w-full max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-        <input
-          className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-3 placeholder-white/20 text-white focus:outline-none focus:border-pink-500/50 backdrop-blur-sm transition-all"
-          placeholder="Buscar taller..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* Barra de Controles Unificada en Glassmorphic */}
+      <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5 mt-2">
+        <div className="relative flex-1 sm:max-w-xl w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-pink-400" />
+          <input
+            className="w-full rounded-2xl border border-white/15 bg-black/25 pl-12 pr-5 py-3 text-sm text-white shadow-inner shadow-black/20 placeholder-white/45 transition-all hover:border-white/30 hover:bg-black/35 focus:border-pink-400/70 focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-pink-500/25"
+            placeholder="Buscar taller..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <button 
+          onClick={handleNew} 
+          className="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white font-black uppercase tracking-wider text-xs px-6 py-3.5 rounded-2xl transition flex items-center justify-center gap-2 cursor-pointer shrink-0 ring-1 ring-pink-300/20"
+        >
+          <Plus size={16} />
+          <span className="whitespace-nowrap">Nuevo Taller</span>
+        </button>
       </div>
 
       <div className="responsive-table-container mt-2">
@@ -127,12 +167,20 @@ function Talleres() {
                   </td>
                   <td data-label="Horario" className="text-sm text-white/90 font-medium max-w-xs truncate drop-shadow-sm">{t.horarioDescripcion || 'Sin horario definido'}</td>
                   <td data-label="Acciones" className="text-right">
-                    <div className="flex justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleEdit(t)} className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-xl transition" title="Editar">
-                        <Edit3 size={18} />
+                    <div className="flex justify-end gap-2">
+                      <button 
+                        onClick={() => handleEdit(t)} 
+                        className="p-2.5 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-cyan-500/30 text-white/60" 
+                        title="Editar"
+                      >
+                        <Edit3 size={16} />
                       </button>
-                      <button onClick={() => handleDelete(t.id)} className="p-2 hover:bg-rose-500/10 hover:text-rose-400 rounded-xl transition" title="Eliminar">
-                        <Trash2 size={18} />
+                      <button 
+                        onClick={() => handleDelete(t.id)} 
+                        className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30 text-white/60" 
+                        title="Eliminar"
+                      >
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>
@@ -171,9 +219,50 @@ function Talleres() {
       )}
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}
-             title={editTaller ? 'Editar Taller' : 'Nuevo Taller'}>
-        <TallerForm taller={editTaller} onClose={() => setModalOpen(false)} onSave={fetchTalleres} />
+             title={editTaller ? 'Editar Taller' : 'Nuevo Taller'}
+             maxWidth="max-w-2xl">
+        <TallerForm taller={editTaller} onClose={() => setModalOpen(false)} onSave={handleSave} />
       </Modal>
+
+      {/* ConfirmModal */}
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmConfig.onConfirm}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        cancelText="Cancelar"
+      />
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, x: -80 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 80 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className={`fixed right-6 top-6 z-200 flex items-center gap-3 rounded-2xl bg-slate-950/90 px-5 py-4 text-white shadow-2xl backdrop-blur-xl ${
+              toast.type === 'delete' || toast.type === 'error'
+                ? 'border border-rose-500/25 shadow-rose-500/10'
+                : 'border border-emerald-500/20 shadow-emerald-500/10'
+            }`}
+          >
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${
+              toast.type === 'delete' || toast.type === 'error'
+                ? 'border-rose-500/25 bg-rose-500/10 text-rose-400'
+                : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
+            }`}>
+              {toast.type === 'delete' || toast.type === 'error' ? <AlertTriangle size={22} /> : <CheckCircle size={22} />}
+            </div>
+            <div>
+              <p className="text-sm font-black">{toast.title}</p>
+              <p className="text-xs font-medium text-white/50">{toast.message}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
