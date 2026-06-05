@@ -240,18 +240,23 @@ function Instructores() {
       {/* KPIs Resumen */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total', value: instructores.length, icon: Users, color: 'bg-white/15 border-white/25 text-white' },
-          { label: 'Activos', value: instructores.filter(i => i.estado === 'Activo').length, icon: CheckCircle2, color: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300' },
-          { label: 'Pendientes', value: instructores.filter(i => i.estado === 'Pendiente').length, icon: Clock, color: 'bg-amber-500/20 border-amber-500/30 text-amber-300' },
-          { label: 'Inactivos', value: instructores.filter(i => i.estado === 'Inactivo').length, icon: Ban, color: 'bg-rose-500/20 border-rose-500/30 text-rose-300' },
+          { label: 'Total', value: instructores.length, icon: Users, color: 'bg-white/15 border-white/25 text-white hover:shadow-white/20' },
+          { label: 'Activos', value: instructores.filter(i => i.estado === 'Activo').length, icon: CheckCircle2, color: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300 hover:shadow-emerald-500/20' },
+          { label: 'Pendientes', value: instructores.filter(i => i.estado === 'Pendiente').length, icon: Clock, color: 'bg-amber-500/20 border-amber-500/30 text-amber-300 hover:shadow-amber-500/20' },
+          { label: 'Inactivos', value: instructores.filter(i => i.estado === 'Inactivo').length, icon: Ban, color: 'bg-rose-500/20 border-rose-500/30 text-rose-300 hover:shadow-rose-500/20' },
         ].map(kpi => (
-          <div key={kpi.label} className={`rounded-2xl p-4 border backdrop-blur-xl ${kpi.color} flex items-center gap-3 shadow-lg shadow-black/20 transition hover:scale-[1.02] hover:bg-white/20`}>
+          <motion.div 
+            key={kpi.label}
+            whileHover={{ scale: 1.02 }}
+            className={`rounded-2xl p-4 border backdrop-blur-md ${kpi.color} flex items-center gap-3 shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative group`}
+          >
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all" />
             <kpi.icon size={22} className="opacity-90 shrink-0" />
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{kpi.label}</p>
               <p className="text-xl font-black tracking-tighter">{kpi.value}</p>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
