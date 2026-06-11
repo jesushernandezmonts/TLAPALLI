@@ -5,6 +5,9 @@ import { UpdateInstructorDto } from './dto/update-instructor.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { MailerService } from '../mail/mailer.service';
+import { join } from 'path';
+import * as fs from 'fs';
+
 
 @Injectable()
 export class InstructoresService {
@@ -170,7 +173,7 @@ export class InstructoresService {
   }
 
   async remove(id: number) {
-    await this.findOne(id);
+    const instructor = await this.findOne(id);
 
     // Borrar el Usuario vinculado primero
     const usuario = await this.prisma.usuario.findUnique({ where: { instructorId: id } });
@@ -186,6 +189,14 @@ export class InstructoresService {
 
       // 3. Borrar el Usuario
       await this.prisma.usuario.delete({ where: { id: usuario.id } });
+    }
+
+    // Borrar archivos físicos
+    if (instructor.curriculumUrl) {
+      this.deletePhysicalFile(instructor.curriculumUrl);
+    }
+    if (instructor.temarioUrl) {
+      this.deletePhysicalFile(instructor.temarioUrl);
     }
 
     return this.prisma.instructor.delete({ where: { id } });
@@ -259,5 +270,64 @@ export class InstructoresService {
     }
     
     return { message: 'Enlace enviado exitosamente' };
+  }
+
+  async updateCvUrl(id: number, url: string) {
+    const instructor = await this.findOne(id);
+    if (instructor.curriculumUrl) {
+      this.deletePhysicalFile(instructor.curriculumUrl);
+    }
+    return this.prisma.instructor.update({
+      where: { id },
+      data: { curriculumUrl: url },
+      include: { taller: true, usuario: { select: { id: true, email: true, googleId: true } } },
+    });
+  }
+
+  async updateTemarioUrl(id: number, url: string) {
+    const instructor = await this.findOne(id);
+    if (instructor.temarioUrl) {
+      this.deletePhysicalFile(instructor.temarioUrl);
+    }
+    return this.prisma.instructor.update({
+      where: { id },
+      data: { temarioUrl: url },
+      include: { taller: true, usuario: { select: { id: true, email: true, googleId: true } } },
+    });
+  }
+
+  async removeCv(id: number) {
+    const instructor = await this.findOne(id);
+    if (instructor.curriculumUrl) {
+      this.deletePhysicalFile(instructor.curriculumUrl);
+    }
+    return this.prisma.instructor.update({
+      where: { id },
+      data: { curriculumUrl: null },
+      include: { taller: true, usuario: { select: { id: true, email: true, googleId: true } } },
+    });
+  }
+
+  async removeTemario(id: number) {
+    const instructor = await this.findOne(id);
+    if (instructor.temarioUrl) {
+      this.deletePhysicalFile(instructor.temarioUrl);
+    }
+    return this.prisma.instructor.update({
+      where: { id },
+      data: { temarioUrl: null },
+      include: { taller: true, usuario: { select: { id: true, email: true, googleId: true } } },
+    });
+  }
+
+  private deletePhysicalFile(relativeUrl: string) {
+    const physicalPath = join(process.cwd(), relativeUrl);
+    try {
+      if (fs.existsSync(physicalPath)) {
+        fs.unlinkSync(physicalPath);
+      }
+    } catch (e) {
+      console.error('No se pudo borrar el archivo físico:', e);
+    }
   }
 }

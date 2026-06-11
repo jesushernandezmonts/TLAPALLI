@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
-import { Plus, UserPlus, Trash2, Calendar } from 'lucide-react';
+import { Plus, UserPlus, Trash2, Calendar, AlertTriangle, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function Inscripciones() {
+  const [toast, setToast] = useState(null);
+  const showToast = (title, message = '', type = 'success') => {
+    setToast({ title, message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
   const [inscripciones, setInscripciones] = useState([]);
   const [alumnos, setAlumnos] = useState([]);
   const [talleres, setTalleres] = useState([]);
@@ -46,7 +52,7 @@ function Inscripciones() {
       setForm({ alumnoId: '', tallerId: '' });
       fetchInscripciones();
     } catch (err) {
-      alert(err.response?.data?.message || 'Error al inscribir');
+      showToast('Error', err.response?.data?.message || 'Error al inscribir', 'error');
     }
   };
 
@@ -208,6 +214,28 @@ function Inscripciones() {
           </div>
         </form>
       </Modal>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, x: -80 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 80 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className={`fixed right-6 top-6 z-200 flex items-center gap-3 rounded-2xl bg-slate-950/90 px-5 py-4 text-white shadow-2xl backdrop-blur-xl ${toast.type === 'error' ? 'border border-rose-500/25 shadow-rose-500/10' : 'border border-emerald-500/20 shadow-emerald-500/10'}`}
+          >
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${toast.type === 'error' ? 'border-rose-500/25 bg-rose-500/10 text-rose-400' : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'}`}
+            >
+              {toast.type === 'error' ? <AlertTriangle size={22} /> : <CheckCircle size={22} />}
+            </div>
+            <div>
+              <p className="text-sm font-black">{toast.title}</p>
+              <p className="text-xs font-medium text-white/50">{toast.message}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

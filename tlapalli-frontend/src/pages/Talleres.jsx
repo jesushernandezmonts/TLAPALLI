@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 function Talleres() {
   const [talleres, setTalleres] = useState([]);
+  const [pagos, setPagos] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -26,10 +27,14 @@ function Talleres() {
 
   const fetchTalleres = async () => {
     try {
-      const { data } = await api.get('/talleres');
-      setTalleres(data);
+      const [talleresRes, pagosRes] = await Promise.all([
+        api.get('/talleres'),
+        api.get('/pagos')
+      ]);
+      setTalleres(talleresRes.data);
+      setPagos(pagosRes.data);
     } catch (err) {
-      console.error('Error al cargar talleres', err);
+      console.error('Error al cargar talleres y pagos', err);
     } finally {
       setLoading(false);
     }
@@ -110,9 +115,8 @@ function Talleres() {
     return active >= t.cupoMaximo;
   }).length;
 
-  const ingresosEstimados = talleres.reduce((acc, t) => {
-    const active = t.inscripciones ? t.inscripciones.filter(i => i.estatusPago !== 'baja').length : 0;
-    return acc + (active * Number(t.costoMensual));
+  const ingresosReales = pagos.reduce((acc, p) => {
+    return acc + Number(p.monto);
   }, 0);
 
   const getActiveCount = (taller) => {
@@ -138,7 +142,7 @@ function Talleres() {
           { label: 'Total Talleres', value: totalTalleres, icon: Calendar, color: 'bg-white/15 border-white/25 text-white hover:shadow-white/20' },
           { label: 'Alumnos Inscritos', value: totalAlumnos, icon: Users, color: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300 hover:shadow-emerald-500/20' },
           { label: 'Talleres Llenos', value: talleresLlenos, icon: TrendingUp, color: 'bg-rose-500/20 border-rose-500/30 text-rose-300 hover:shadow-rose-500/20' },
-          { label: 'Ingresos Est. 💰', value: `$${ingresosEstimados.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: DollarSign, color: 'bg-amber-500/20 border-amber-500/30 text-amber-300 hover:shadow-amber-500/20' },
+          { label: 'Ingresos Reales 💰', value: `$${ingresosReales.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: DollarSign, color: 'bg-amber-500/20 border-amber-500/30 text-amber-300 hover:shadow-amber-500/20' },
         ].map(kpi => (
           <motion.div 
             key={kpi.label}

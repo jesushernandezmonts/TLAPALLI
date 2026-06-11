@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Send, ChevronDown, Loader2, CheckCircle, AlertTriangle, Lock, Unlock, Check } from 'lucide-react';
+import { Mail, Send, ChevronDown, Loader2, CheckCircle, AlertTriangle, Lock, Unlock, Check, Upload, FileText, Trash2, ExternalLink, X } from 'lucide-react';
 import api from '../services/api';
 
 function InstructorForm({ instructor, talleres, onClose, onSave }) {
@@ -9,6 +9,10 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
     telefono: '',
     tallerId: '',
   });
+  const [cvFile, setCvFile] = useState(null);
+  const [temarioFile, setTemarioFile] = useState(null);
+  const [curriculumUrl, setCurriculumUrl] = useState('');
+  const [temarioUrl, setTemarioUrl] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
@@ -23,6 +27,8 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
         telefono: instructor.telefono || '',
         tallerId: instructor.tallerId || '',
       });
+      setCurriculumUrl(instructor.curriculumUrl || '');
+      setTemarioUrl(instructor.temarioUrl || '');
     }
   }, [instructor]);
 
@@ -59,13 +65,34 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
         tallerId: form.tallerId ? parseInt(form.tallerId) : null
       };
 
+      let instructorId = null;
+
       if (instructor) {
-        await api.patch(`/instructores/${instructor.id}`, payload);
-        setSuccess('Instructor actualizado correctamente');
+        instructorId = instructor.id;
+        await api.patch(`/instructores/${instructorId}`, payload);
       } else {
-        await api.post('/instructores', payload);
-        setSuccess('Instructor creado y correo de activación enviado');
+        const response = await api.post('/instructores', payload);
+        instructorId = response.data.id;
       }
+
+      // Subir archivos si fueron seleccionados
+      if (cvFile && instructorId) {
+        const formData = new FormData();
+        formData.append('cv', cvFile);
+        await api.post(`/instructores/${instructorId}/upload-cv`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+
+      if (temarioFile && instructorId) {
+        const formData = new FormData();
+        formData.append('temario', temarioFile);
+        await api.post(`/instructores/${instructorId}/upload-temario`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+
+      setSuccess(instructor ? 'Instructor actualizado correctamente' : 'Instructor creado y correo de activación enviado');
       setTimeout(() => {
         onSave();
         onClose();
@@ -74,6 +101,32 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
       setError(err.response?.data?.message || 'Error al guardar instructor');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteCv = async () => {
+    if (window.confirm('¿Seguro que deseas eliminar el currículum de este instructor?')) {
+      try {
+        await api.delete(`/instructores/${instructor.id}/cv`);
+        setCurriculumUrl('');
+        setSuccess('Currículum eliminado correctamente');
+        setTimeout(() => setSuccess(''), 2000);
+      } catch (err) {
+        setError('Error al eliminar currículum');
+      }
+    }
+  };
+
+  const handleDeleteTemario = async () => {
+    if (window.confirm('¿Seguro que deseas eliminar el temario de este instructor?')) {
+      try {
+        await api.delete(`/instructores/${instructor.id}/temario`);
+        setTemarioUrl('');
+        setSuccess('Temario eliminado correctamente');
+        setTimeout(() => setSuccess(''), 2000);
+      } catch (err) {
+        setError('Error al eliminar temario');
+      }
     }
   };
 
@@ -192,6 +245,147 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* Sección de Documentación */}
+      <div className="border-t border-white/10 pt-4">
+        <h4 className="text-sm font-bold text-white mb-3 tracking-wide flex items-center gap-2">
+          <FileText size={16} className="text-pink-400" />
+          Documentación del Instructor
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          {/* Currículum Vitae (CV) */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col gap-3 relative overflow-hidden group">
+            <div className="absolute -right-6 -top-6 w-16 h-16 bg-pink-500/5 rounded-full blur-xl group-hover:bg-pink-500/10 transition-all" />
+            <label className="text-xs font-black uppercase tracking-widest text-white/50">Currículum Vitae (CV)</label>
+            
+            {curriculumUrl ? (
+              <div className="flex items-center justify-between bg-black/20 border border-white/10 rounded-xl p-3">
+                <div className="flex items-center gap-2.5 overflow-hidden">
+                  <FileText size={20} className="text-pink-400 shrink-0" />
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-white/90 truncate">Currículum cargado</p>
+                    <a
+                      href={`${api.defaults.baseURL || 'http://localhost:3000'}${curriculumUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5"
+                    >
+                      Ver archivo <ExternalLink size={10} />
+                    </a>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDeleteCv}
+                  className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg border border-rose-500/20 hover:border-rose-500/30 transition"
+                  title="Eliminar CV de la cuenta"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ) : cvFile ? (
+              <div className="flex items-center justify-between bg-pink-500/5 border border-pink-500/20 rounded-xl p-3">
+                <div className="flex items-center gap-2.5 overflow-hidden">
+                  <FileText size={20} className="text-pink-400 shrink-0" />
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-white truncate">{cvFile.name}</p>
+                    <p className="text-[10px] text-white/40">{(cvFile.size / 1024 / 1024).toFixed(2)} MB - Listo</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCvFile(null)}
+                  className="p-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-lg transition"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <label className="border-2 border-dashed border-white/15 hover:border-pink-500/40 rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer bg-black/10 hover:bg-pink-500/5 transition duration-300">
+                <Upload size={20} className="text-white/40 group-hover:text-pink-400 transition" />
+                <span className="text-[11px] font-bold text-white/70">Seleccionar PDF del CV</span>
+                <span className="text-[9px] text-white/40">Máximo 5MB (PDF)</span>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) setCvFile(file);
+                  }}
+                  className="hidden"
+                />
+              </label>
+            )}
+          </div>
+
+          {/* Temario (Syllabus) */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col gap-3 relative overflow-hidden group">
+            <div className="absolute -right-6 -top-6 w-16 h-16 bg-pink-500/5 rounded-full blur-xl group-hover:bg-pink-500/10 transition-all" />
+            <label className="text-xs font-black uppercase tracking-widest text-white/50">Temario (Syllabus)</label>
+            
+            {temarioUrl ? (
+              <div className="flex items-center justify-between bg-black/20 border border-white/10 rounded-xl p-3">
+                <div className="flex items-center gap-2.5 overflow-hidden">
+                  <FileText size={20} className="text-pink-400 shrink-0" />
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-white/90 truncate">Temario cargado</p>
+                    <a
+                      href={`${api.defaults.baseURL || 'http://localhost:3000'}${temarioUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5"
+                    >
+                      Ver archivo <ExternalLink size={10} />
+                    </a>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDeleteTemario}
+                  className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg border border-rose-500/20 hover:border-rose-500/30 transition"
+                  title="Eliminar temario de la cuenta"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ) : temarioFile ? (
+              <div className="flex items-center justify-between bg-pink-500/5 border border-pink-500/20 rounded-xl p-3">
+                <div className="flex items-center gap-2.5 overflow-hidden">
+                  <FileText size={20} className="text-pink-400 shrink-0" />
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-white truncate">{temarioFile.name}</p>
+                    <p className="text-[10px] text-white/40">{(temarioFile.size / 1024 / 1024).toFixed(2)} MB - Listo</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTemarioFile(null)}
+                  className="p-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-lg transition"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <label className="border-2 border-dashed border-white/15 hover:border-pink-500/40 rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer bg-black/10 hover:bg-pink-500/5 transition duration-300">
+                <Upload size={20} className="text-white/40 group-hover:text-pink-400 transition" />
+                <span className="text-[11px] font-bold text-white/70">Seleccionar PDF del temario</span>
+                <span className="text-[9px] text-white/40">Máximo 5MB (PDF)</span>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) setTemarioFile(file);
+                  }}
+                  className="hidden"
+                />
+              </label>
+            )}
+          </div>
+
         </div>
       </div>
 

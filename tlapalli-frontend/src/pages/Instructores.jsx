@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import InstructorForm from '../components/InstructorForm';
-import { Plus, Search, Edit3, Trash2, UserSquare2, Palette, Mail, Send, Power, RefreshCw, AlertTriangle, CheckCircle, X, ChevronDown, Loader2, Users, CheckCircle2, Clock, Ban, Filter, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Search, Edit3, Trash2, UserSquare2, Palette, Mail, Send, Power, RefreshCw, AlertTriangle, CheckCircle, X, ChevronDown, Loader2, Users, CheckCircle2, Clock, Ban, Filter, Eye, ArrowUpDown, ArrowUp, ArrowDown, FileText, ExternalLink } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -141,6 +141,32 @@ function Instructores() {
       showToast('Error al enviar', err.response?.data?.message || 'Intente de nuevo', 'error');
     } finally {
       setSendingEmail(null);
+    }
+  };
+
+  const handleDeleteCv = async (instructorId) => {
+    if (window.confirm('¿Seguro que deseas eliminar el currículum de este instructor?')) {
+      try {
+        await api.delete(`/instructores/${instructorId}/cv`);
+        showToast('CV Eliminado', 'El currículum se eliminó correctamente.', 'success');
+        setDetailInstructor(prev => ({ ...prev, curriculumUrl: null }));
+        fetchInstructores();
+      } catch (err) {
+        showToast('Error', 'No se pudo eliminar el currículum.', 'error');
+      }
+    }
+  };
+
+  const handleDeleteTemario = async (instructorId) => {
+    if (window.confirm('¿Seguro que deseas eliminar el temario de este instructor?')) {
+      try {
+        await api.delete(`/instructores/${instructorId}/temario`);
+        showToast('Temario Eliminado', 'El temario se eliminó correctamente.', 'success');
+        setDetailInstructor(prev => ({ ...prev, temarioUrl: null }));
+        fetchInstructores();
+      } catch (err) {
+        showToast('Error', 'No se pudo eliminar el temario.', 'error');
+      }
     }
   };
 
@@ -544,6 +570,78 @@ function Instructores() {
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Estado de Cuenta</p>
                 <p className="text-sm text-white/80">{detailInstructor.estado === 'Activo' ? 'Cuenta activada y operativa' : detailInstructor.estado === 'Pendiente' ? 'Esperando activación por correo' : 'Cuenta desactivada por administrador'}</p>
+              </div>
+              
+              {/* Documentos Adjuntos */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2 space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Documentos Adjuntos</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  
+                  {/* Tarjeta CV */}
+                  <div className="bg-black/20 border border-white/10 rounded-xl p-3 flex items-center justify-between gap-3 overflow-hidden">
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <FileText size={18} className="text-pink-400 shrink-0" />
+                      <div className="overflow-hidden">
+                        <p className="text-xs font-bold text-white/90 truncate">Currículum Vitae (CV)</p>
+                        {detailInstructor.curriculumUrl ? (
+                          <a
+                            href={`${api.defaults.baseURL || 'http://localhost:3000'}${detailInstructor.curriculumUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5"
+                          >
+                            Ver PDF <ExternalLink size={10} />
+                          </a>
+                        ) : (
+                          <p className="text-[10px] text-white/30 italic">No subido</p>
+                        )}
+                      </div>
+                    </div>
+                    {detailInstructor.curriculumUrl && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCv(detailInstructor.id)}
+                        className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg border border-rose-500/20 hover:border-rose-500/30 transition shrink-0"
+                        title="Eliminar currículum"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Tarjeta Temario */}
+                  <div className="bg-black/20 border border-white/10 rounded-xl p-3 flex items-center justify-between gap-3 overflow-hidden">
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <FileText size={18} className="text-pink-400 shrink-0" />
+                      <div className="overflow-hidden">
+                        <p className="text-xs font-bold text-white/90 truncate">Temario (Syllabus)</p>
+                        {detailInstructor.temarioUrl ? (
+                          <a
+                            href={`${api.defaults.baseURL || 'http://localhost:3000'}${detailInstructor.temarioUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5"
+                          >
+                            Ver PDF <ExternalLink size={10} />
+                          </a>
+                        ) : (
+                          <p className="text-[10px] text-white/30 italic">No subido</p>
+                        )}
+                      </div>
+                    </div>
+                    {detailInstructor.temarioUrl && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTemario(detailInstructor.id)}
+                        className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg border border-rose-500/20 hover:border-rose-500/30 transition shrink-0"
+                        title="Eliminar temario"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                </div>
               </div>
             </div>
 

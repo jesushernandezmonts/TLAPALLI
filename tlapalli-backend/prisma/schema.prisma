@@ -75,15 +75,17 @@ model Taller {
 }
 
 model Instructor {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  email     String?  @unique
-  telefono  String?
-  estado    String   @default("Pendiente") // Pendiente, Activo, Inactivo
-  activo    Boolean  @default(true)
-  tallerId  Int?     @map("taller_id")
-  taller    Taller?  @relation(fields: [tallerId], references: [id])
-  usuario   Usuario?
+  id            Int      @id @default(autoincrement())
+  nombre        String
+  email         String?  @unique
+  telefono      String?
+  estado        String   @default("Pendiente") // Pendiente, Activo, Inactivo
+  activo        Boolean  @default(true)
+  tallerId      Int?     @map("taller_id")
+  taller        Taller?  @relation(fields: [tallerId], references: [id])
+  usuario       Usuario?
+  temarioUrl    String?  @map("temario_url")
+  curriculumUrl String?  @map("curriculum_url")
 }
 
 model Inscripcion {
