@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Phone, FileText, Activity, ExternalLink, User, Users, Palette } from 'lucide-react';
+import { Phone, FileText, Activity, ExternalLink, User, Users, Palette, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import DocumentViewerModal from './DocumentViewerModal';
 
 function AlumnoDetail({ alumno, onClose }) {
@@ -37,6 +37,19 @@ function AlumnoDetail({ alumno, onClose }) {
 
   const initials = alumno.nombre ? alumno.nombre[0].toUpperCase() : '?';
 
+  // Documentos obligatorios definidos con etiqueta visual
+  const DOCS_REQUERIDOS = [
+    { tipo: 'acta_nacimiento',       label: 'Acta de Nacimiento' },
+    { tipo: 'curp',                  label: 'CURP' },
+    { tipo: 'comprobante_domicilio', label: 'Comprobante de Domicilio' },
+    { tipo: 'identificacion',        label: 'Identificación Oficial' },
+    { tipo: 'foto',                  label: 'Fotografía' },
+  ];
+
+  const tiposSubidos = new Set(documentos.map(d => d.tipo));
+  const docsFaltantes = DOCS_REQUERIDOS.filter(d => !tiposSubidos.has(d.tipo));
+  const expedienteCompleto = docsFaltantes.length === 0;
+
   return (
     <>
       <div className="space-y-6 text-left">
@@ -45,21 +58,33 @@ function AlumnoDetail({ alumno, onClose }) {
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-pink-600/10 shrink-0 select-none">
           {initials}
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-xl font-extrabold text-white truncate drop-shadow-sm">
-              {alumno.nombre} {alumno.apellidoPaterno} {alumno.apellidoMaterno}
-            </h3>
-            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
-              alumno.estatusActivo 
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-            }`}>
-              {alumno.estatusActivo ? 'Activo' : 'Inactivo'}
-            </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-xl font-extrabold text-white truncate drop-shadow-sm">
+                {alumno.nombre} {alumno.apellidoPaterno} {alumno.apellidoMaterno}
+              </h3>
+              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
+                alumno.estatusActivo 
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                  : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+              }`}>
+                {alumno.estatusActivo ? 'Activo' : 'Inactivo'}
+              </span>
+              {/* Badge de expediente completo/incompleto en el encabezado */}
+              {!loading && (
+                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
+                  expedienteCompleto
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                }`}>
+                  {expedienteCompleto
+                    ? <><CheckCircle2 size={10} /> Expediente Completo</>
+                    : <><AlertCircle size={10} /> Faltan {docsFaltantes.length} doc{docsFaltantes.length > 1 ? 's' : ''}.</>}
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-white/40 uppercase tracking-widest font-black mt-1">ID del Estudiante: #{alumno.displayId || alumno.id}</p>
           </div>
-          <p className="text-[10px] text-white/40 uppercase tracking-widest font-black mt-1">ID del Estudiante: #{alumno.displayId || alumno.id}</p>
-        </div>
       </div>
 
       {/* Información en Rejilla */}
@@ -127,7 +152,7 @@ function AlumnoDetail({ alumno, onClose }) {
           </div>
         </div>
 
-        {/* Expediente Digital */}
+        {/* Expediente Digital - Lista de documentos subidos */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col">
           <h4 className="text-xs font-black uppercase tracking-widest text-pink-500 border-b border-white/5 pb-2 shrink-0">Expediente Digital</h4>
           
@@ -161,7 +186,69 @@ function AlumnoDetail({ alumno, onClose }) {
             )}
           </div>
         </div>
-      </div>
+
+        {/* Checklist de Documentación Requerida - NUEVA SECCIÓN */}
+        <div className={`md:col-span-2 rounded-2xl p-5 border ${
+          loading
+            ? 'bg-white/5 border-white/10'
+            : expedienteCompleto
+              ? 'bg-emerald-500/5 border-emerald-500/20'
+              : 'bg-amber-500/5 border-amber-500/20'
+        }`}>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-xs font-black uppercase tracking-widest text-pink-500">Documentación Requerida</h4>
+            {!loading && (
+              <span className={`text-[10px] font-black uppercase tracking-wider ${
+                expedienteCompleto ? 'text-emerald-400' : 'text-amber-400'
+              }`}>
+                {DOCS_REQUERIDOS.length - docsFaltantes.length} / {DOCS_REQUERIDOS.length} documentos
+              </span>
+            )}
+          </div>
+
+          {loading ? (
+            <p className="text-xs text-white/30 italic">Verificando documentos...</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {DOCS_REQUERIDOS.map(req => {
+                const subido = tiposSubidos.has(req.tipo);
+                return (
+                  <div
+                    key={req.tipo}
+                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition ${
+                      subido
+                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                        : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                    }`}
+                  >
+                    {subido
+                      ? <CheckCircle2 size={14} className="shrink-0" />
+                      : <AlertCircle size={14} className="shrink-0 animate-pulse" />}
+                    <span className="text-[11px] font-bold truncate">{req.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Mensaje de alerta si faltan documentos */}
+          {!loading && !expedienteCompleto && (
+            <div className="mt-3 flex items-start gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2.5">
+              <Clock size={14} className="text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-amber-300 font-semibold leading-relaxed">
+                El expediente está incompleto. Faltan: <span className="font-black">{docsFaltantes.map(d => d.label).join(', ')}</span>.
+              </p>
+            </div>
+          )}
+          {!loading && expedienteCompleto && (
+            <div className="mt-3 flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2.5">
+              <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+              <p className="text-[10px] text-emerald-300 font-black">¡Expediente completo! Todos los documentos requeridos han sido cargados.</p>
+            </div>
+          )}
+        </div>
+
+      </div>{/* fin grid */}
 
       {/* Acciones */}
       <div className="flex justify-end pt-2">
