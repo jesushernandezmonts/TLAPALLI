@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Phone, FileText, Activity, ExternalLink, User, Users, Palette } from 'lucide-react';
+import DocumentViewerModal from './DocumentViewerModal';
 
 function AlumnoDetail({ alumno, onClose }) {
   const [documentos, setDocumentos] = useState([]);
   const [inscripciones, setInscripciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingInscripciones, setLoadingInscripciones] = useState(true);
+  const [activeDoc, setActiveDoc] = useState(null);
 
   useEffect(() => {
     const fetchDocumentos = async () => {
@@ -36,7 +38,8 @@ function AlumnoDetail({ alumno, onClose }) {
   const initials = alumno.nombre ? alumno.nombre[0].toUpperCase() : '?';
 
   return (
-    <div className="space-y-6 text-left">
+    <>
+      <div className="space-y-6 text-left">
       {/* Encabezado del Perfil */}
       <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-5">
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-pink-600/10 shrink-0 select-none">
@@ -142,15 +145,17 @@ function AlumnoDetail({ alumno, onClose }) {
                     <p className="text-xs font-bold text-white/90 truncate">{doc.nombre}</p>
                     <p className="text-[8px] text-white/40 uppercase tracking-wider mt-0.5">{doc.tipo.replace('_', ' ')}</p>
                   </div>
-                  <a 
-                    href={`http://localhost:3000${doc.url}`} 
-                    target="_blank" 
-                    rel="noreferrer"
+                  <button 
+                    type="button"
+                    onClick={() => setActiveDoc({
+                      url: `http://localhost:3000${doc.url}`,
+                      title: doc.nombre
+                    })}
                     className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase bg-pink-600/10 text-pink-400 hover:bg-pink-600/25 border border-pink-500/15 hover:border-pink-500/30 transition cursor-pointer select-none shrink-0"
                   >
                     <span>Ver</span>
                     <ExternalLink size={10} />
-                  </a>
+                  </button>
                 </div>
               ))
             )}
@@ -167,7 +172,15 @@ function AlumnoDetail({ alumno, onClose }) {
           Cerrar Vista
         </button>
       </div>
-    </div>
+      </div>
+
+      <DocumentViewerModal
+        isOpen={!!activeDoc}
+        onClose={() => setActiveDoc(null)}
+        url={activeDoc?.url}
+        title={activeDoc?.title}
+      />
+    </>
   );
 }
 

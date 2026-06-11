@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Scan } from 'lucide-react';
+import DocumentViewerModal from './DocumentViewerModal';
 
 function ExpedienteDigital({ alumnoId }) {
   const [documentos, setDocumentos] = useState([]);
@@ -8,6 +9,7 @@ function ExpedienteDigital({ alumnoId }) {
   const [archivo, setArchivo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [activeDoc, setActiveDoc] = useState(null);
 
   useEffect(() => {
     fetchDocumentos();
@@ -89,7 +91,8 @@ function ExpedienteDigital({ alumnoId }) {
   };
 
   return (
-    <div className="bg-white/5 backdrop-blur-md border border-white/20 rounded-2xl p-6">
+    <>
+      <div className="bg-white/5 backdrop-blur-md border border-white/20 rounded-2xl p-6">
       <h3 className="text-lg font-semibold mb-4 text-white/90">Expediente Digital</h3>
       
       {/* Subir o Escanear documento */}
@@ -162,15 +165,31 @@ function ExpedienteDigital({ alumnoId }) {
                 <p className="text-[10px] text-white/40 uppercase tracking-wider">{doc.tipo.replace('_', ' ')} • {new Date(doc.subidoEn).toLocaleDateString()}</p>
               </div>
               <div className="flex gap-4">
-                <a href={`http://localhost:3000${doc.url}`} target="_blank" rel="noreferrer"
-                  className="text-pink-400 hover:text-pink-300 transition text-sm font-medium">Ver</a>
+                <button
+                  type="button"
+                  onClick={() => setActiveDoc({
+                    url: `http://localhost:3000${doc.url}`,
+                    title: doc.nombre
+                  })}
+                  className="text-pink-400 hover:text-pink-300 transition text-sm font-medium cursor-pointer"
+                >
+                  Ver
+                </button>
                 <button onClick={() => handleRemove(doc.id)} className="text-rose-400 hover:text-rose-300 transition text-sm font-medium">Eliminar</button>
               </div>
             </div>
           ))
         )}
       </div>
-    </div>
+      </div>
+
+      <DocumentViewerModal
+        isOpen={!!activeDoc}
+        onClose={() => setActiveDoc(null)}
+        url={activeDoc?.url}
+        title={activeDoc?.title}
+      />
+    </>
   );
 }
 

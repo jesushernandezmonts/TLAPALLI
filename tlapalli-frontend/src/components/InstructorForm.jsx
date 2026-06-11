@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Mail, Send, ChevronDown, Loader2, CheckCircle, AlertTriangle, Lock, Unlock, Check, Upload, FileText, Trash2, ExternalLink, X } from 'lucide-react';
 import api from '../services/api';
+import DocumentViewerModal from './DocumentViewerModal';
 
 function InstructorForm({ instructor, talleres, onClose, onSave }) {
   const [form, setForm] = useState({
@@ -18,6 +19,7 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
   const [saving, setSaving] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
   const [isEmailUnlocked, setIsEmailUnlocked] = useState(false);
+  const [activeDoc, setActiveDoc] = useState(null);
 
   useEffect(() => {
     if (instructor) {
@@ -131,7 +133,8 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <>
+      <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-sm text-white/60 ml-1">Nombre Completo</label>
@@ -267,14 +270,16 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
                   <FileText size={20} className="text-pink-400 shrink-0" />
                   <div className="overflow-hidden">
                     <p className="text-xs font-bold text-white/90 truncate">Currículum cargado</p>
-                    <a
-                      href={`${api.defaults.baseURL || 'http://localhost:3000'}${curriculumUrl}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5"
+                    <button
+                      type="button"
+                      onClick={() => setActiveDoc({
+                        url: `${api.defaults.baseURL || 'http://localhost:3000'}${curriculumUrl}`,
+                        title: `CV - ${form.nombre}`
+                      })}
+                      className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5 cursor-pointer text-left"
                     >
                       Ver archivo <ExternalLink size={10} />
-                    </a>
+                    </button>
                   </div>
                 </div>
                 <button
@@ -332,14 +337,16 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
                   <FileText size={20} className="text-pink-400 shrink-0" />
                   <div className="overflow-hidden">
                     <p className="text-xs font-bold text-white/90 truncate">Temario cargado</p>
-                    <a
-                      href={`${api.defaults.baseURL || 'http://localhost:3000'}${temarioUrl}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5"
+                    <button
+                      type="button"
+                      onClick={() => setActiveDoc({
+                        url: `${api.defaults.baseURL || 'http://localhost:3000'}${temarioUrl}`,
+                        title: `Temario - ${form.nombre}`
+                      })}
+                      className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5 cursor-pointer text-left"
                     >
                       Ver archivo <ExternalLink size={10} />
-                    </a>
+                    </button>
                   </div>
                 </div>
                 <button
@@ -446,7 +453,15 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
           )}
         </button>
       </div>
-    </form>
+      </form>
+
+      <DocumentViewerModal
+        isOpen={!!activeDoc}
+        onClose={() => setActiveDoc(null)}
+        url={activeDoc?.url}
+        title={activeDoc?.title}
+      />
+    </>
   );
 }
 

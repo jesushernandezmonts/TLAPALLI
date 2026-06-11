@@ -5,6 +5,7 @@ import InstructorForm from '../components/InstructorForm';
 import { Plus, Search, Edit3, Trash2, UserSquare2, Palette, Mail, Send, Power, RefreshCw, AlertTriangle, CheckCircle, X, ChevronDown, Loader2, Users, CheckCircle2, Clock, Ban, Filter, Eye, ArrowUpDown, ArrowUp, ArrowDown, FileText, ExternalLink } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import { AnimatePresence, motion } from 'framer-motion';
+import DocumentViewerModal from '../components/DocumentViewerModal';
 
 function Instructores() {
   const [instructores, setInstructores] = useState([]);
@@ -25,6 +26,7 @@ function Instructores() {
   const [toast, setToast] = useState(null);
   const [sortBy, setSortBy] = useState(null);
   const [sortDir, setSortDir] = useState('asc');
+  const [activeDoc, setActiveDoc] = useState(null);
 
   useEffect(() => {
     fetchInstructores();
@@ -584,14 +586,16 @@ function Instructores() {
                       <div className="overflow-hidden">
                         <p className="text-xs font-bold text-white/90 truncate">Currículum Vitae (CV)</p>
                         {detailInstructor.curriculumUrl ? (
-                          <a
-                            href={`${api.defaults.baseURL || 'http://localhost:3000'}${detailInstructor.curriculumUrl}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5"
+                          <button
+                            type="button"
+                            onClick={() => setActiveDoc({
+                              url: `${api.defaults.baseURL || 'http://localhost:3000'}${detailInstructor.curriculumUrl}`,
+                              title: `CV - ${detailInstructor.nombre}`
+                            })}
+                            className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5 cursor-pointer"
                           >
                             Ver PDF <ExternalLink size={10} />
-                          </a>
+                          </button>
                         ) : (
                           <p className="text-[10px] text-white/30 italic">No subido</p>
                         )}
@@ -616,14 +620,16 @@ function Instructores() {
                       <div className="overflow-hidden">
                         <p className="text-xs font-bold text-white/90 truncate">Temario (Syllabus)</p>
                         {detailInstructor.temarioUrl ? (
-                          <a
-                            href={`${api.defaults.baseURL || 'http://localhost:3000'}${detailInstructor.temarioUrl}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5"
+                          <button
+                            type="button"
+                            onClick={() => setActiveDoc({
+                              url: `${api.defaults.baseURL || 'http://localhost:3000'}${detailInstructor.temarioUrl}`,
+                              title: `Temario - ${detailInstructor.nombre}`
+                            })}
+                            className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5 cursor-pointer"
                           >
                             Ver PDF <ExternalLink size={10} />
-                          </a>
+                          </button>
                         ) : (
                           <p className="text-[10px] text-white/30 italic">No subido</p>
                         )}
@@ -671,6 +677,13 @@ function Instructores() {
              maxWidth="max-w-3xl">
         <InstructorForm instructor={editInstructor} talleres={talleres} onClose={() => setModalOpen(false)} onSave={handleSave} />
       </Modal>
+
+      <DocumentViewerModal
+        isOpen={!!activeDoc}
+        onClose={() => setActiveDoc(null)}
+        url={activeDoc?.url}
+        title={activeDoc?.title}
+      />
     </div>
   );
 }
