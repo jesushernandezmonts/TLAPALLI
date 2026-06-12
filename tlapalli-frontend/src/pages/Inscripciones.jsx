@@ -4,6 +4,45 @@ import Modal from '../components/Modal';
 import { Plus, UserPlus, Trash2, Calendar, AlertTriangle, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Component to fetch and display missing documents for an alumno
+function MissingDocsCell({ alumnoId }) {
+  const [loadingDocs, setLoadingDocs] = useState(true);
+  const [missingLabels, setMissingLabels] = useState([]);
+
+  const DOCS_REQUERIDOS = [
+    { tipo: 'acta_nacimiento', label: 'Acta de Nacimiento' },
+    { tipo: 'curp', label: 'CURP' },
+    { tipo: 'comprobante_domicilio', label: 'Comprobante de Domicilio' },
+    { tipo: 'identificacion', label: 'Identificación Oficial' },
+    { tipo: 'foto', label: 'Fotografía' },
+  ];
+
+  useEffect(() => {
+    const fetchDocs = async () => {
+      try {
+        const { data } = await api.get(`/documentos/alumno/${alumnoId}`);
+        const uploaded = new Set(data.map(d => d.tipo));
+        const missing = DOCS_REQUERIDOS.filter(d => !uploaded.has(d.tipo)).map(d => d.label);
+        setMissingLabels(missing);
+      } catch (err) {
+        console.error('Error fetching documentos for alumno', alumnoId, err);
+        setMissingLabels(['Error']);
+      } finally {
+        setLoadingDocs(false);
+      }
+    };
+    if (alumnoId) fetchDocs();
+  }, [alumnoId]);
+
+  if (loadingDocs) return <span className="text-xs text-white/30">…</span>;
+  if (missingLabels.length === 0) return <span className="text-emerald-400 text-xs">Completos</span>;
+  return (
+    <span className="text-amber-400 text-xs" title={missingLabels.join(', ')}>
+      {missingLabels.length} faltante(s)
+    </span>
+  );
+}
+
 function Inscripciones() {
   const [toast, setToast] = useState(null);
   const showToast = (title, message = '', type = 'success') => {
@@ -95,14 +134,15 @@ function Inscripciones() {
               <th>Taller</th>
               <th>Fecha Registro</th>
               <th className="text-center">Estatus Pago</th>
+              <th className="text-center">Docs Faltantes</th>
               <th className="text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
             {loading ? (
-              <tr><td colSpan="5" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando inscripciones...</td></tr>
+              <tr><td colSpan="6" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando inscripciones...</td></tr>
             ) : inscripciones.length === 0 ? (
-              <tr><td colSpan="5" className="p-20 text-center text-white/20 italic font-medium">No hay inscripciones activas.</td></tr>
+              <tr><td colSpan="6" className="p-20 text-center text-white/20 italic font-medium">No hay inscripciones activas.</td></tr>
             ) : (
               paginatedInscripciones.map(i => (
                 <tr key={i.id} className="hover:bg-white/5 transition group">
@@ -131,6 +171,9 @@ function Inscripciones() {
                     }`}>
                       {i.estatusPago.replace('_', ' ')}
                     </span>
+                  </td>
+                  <td data-label="Docs Faltantes" className="text-center">
+                    <MissingDocsCell alumnoId={i.alumno?.id} />
                   </td>
                   <td data-label="Acciones" className="text-right">
                     {i.estatusPago !== 'baja' && (

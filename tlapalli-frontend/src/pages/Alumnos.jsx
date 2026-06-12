@@ -14,7 +14,9 @@ function Alumnos() {
   const [tallerFilter, setTallerFilter] = useState('todos');
   const [talleres, setTalleres] = useState([]);
   const [inscripciones, setInscripciones] = useState([]);
+  const [documentosPorAlumno, setDocumentosPorAlumno] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadingDocumentos, setLoadingDocumentos] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editAlumno, setEditAlumno] = useState(null);
   const [viewAlumno, setViewAlumno] = useState(null);
@@ -29,11 +31,66 @@ function Alumnos() {
   const [openFilter, setOpenFilter] = useState(null);
   const alumnosPerPage = 8;
 
+  // Documentos obligatorios
+  const DOCS_REQUERIDOS = [
+    { tipo: 'acta_nacimiento', label: 'Acta de Nacimiento' },
+    { tipo: 'curp', label: 'CURP' },
+    { tipo: 'comprobante_domicilio', label: 'Comprobante de Domicilio' },
+    { tipo: 'identificacion', label: 'Identificación Oficial' },
+    { tipo: 'foto', label: 'Fotografía' },
+  ];
+
   useEffect(() => {
     fetchAlumnos();
     fetchTalleres();
     fetchInscripciones();
   }, []);
+
+  useEffect(() => {
+    const fetchDocumentosTodosAlumnos = async () => {
+      try {
+        setLoadingDocumentos(true);
+        const documentosMap = {};
+        await Promise.all(
+          alumnos.map(async (alumno) => {
+            try {
+              const { data } = await api.get(`/documentos/alumno/${alumno.id}`);
+              documentosMap[alumno.id] = data;
+            } catch (err) {
+              documentosMap[alumno.id] = [];
+            }
+          })
+        );
+        setDocumentosPorAlumno(documentosMap);
+      } catch (err) {
+        console.error('Error al cargar documentos de alumnos', err);
+      } finally {
+        setLoadingDocumentos(false);
+      }
+    };
+
+    if (alumnos.length > 0) {
+      fetchDocumentosTodosAlumnos();
+    }
+  }, [alumnos]);
+
+  const getEstadoExpediente = (alumnoId) => {
+    const documentos = documentosPorAlumno[alumnoId] || [];
+    const tiposSubidos = new Set(documentos.map(d => d.tipo));
+    const docsFaltantes = DOCS_REQUERIDOS.filter(d => !tiposSubidos.has(d.tipo));
+    const totalDocs = DOCS_REQUERIDOS.length;
+    const docsSubidos = tiposSubidos.size;
+
+    if (docsSubidos === 0) {
+      return { estado: 'critico', color: 'rose', docsFaltantes, porcentaje: 0 };
+    } else if (docsSubidos === totalDocs) {
+      return { estado: 'completo', color: 'emerald', docsFaltantes: [], porcentaje: 100 };
+    } else if (docsSubidos >= totalDocs * 0.6) {
+      return { estado: 'casi_completo', color: 'amber', docsFaltantes, porcentaje: Math.round((docsSubidos / totalDocs) * 100) };
+    } else {
+      return { estado: 'incompleto', color: 'rose', docsFaltantes, porcentaje: Math.round((docsSubidos / totalDocs) * 100) };
+    }
+  };
 
   useEffect(() => {
     const closeFilters = (event) => {
@@ -298,15 +355,16 @@ function Alumnos() {
               <th>Nombre Completo</th>
               <th>Padecimientos</th>
               <th>Teléfono</th>
+              <th className="text-center">Expediente</th>
               <th className="text-center">Estado</th>
               <th className="text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
             {loading ? (
-              <tr><td colSpan="5" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando alumnos...</td></tr>
+              <tr><td colSpan="6" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando alumnos...</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan="5" className="p-20 text-center text-white/20 italic font-medium">No se encontraron registros.</td></tr>
+              <tr><td colSpan="6" className="p-20 text-center text-white/20 italic font-medium">No se encontraron registros.</td></tr>
             ) : (
               paginatedAlumnos.map((a, index) => (
                 <tr key={a.id} className="hover:bg-white/5 transition group">
@@ -334,6 +392,46 @@ function Alumnos() {
                     )}
                   </td>
                   <td data-label="Teléfono" className="text-sm text-white/80 font-medium">{a.telefono || <span className="opacity-40">No registrado</span>}</td>
+                  <td data-label="Expediente" className="text-center">
+                    {loadingDocumentos ? (
+                      <span className="text-[10px] text-white/40 animate-pulse">Cargando...</span>
+                    ) : (
+                      (() => {
+                        const { estado, color, docsFaltantes, porcentaje } = getEstadoExpediente(a.id);
+                        let badgeText = '';
+                        let badgeTitle = '';
+                        
+                        if (estado === 'completo') {
+                          badgeText = 'Completo';
+                          badgeTitle = 'Todos los documentos subidos';
+                        } else if (estado === 'critico') {
+                          badgeText = 'Sin documentos';
+                          badgeTitle = `Faltan todos los documentos: ${docsFaltantes.map(d => d.label).join(', ')}`;
+                        } else {
+                          badgeText = `${porcentaje}%`;
+                          badgeTitle = `Faltan: ${docsFaltantes.map(d => d.label).join(', ')}`;
+                        }
+
+                        return (
+                          <span 
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border cursor-help ${
+                              color === 'emerald'
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                : color === 'amber'
+                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                            }`}
+                            title={badgeTitle}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${
+                              color === 'emerald' ? 'bg-emerald-400' : color === 'amber' ? 'bg-amber-400' : 'bg-rose-400'
+                            }`} />
+                            {badgeText}
+                          </span>
+                        );
+                      })()
+                    )}
+                  </td>
                   <td data-label="Estado" className="text-center">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${a.estatusActivo
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
