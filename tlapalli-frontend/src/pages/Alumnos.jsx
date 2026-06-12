@@ -509,10 +509,10 @@ function Alumnos() {
         </div>
       )}
 
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}
+      <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); fetchAlumnos(); }}
         title={editAlumno ? 'Editar Alumno' : 'Nuevo Alumno'}
         maxWidth="max-w-3xl">
-        <AlumnoForm alumno={editAlumno} onClose={() => setModalOpen(false)} onSave={handleSave} />
+        <AlumnoForm alumno={editAlumno} onClose={() => { setModalOpen(false); fetchAlumnos(); }} onSave={handleSave} />
       </Modal>
 
       <Modal isOpen={viewAlumno !== null} onClose={() => setViewAlumno(null)}

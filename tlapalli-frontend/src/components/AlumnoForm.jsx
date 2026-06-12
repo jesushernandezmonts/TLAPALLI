@@ -29,14 +29,17 @@ function AlumnoForm({ alumno, onClose, onSave }) {
   const [originalInscripciones, setOriginalInscripciones] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Estados para archivos (solo creación)
+  // Estados para archivos (creación y edición)
   const [archivos, setArchivos] = useState(emptyArchivos);
+  const [documentosExistentes, setDocumentosExistentes] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [scanning, setScanning] = useState(null); // 'acta_nacimiento', 'curp', etc.
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteDocConfirmOpen, setDeleteDocConfirmOpen] = useState(false);
+  const [docToDelete, setDocToDelete] = useState(null);
 
   useEffect(() => {
     fetchTalleres();
@@ -52,9 +55,11 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         estatusActivo: alumno.estatusActivo ?? true,
       });
       fetchInscripcionesAlumno(alumno.id);
+      fetchDocumentosAlumno(alumno.id);
     } else {
       setForm(emptyForm);
       setArchivos(emptyArchivos);
+      setDocumentosExistentes([]);
       setSelectedTallerIds([]);
       setOriginalInscripciones([]);
     }
@@ -62,6 +67,36 @@ function AlumnoForm({ alumno, onClose, onSave }) {
     setError('');
     setFieldErrors({});
   }, [alumno]);
+
+  const fetchDocumentosAlumno = async (alumnoId) => {
+    try {
+      const { data } = await api.get(`/documentos/alumno/${alumnoId}`);
+      setDocumentosExistentes(data);
+    } catch (err) {
+      console.error('Error al cargar documentos del alumno', err);
+    }
+  };
+
+  const handleRemoveExistente = (docId) => {
+    setDocToDelete(docId);
+    setDeleteDocConfirmOpen(true);
+  };
+
+  const confirmRemoveExistente = async () => {
+    if (!docToDelete) return;
+    try {
+      await api.delete(`/documentos/${docToDelete}`);
+      if (alumno) {
+        fetchDocumentosAlumno(alumno.id);
+      }
+    } catch (err) {
+      console.error('Error al eliminar documento:', err);
+      setError('No se pudo eliminar el documento del servidor.');
+    } finally {
+      setDeleteDocConfirmOpen(false);
+      setDocToDelete(null);
+    }
+  };
 
   const fetchTalleres = async () => {
     try {
@@ -400,6 +435,8 @@ function AlumnoForm({ alumno, onClose, onSave }) {
             onScan={() => handleScan('acta_nacimiento')}
             fileName={archivos.acta_nacimiento?.name}
             isScanning={scanning === 'acta_nacimiento'}
+            existingDoc={documentosExistentes.find(d => d.tipo === 'acta_nacimiento')}
+            onRemoveExisting={handleRemoveExistente}
           />
           <FileInput 
             label="CURP (Documento)" 
@@ -407,6 +444,8 @@ function AlumnoForm({ alumno, onClose, onSave }) {
             onScan={() => handleScan('curp')}
             fileName={archivos.curp?.name}
             isScanning={scanning === 'curp'}
+            existingDoc={documentosExistentes.find(d => d.tipo === 'curp')}
+            onRemoveExisting={handleRemoveExistente}
           />
           <FileInput 
             label="Comprobante Domicilio" 
@@ -414,6 +453,8 @@ function AlumnoForm({ alumno, onClose, onSave }) {
             onScan={() => handleScan('comprobante_domicilio')}
             fileName={archivos.comprobante_domicilio?.name}
             isScanning={scanning === 'comprobante_domicilio'}
+            existingDoc={documentosExistentes.find(d => d.tipo === 'comprobante_domicilio')}
+            onRemoveExisting={handleRemoveExistente}
           />
           <FileInput 
             label="Foto Infantil" 
@@ -421,6 +462,8 @@ function AlumnoForm({ alumno, onClose, onSave }) {
             onScan={() => handleScan('foto')}
             fileName={archivos.foto?.name}
             isScanning={scanning === 'foto'}
+            existingDoc={documentosExistentes.find(d => d.tipo === 'foto')}
+            onRemoveExisting={handleRemoveExistente}
           />
           <FileInput 
             label="Registro" 
@@ -428,6 +471,8 @@ function AlumnoForm({ alumno, onClose, onSave }) {
             onScan={() => handleScan('registro')}
             fileName={archivos.registro?.name}
             isScanning={scanning === 'registro'}
+            existingDoc={documentosExistentes.find(d => d.tipo === 'registro')}
+            onRemoveExisting={handleRemoveExistente}
           />
         </div>
       </div>
@@ -471,25 +516,40 @@ function AlumnoForm({ alumno, onClose, onSave }) {
       isOpen={confirmOpen}
       onClose={() => setConfirmOpen(false)}
       onConfirm={handleConfirmSubmit}
-      title="¿Registrar Alumno?"
-      message="Se registrará el alumno con la información capturada, documentos y talleres seleccionados. ¿Deseas continuar?"
-      confirmText="Sí, registrar"
+      title={alumno ? "¿Guardar Cambios?" : "¿Registrar Alumno?"}
+      message={alumno
+        ? "Se guardarán las modificaciones realizadas al alumno. ¿Deseas continuar?"
+        : "Se registrará el alumno con la información capturada, documentos y talleres seleccionados. ¿Deseas continuar?"}
+      confirmText={alumno ? "Sí, guardar" : "Sí, registrar"}
+      cancelText="Cancelar"
+    />
+    <ConfirmModal
+      isOpen={deleteDocConfirmOpen}
+      onClose={() => { setDeleteDocConfirmOpen(false); setDocToDelete(null); }}
+      onConfirm={confirmRemoveExistente}
+      title="¿Eliminar Documento?"
+      message="Esta acción eliminará de forma permanente el documento del servidor. ¿Deseas continuar?"
+      confirmText="Sí, eliminar"
       cancelText="Cancelar"
     />
     </>
   );
 }
 
-function FileInput({ label, onChange, onScan, fileName, isScanning }) {
+function FileInput({ label, onChange, onScan, fileName, isScanning, existingDoc, onRemoveExisting }) {
   return (
     <div className="flex items-center justify-between gap-3 bg-white/5 border border-white/10 rounded-xl p-2.5 hover:border-white/20 transition-all">
       <div className="min-w-0 flex-1">
         <label className="text-[10px] text-white/50 uppercase font-black tracking-wider px-0.5 block truncate">{label}</label>
-        {fileName && (
+        {fileName ? (
           <span className="text-[9px] text-pink-400 font-semibold truncate block mt-0.5" title={fileName}>
-            ✓ {fileName}
+            ✓ Nuevo: {fileName}
           </span>
-        )}
+        ) : existingDoc ? (
+          <span className="text-[9px] text-emerald-400 font-semibold truncate block mt-0.5" title={existingDoc.nombre}>
+            ✓ Subido: {existingDoc.nombre}
+          </span>
+        ) : null}
       </div>
       <div className="flex gap-1.5 shrink-0">
         {fileName ? (
@@ -499,6 +559,14 @@ function FileInput({ label, onChange, onScan, fileName, isScanning }) {
             className="px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase bg-rose-500/20 text-rose-300 hover:bg-rose-500/35 transition cursor-pointer select-none"
           >
             Quitar
+          </button>
+        ) : existingDoc ? (
+          <button
+            type="button"
+            onClick={() => onRemoveExisting(existingDoc.id)}
+            className="px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase bg-rose-500/20 text-rose-300 hover:bg-rose-500/35 transition cursor-pointer select-none"
+          >
+            Eliminar
           </button>
         ) : (
           <>
