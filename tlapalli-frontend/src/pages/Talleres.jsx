@@ -65,18 +65,21 @@ function Talleres() {
     fetchTalleres();
   }, []);
 
-  const fetchTalleres = async () => {
+  const fetchTalleres = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [talleresRes, pagosRes] = await Promise.all([
         api.get('/talleres'),
         api.get('/pagos')
       ]);
-      setTalleres(talleresRes.data);
+      // Ordenar por ID de forma ascendente para mantener un orden estable
+      const sortedTalleres = (talleresRes.data || []).sort((a, b) => a.id - b.id);
+      setTalleres(sortedTalleres);
       setPagos(pagosRes.data);
     } catch (err) {
       console.error('Error al cargar talleres y pagos', err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -109,7 +112,7 @@ function Talleres() {
         try {
           await api.delete(`/talleres/${id}`);
           showToast('Taller eliminado', 'El taller se eliminó correctamente.', 'delete');
-          fetchTalleres();
+          fetchTalleres(true);
         } catch (err) {
           showToast('Error al eliminar', err.response?.data?.message || 'No se puede eliminar: tiene inscripciones activas.', 'error');
         } finally {
@@ -121,7 +124,7 @@ function Talleres() {
 
   const handleSave = () => {
     setModalOpen(false);
-    fetchTalleres();
+    fetchTalleres(true);
     if (editTaller) {
       showToast('Cambios guardados', 'La información del taller se actualizó correctamente.', 'success');
     } else {

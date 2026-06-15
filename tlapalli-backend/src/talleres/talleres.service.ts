@@ -14,7 +14,10 @@ export class TalleresService {
   }
 
   async findAll() {
-    return this.prisma.taller.findMany({ include: { inscripciones: true } });
+    return this.prisma.taller.findMany({
+      include: { inscripciones: true },
+      orderBy: { id: 'asc' },
+    });
   }
 
   async findOne(id: number) {
