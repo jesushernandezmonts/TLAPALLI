@@ -11,6 +11,7 @@ function TallerForm({ taller, onClose, onSave }) {
     horarioDescripcion: '',
   });
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -26,12 +27,39 @@ function TallerForm({ taller, onClose, onSave }) {
   }, [taller]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    // Limpiar error del campo al escribir
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validate = () => {
+    const errors = {};
+
+    if (!form.nombreTaller.trim()) {
+      errors.nombreTaller = 'El nombre del taller es obligatorio';
+    }
+
+    if (!form.costoMensual || parseFloat(form.costoMensual) < 0) {
+      errors.costoMensual = 'El costo debe ser mayor o igual a 0';
+    }
+
+    if (!form.cupoMaximo || parseInt(form.cupoMaximo) < 1) {
+      errors.cupoMaximo = 'El cupo debe ser al menos 1';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!validate()) return;
+
     setLoading(true);
     try {
       const payload = {
@@ -53,26 +81,37 @@ function TallerForm({ taller, onClose, onSave }) {
     }
   };
 
-  const inputBase = "bg-white/5 border border-white/15 rounded-xl pl-11 pr-4 w-full text-white placeholder-white/25 focus:outline-none focus:border-pink-500/60 focus:bg-white/8 focus:ring-2 focus:ring-pink-500/15 text-sm h-12 transition-all duration-200 hover:border-white/30";
+  const getInputClass = (fieldName) => {
+    const base = "bg-white/5 border rounded-xl pl-11 pr-4 w-full text-white placeholder-white/25 focus:outline-none focus:ring-2 text-sm h-12 transition-all duration-200";
+    if (fieldErrors[fieldName]) {
+      return `${base} border-rose-500/50 focus:border-rose-500/60 focus:ring-rose-500/20 hover:border-rose-500/60`;
+    }
+    return `${base} border-white/15 focus:border-pink-500/60 focus:ring-pink-500/15 hover:border-white/30`;
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 text-left">
+    <form onSubmit={handleSubmit} className="space-y-5 text-left" noValidate>
       {/* Nombre del Taller */}
       <div className="space-y-1.5">
         <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">
-          Nombre del Taller
+          Nombre del Taller <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <Music size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-pink-400/70" />
+          <Music size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${fieldErrors.nombreTaller ? 'text-rose-400/70' : 'text-pink-400/70'}`} />
           <input
             name="nombreTaller"
             placeholder="Ej. Violín, Pintura, Teatro"
             value={form.nombreTaller}
             onChange={handleChange}
-            className={inputBase}
-            required
+            className={getInputClass('nombreTaller')}
           />
         </div>
+        {fieldErrors.nombreTaller && (
+          <p className="text-rose-400 text-[11px] font-medium ml-1 flex items-center gap-1.5 mt-1">
+            <AlertTriangle size={12} />
+            {fieldErrors.nombreTaller}
+          </p>
+        )}
       </div>
 
       {/* Descripción */}
@@ -87,7 +126,7 @@ function TallerForm({ taller, onClose, onSave }) {
             placeholder="Breve descripción de los temas o el taller..."
             value={form.descripcion}
             onChange={handleChange}
-            className="bg-white/5 border border-white/15 rounded-xl pl-11 pr-4 py-3 w-full text-white placeholder-white/25 focus:outline-none focus:border-pink-500/60 focus:bg-white/8 focus:ring-2 focus:ring-pink-500/15 text-sm transition-all duration-200 hover:border-white/30 resize-none"
+            className="bg-white/5 border border-white/15 rounded-xl pl-11 pr-4 py-3 w-full text-white placeholder-white/25 focus:outline-none focus:border-pink-500/60 focus:ring-2 focus:ring-pink-500/15 text-sm transition-all duration-200 hover:border-white/30 resize-none"
             rows="3"
           />
         </div>
@@ -97,40 +136,48 @@ function TallerForm({ taller, onClose, onSave }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">
-            Costo Mensual
+            Costo Mensual <span className="text-rose-400">*</span>
           </label>
           <div className="relative">
-            <DollarSign size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-400/70" />
+            <DollarSign size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${fieldErrors.costoMensual ? 'text-rose-400/70' : 'text-emerald-400/70'}`} />
             <input
               name="costoMensual"
               type="number"
               step="0.01"
-              min="0"
               placeholder="350.00"
               value={form.costoMensual}
               onChange={handleChange}
-              className={inputBase}
-              required
+              className={getInputClass('costoMensual')}
             />
           </div>
+          {fieldErrors.costoMensual && (
+            <p className="text-rose-400 text-[11px] font-medium ml-1 flex items-center gap-1.5 mt-1">
+              <AlertTriangle size={12} />
+              {fieldErrors.costoMensual}
+            </p>
+          )}
         </div>
         <div className="space-y-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">
-            Cupo Máximo
+            Cupo Máximo <span className="text-rose-400">*</span>
           </label>
           <div className="relative">
-            <Users size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-400/70" />
+            <Users size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${fieldErrors.cupoMaximo ? 'text-rose-400/70' : 'text-blue-400/70'}`} />
             <input
               name="cupoMaximo"
               type="number"
-              min="1"
               placeholder="15"
               value={form.cupoMaximo}
               onChange={handleChange}
-              className={inputBase}
-              required
+              className={getInputClass('cupoMaximo')}
             />
           </div>
+          {fieldErrors.cupoMaximo && (
+            <p className="text-rose-400 text-[11px] font-medium ml-1 flex items-center gap-1.5 mt-1">
+              <AlertTriangle size={12} />
+              {fieldErrors.cupoMaximo}
+            </p>
+          )}
         </div>
       </div>
 
@@ -146,12 +193,12 @@ function TallerForm({ taller, onClose, onSave }) {
             placeholder="Ej. Lunes y Miércoles 16:00 - 18:00"
             value={form.horarioDescripcion}
             onChange={handleChange}
-            className={inputBase}
+            className={getInputClass('horarioDescripcion')}
           />
         </div>
       </div>
 
-      {/* Error */}
+      {/* Error del servidor */}
       {error && (
         <div className="flex items-center gap-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-medium px-4 py-3 rounded-xl">
           <AlertTriangle size={16} className="shrink-0" />
