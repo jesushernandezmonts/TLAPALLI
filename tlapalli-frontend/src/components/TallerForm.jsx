@@ -9,6 +9,7 @@ function TallerForm({ taller, onClose, onSave }) {
     costoMensual: '',
     cupoMaximo: '',
     horarioDescripcion: '',
+    activo: true,
   });
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
@@ -22,6 +23,7 @@ function TallerForm({ taller, onClose, onSave }) {
         costoMensual: String(taller.costoMensual || ''),
         cupoMaximo: String(taller.cupoMaximo || ''),
         horarioDescripcion: taller.horarioDescripcion || '',
+        activo: taller.activo !== false,
       });
     }
   }, [taller]);
@@ -197,6 +199,23 @@ function TallerForm({ taller, onClose, onSave }) {
           />
         </div>
       </div>
+
+      {/* Activo (solo al editar) */}
+      {taller && (
+        <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3.5">
+          <input
+            type="checkbox"
+            name="activo"
+            id="activo"
+            checked={form.activo}
+            onChange={(e) => setForm({ ...form, activo: e.target.checked })}
+            className="w-4 h-4 rounded text-pink-600 bg-black/20 border-white/15 focus:ring-pink-500 cursor-pointer"
+          />
+          <label htmlFor="activo" className="text-sm font-semibold text-white/90 cursor-pointer select-none">
+            Taller Activo (Disponible para inscripciones)
+          </label>
+        </div>
+      )}
 
       {/* Error del servidor */}
       {error && (

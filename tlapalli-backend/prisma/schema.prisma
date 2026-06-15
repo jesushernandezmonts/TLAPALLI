@@ -70,6 +70,7 @@ model Taller {
   costoMensual      Decimal       @map("costo_mensual") @db.Decimal(10, 2)
   cupoMaximo        Int           @map("cupo_maximo")
   horarioDescripcion String?      @map("horario_descripcion")
+  activo            Boolean       @default(true)
   inscripciones     Inscripcion[]
   instructores      Instructor[]
 }

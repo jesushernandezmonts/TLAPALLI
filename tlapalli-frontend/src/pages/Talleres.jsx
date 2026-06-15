@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import TallerForm from '../components/TallerForm';
-import { Plus, Search, Edit3, Trash2, Calendar, AlertTriangle, CheckCircle, Eye, Users, DollarSign, TrendingUp, Palette, Music, Dumbbell, BookOpen, Laptop, Briefcase, Guitar, Piano, Drama, Mic, Heart, Sparkles } from 'lucide-react';
+import { Plus, Search, Edit3, Trash2, Calendar, AlertTriangle, CheckCircle, Eye, Users, DollarSign, TrendingUp, Palette, Music, Dumbbell, BookOpen, Laptop, Briefcase, Guitar, Piano, Drama, Mic, Heart, Sparkles, Power } from 'lucide-react';
 
 // Mapea el nombre del taller a un ícono y color representativo
 const getTallerIcon = (nombreTaller) => {
@@ -132,6 +132,32 @@ function Talleres() {
     }
   };
 
+  const handleToggleActivo = (id, currentActivo) => {
+    const isActivating = !currentActivo;
+    openConfirm({
+      title: isActivating ? '¿Activar Taller?' : '¿Desactivar Taller?',
+      message: isActivating
+        ? 'El taller volverá a estar activo y disponible para registrar inscripciones de alumnos. ¿Deseas continuar?'
+        : 'El taller se desactivará. No se podrán inscribir nuevos alumnos en este taller, aunque los alumnos actualmente inscritos conservarán su historial. ¿Deseas continuar?',
+      confirmText: isActivating ? 'Sí, activar' : 'Sí, desactivar',
+      onConfirm: async () => {
+        try {
+          await api.patch(`/talleres/${id}`, { activo: isActivating });
+          showToast(
+            isActivating ? 'Taller activado' : 'Taller desactivado',
+            'El estado del taller se actualizó correctamente.',
+            'success'
+          );
+          fetchTalleres(true);
+        } catch (err) {
+          showToast('Error al actualizar', 'No se pudo actualizar el estado del taller.', 'error');
+        } finally {
+          setConfirmOpen(false);
+        }
+      },
+    });
+  };
+
   const filtered = talleres.filter(t =>
     (t.nombreTaller || '').toLowerCase().includes(search.toLowerCase()) ||
     (t.descripcion || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -231,14 +257,15 @@ function Talleres() {
               <th>Costo Mensual</th>
               <th>Cupo Máx.</th>
               <th>Horario / Descripción</th>
+              <th className="text-center">Estado</th>
               <th className="text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
             {loading ? (
-              <tr><td colSpan="5" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando talleres...</td></tr>
+              <tr><td colSpan="6" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando talleres...</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan="5" className="p-20 text-center text-white/20 italic font-medium">No se encontraron talleres.</td></tr>
+              <tr><td colSpan="6" className="p-20 text-center text-white/20 italic font-medium">No se encontraron talleres.</td></tr>
             ) : (
               paginatedTalleres.map(t => (
                 <tr key={t.id} className="hover:bg-white/5 transition group">
@@ -291,6 +318,15 @@ function Talleres() {
                     </div>
                   </td>
                   <td data-label="Horario" className="text-sm text-white/90 font-medium max-w-xs break-words drop-shadow-sm leading-tight">{t.horarioDescripcion || 'Sin horario definido'}</td>
+                  <td data-label="Estado" className="text-center">
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
+                      t.activo !== false
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                    }`}>
+                      {t.activo !== false ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
                   <td data-label="Acciones" className="text-right">
                     <div className="flex justify-end gap-2">
                       <button 
@@ -306,6 +342,17 @@ function Talleres() {
                         title="Editar"
                       >
                         <Edit3 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleToggleActivo(t.id, t.activo !== false)} 
+                        className={`p-2.5 bg-white/5 rounded-xl transition-all duration-300 border border-white/5 text-white/60 ${
+                          t.activo === false 
+                            ? 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30' 
+                            : 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30'
+                        }`}
+                        title={t.activo === false ? 'Activar' : 'Desactivar'}
+                      >
+                        <Power size={16} />
                       </button>
                       <button 
                         onClick={() => handleDelete(t.id)} 
@@ -371,26 +418,38 @@ function Talleres() {
               })()}
               <div>
                 <h3 className="text-xl font-black text-white">{detailTaller.nombreTaller}</h3>
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border mt-1.5 ${
-                  getActiveCount(detailTaller) >= detailTaller.cupoMaximo
-                    ? 'bg-rose-500/10 border-rose-500/25 text-rose-400'
-                    : detailTaller.cupoMaximo - getActiveCount(detailTaller) <= 3
-                    ? 'bg-amber-500/10 border-amber-500/25 text-amber-400'
-                    : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${
-                    getActiveCount(detailTaller) >= detailTaller.cupoMaximo
-                      ? 'bg-rose-500 animate-pulse'
-                      : detailTaller.cupoMaximo - getActiveCount(detailTaller) <= 3
-                      ? 'bg-amber-500 animate-pulse'
-                      : 'bg-emerald-500 animate-pulse'
-                  }`} />
-                  {getActiveCount(detailTaller) >= detailTaller.cupoMaximo
-                    ? 'Cupo Agotado'
-                    : detailTaller.cupoMaximo - getActiveCount(detailTaller) <= 3
-                    ? `Últimos ${detailTaller.cupoMaximo - getActiveCount(detailTaller)} lugares`
-                    : 'Inscripciones Abiertas'}
-                </span>
+                <div className="flex flex-wrap gap-2 mt-1.5">
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                    detailTaller.activo === false
+                      ? 'bg-rose-500/10 border-rose-500/25 text-rose-400'
+                      : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${detailTaller.activo === false ? 'bg-rose-500' : 'bg-emerald-500 animate-pulse'}`} />
+                    {detailTaller.activo === false ? 'Inactivo' : 'Activo'}
+                  </span>
+                  {detailTaller.activo !== false && (
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                      getActiveCount(detailTaller) >= detailTaller.cupoMaximo
+                        ? 'bg-rose-500/10 border-rose-500/25 text-rose-400'
+                        : detailTaller.cupoMaximo - getActiveCount(detailTaller) <= 3
+                        ? 'bg-amber-500/10 border-amber-500/25 text-amber-400'
+                        : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        getActiveCount(detailTaller) >= detailTaller.cupoMaximo
+                          ? 'bg-rose-500 animate-pulse'
+                          : detailTaller.cupoMaximo - getActiveCount(detailTaller) <= 3
+                          ? 'bg-amber-500 animate-pulse'
+                          : 'bg-emerald-500 animate-pulse'
+                      }`} />
+                      {getActiveCount(detailTaller) >= detailTaller.cupoMaximo
+                        ? 'Cupo Agotado'
+                        : detailTaller.cupoMaximo - getActiveCount(detailTaller) <= 3
+                        ? `Últimos ${detailTaller.cupoMaximo - getActiveCount(detailTaller)} lugares`
+                        : 'Inscripciones Abiertas'}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -408,6 +467,23 @@ function Talleres() {
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Inversión Mensual</p>
                 <p className="text-lg text-emerald-400 font-black">${Number(detailTaller.costoMensual).toFixed(2)} MXN</p>
+              </div>
+
+              {/* Instructor(es) asignados */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1.5">Instructor(es) Asignado(s)</p>
+                {detailTaller.instructores && detailTaller.instructores.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {detailTaller.instructores.map(inst => (
+                      <span key={inst.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/25 text-purple-300 text-xs font-bold">
+                        <Users size={12} className="text-purple-400" />
+                        {inst.nombre}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-white/40 italic">Sin instructor asignado.</p>
+                )}
               </div>
 
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2">
@@ -430,6 +506,37 @@ function Talleres() {
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Alumnos inscritos activos */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2 space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Alumnos Inscritos Activos</p>
+                {(() => {
+                  const alumnosActivos = detailTaller.inscripciones
+                    ? detailTaller.inscripciones.filter(i => i.estatusPago !== 'baja')
+                    : [];
+                  if (alumnosActivos.length === 0) {
+                    return <p className="text-xs text-white/40 italic">No hay alumnos inscritos activos.</p>;
+                  }
+                  return (
+                    <div className="max-h-48 overflow-y-auto border border-white/5 rounded-xl divide-y divide-white/5 bg-black/20">
+                      {alumnosActivos.map((insc, idx) => (
+                        <div key={insc.id} className="px-4 py-2.5 flex items-center justify-between text-xs hover:bg-white/5 transition">
+                          <span className="font-semibold text-white/90">
+                            {idx + 1}. {insc.alumno?.nombre} {insc.alumno?.apellidoPaterno} {insc.alumno?.apellidoMaterno}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
+                            insc.estatusPago === 'al_corriente'
+                              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                              : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
+                          }`}>
+                            {insc.estatusPago.replace('_', ' ')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 

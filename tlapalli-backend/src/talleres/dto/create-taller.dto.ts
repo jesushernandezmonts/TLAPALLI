@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, IsBoolean } from 'class-validator';
 
 export class CreateTallerDto {
   @IsString()
@@ -19,4 +19,8 @@ export class CreateTallerDto {
   @IsOptional()
   @IsString()
   horarioDescripcion?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  activo?: boolean;
 }

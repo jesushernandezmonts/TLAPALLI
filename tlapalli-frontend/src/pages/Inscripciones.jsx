@@ -242,7 +242,7 @@ function Inscripciones() {
               required
             >
               <option value="" className="text-black">Seleccionar taller</option>
-              {talleres.map(t => (
+              {talleres.filter(t => t.activo !== false).map(t => (
                 <option key={t.id} value={t.id} className="text-black">{t.nombreTaller}</option>
               ))}
             </select>

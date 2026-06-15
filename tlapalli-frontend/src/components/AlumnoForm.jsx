@@ -375,7 +375,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
             {dropdownOpen && (
               <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-white/10 bg-slate-950/95 shadow-2xl backdrop-blur-md">
                 <div className="max-h-36 overflow-y-auto p-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
-                  {talleres.map((taller) => {
+                  {talleres.filter(taller => taller.activo !== false || selectedTallerIds.includes(taller.id)).map((taller) => {
                     const isSelected = selectedTallerIds.includes(taller.id);
                     return (
                       <div

@@ -15,13 +15,30 @@ export class TalleresService {
 
   async findAll() {
     return this.prisma.taller.findMany({
-      include: { inscripciones: true },
+      include: {
+        instructores: true,
+        inscripciones: {
+          include: {
+            alumno: true,
+          },
+        },
+      },
       orderBy: { id: 'asc' },
     });
   }
 
   async findOne(id: number) {
-    const taller = await this.prisma.taller.findUnique({ where: { id }, include: { inscripciones: true } });
+    const taller = await this.prisma.taller.findUnique({
+      where: { id },
+      include: {
+        instructores: true,
+        inscripciones: {
+          include: {
+            alumno: true,
+          },
+        },
+      },
+    });
     if (!taller) throw new NotFoundException('Taller no encontrado');
     return taller;
   }
