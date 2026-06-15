@@ -2,7 +2,47 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import TallerForm from '../components/TallerForm';
-import { Plus, Search, Edit3, Trash2, Calendar, AlertTriangle, CheckCircle, Eye, Users, DollarSign, TrendingUp } from 'lucide-react';
+import { Plus, Search, Edit3, Trash2, Calendar, AlertTriangle, CheckCircle, Eye, Users, DollarSign, TrendingUp, Palette, Music, Dumbbell, BookOpen, Laptop, Briefcase, Guitar, Piano, Drama, Mic, Heart, Sparkles } from 'lucide-react';
+
+// Mapea el nombre del taller a un ícono y color representativo
+const getTallerIcon = (nombreTaller) => {
+  const name = (nombreTaller || '').toLowerCase();
+
+  // Música
+  if (name.includes('guitarra')) return { icon: Guitar, color: 'text-amber-400', bg: 'bg-amber-500/10' };
+  if (name.includes('piano')) return { icon: Piano, color: 'text-indigo-400', bg: 'bg-indigo-500/10' };
+  if (name.includes('violín') || name.includes('violin')) return { icon: Music, color: 'text-purple-400', bg: 'bg-purple-500/10' };
+  if (name.includes('canto')) return { icon: Mic, color: 'text-pink-400', bg: 'bg-pink-500/10' };
+
+  // Artes plásticas
+  if (name.includes('pintura') || name.includes('dibujo') || name.includes('plásticas') || name.includes('plasticas'))
+    return { icon: Palette, color: 'text-cyan-400', bg: 'bg-cyan-500/10' };
+
+  // Danza
+  if (name.includes('danza') || name.includes('ballet') || name.includes('flamenco') || name.includes('ritmos'))
+    return { icon: Sparkles, color: 'text-rose-400', bg: 'bg-rose-500/10' };
+
+  // Teatro
+  if (name.includes('teatro')) return { icon: Drama, color: 'text-yellow-400', bg: 'bg-yellow-500/10' };
+
+  // Lectura
+  if (name.includes('lectura') || name.includes('cuentacuentos'))
+    return { icon: BookOpen, color: 'text-emerald-400', bg: 'bg-emerald-500/10' };
+
+  // Bienestar
+  if (name.includes('yoga')) return { icon: Heart, color: 'text-teal-400', bg: 'bg-teal-500/10' };
+
+  // Deporte
+  if (name.includes('deporte') || name.includes('ejercicio'))
+    return { icon: Dumbbell, color: 'text-orange-400', bg: 'bg-orange-500/10' };
+
+  // Tecnología
+  if (name.includes('tecnología') || name.includes('computación') || name.includes('programación'))
+    return { icon: Laptop, color: 'text-blue-400', bg: 'bg-blue-500/10' };
+
+  // Default
+  return { icon: Briefcase, color: 'text-orange-400', bg: 'bg-orange-500/10' };
+};
 import ConfirmModal from '../components/ConfirmModal';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -201,9 +241,14 @@ function Talleres() {
                 <tr key={t.id} className="hover:bg-white/5 transition group">
                   <td data-label="Taller">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
-                        <Calendar size={20} />
-                      </div>
+                      {(() => {
+                        const { icon: TallerIcon, color, bg } = getTallerIcon(t.nombreTaller);
+                        return (
+                          <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center ${color}`}>
+                            <TallerIcon size={20} />
+                          </div>
+                        );
+                      })()}
                       <span className="font-bold text-white/90">{t.nombreTaller}</span>
                     </div>
                   </td>
@@ -242,7 +287,7 @@ function Talleres() {
                       </div>
                     </div>
                   </td>
-                  <td data-label="Horario" className="text-sm text-white/90 font-medium max-w-xs truncate drop-shadow-sm">{t.horarioDescripcion || 'Sin horario definido'}</td>
+                  <td data-label="Horario" className="text-sm text-white/90 font-medium max-w-xs break-words drop-shadow-sm leading-tight">{t.horarioDescripcion || 'Sin horario definido'}</td>
                   <td data-label="Acciones" className="text-right">
                     <div className="flex justify-end gap-2">
                       <button 
@@ -313,9 +358,14 @@ function Talleres() {
         <Modal isOpen={!!detailTaller} onClose={() => setDetailTaller(null)} title="Detalle del Taller" maxWidth="max-w-2xl">
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-400 border border-orange-500/20">
-                <Calendar size={32} />
-              </div>
+              {(() => {
+                const { icon: TallerIcon, color, bg } = getTallerIcon(detailTaller.nombreTaller);
+                return (
+                  <div className={`w-16 h-16 rounded-2xl ${bg} flex items-center justify-center ${color} border border-white/10`}>
+                    <TallerIcon size={32} />
+                  </div>
+                );
+              })()}
               <div>
                 <h3 className="text-xl font-black text-white">{detailTaller.nombreTaller}</h3>
                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border mt-1.5 ${
