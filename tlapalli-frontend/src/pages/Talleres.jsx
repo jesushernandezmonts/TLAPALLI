@@ -72,8 +72,14 @@ function Talleres() {
         api.get('/talleres'),
         api.get('/pagos')
       ]);
-      // Ordenar por ID de forma ascendente para mantener un orden estable
-      const sortedTalleres = (talleresRes.data || []).sort((a, b) => a.id - b.id);
+      // Ordenar por activo desc, luego por ID asc para colocar inactivos al final
+      const sortedTalleres = (talleresRes.data || []).sort((a, b) => {
+        const aActivo = a.activo !== false;
+        const bActivo = b.activo !== false;
+        if (aActivo && !bActivo) return -1;
+        if (!aActivo && bActivo) return 1;
+        return a.id - b.id;
+      });
       setTalleres(sortedTalleres);
       setPagos(pagosRes.data);
     } catch (err) {

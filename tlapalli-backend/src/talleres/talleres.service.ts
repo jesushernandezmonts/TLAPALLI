@@ -23,7 +23,10 @@ export class TalleresService {
           },
         },
       },
-      orderBy: { id: 'asc' },
+      orderBy: [
+        { activo: 'desc' },
+        { id: 'asc' },
+      ],
     });
   }
 
