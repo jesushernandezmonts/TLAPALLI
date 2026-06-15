@@ -3,9 +3,11 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, TrendingUp, Users, BookOpen, Calendar,
-  Download, Loader2, AlertCircle, RefreshCw, CheckCircle2,
+  Download, Loader2, AlertCircle, RefreshCw, CheckCircle2, Trash2
 } from 'lucide-react';
 import api from '../services/api';
+import html2canvas from 'html2canvas-pro';
+import { jsPDF } from 'jspdf';
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 const fmt  = (n) => `$${Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
@@ -204,8 +206,21 @@ export default function Reportes() {
   const [printing, setPrinting] = useState(null); // id del reporte activo en print
   const [generating, setGenerating] = useState(null);
   const [done, setDone]         = useState(null);
+  const [savedReports, setSavedReports] = useState([]);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+    fetchSavedReports();
+  }, []);
+
+  const fetchSavedReports = async () => {
+    try {
+      const { data: reports } = await api.get('/reportes');
+      setSavedReports(reports);
+    } catch (err) {
+      console.error('Error al cargar historial de reportes', err);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -223,11 +238,96 @@ export default function Reportes() {
   const handlePrint = async (id) => {
     setGenerating(id);
     setPrinting(id);
-    await new Promise(r => setTimeout(r, 350)); // esperar render
-    window.print();
-    setGenerating(null);
-    setDone(id);
-    setTimeout(() => { setDone(null); setPrinting(null); }, 2500);
+    await new Promise(r => setTimeout(r, 400)); // esperar render
+
+    const element = document.getElementById('print-section');
+    if (!element) {
+      console.error('No se encontró el elemento de impresión');
+      setGenerating(null);
+      setPrinting(null);
+      return;
+    }
+
+    const prevDisplay = element.style.display;
+    element.style.display = 'block';
+
+    const reportTypeTitle = REPORTS.find(r => r.id === id)?.title || 'Reporte';
+    const dateStr = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
+      .replace(/ /g, '_')
+      .replace(/\./g, '')
+      .replace(/,/g, '');
+    const cleanFileName = `${reportTypeTitle.replace(/ /g, '_')}_${dateStr}.pdf`;
+
+    try {
+      // html2canvas-pro soporta oklch y colores modernos de CSS
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+      });
+
+      // Crear PDF con jsPDF
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      const pdf = new jsPDF({ unit: 'mm', format: 'letter', orientation: 'portrait' });
+      const pdfWidth  = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth  = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio     = pdfWidth / imgWidth;
+      const totalPdfHeight = imgHeight * ratio;
+
+      // Paginar si el contenido supera una página
+      let yOffset = 0;
+      while (yOffset < totalPdfHeight) {
+        if (yOffset > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, -yOffset, pdfWidth, totalPdfHeight);
+        yOffset += pdfHeight;
+      }
+
+      const pdfBlob = pdf.output('blob');
+
+      // Descarga local
+      const fileURL = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.download = cleanFileName;
+      link.click();
+      URL.revokeObjectURL(fileURL);
+
+      // Subida al backend
+      const formData = new FormData();
+      formData.append('archivo', pdfBlob, cleanFileName);
+      formData.append('tipo', id);
+      formData.append('nombre', cleanFileName.replace('.pdf', '').replace(/_/g, ' '));
+
+      await api.post('/reportes/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      await fetchSavedReports();
+      setDone(id);
+    } catch (err) {
+      console.error('Error al generar y guardar reporte PDF:', err);
+    } finally {
+      element.style.display = prevDisplay;
+      setGenerating(null);
+      setPrinting(null);
+      setTimeout(() => setDone(null), 2500);
+    }
+  };
+
+  const handleDeleteReport = async (id) => {
+    if (window.confirm('¿Seguro que deseas eliminar este reporte del sistema? El archivo PDF se borrará de forma permanente.')) {
+      try {
+        await api.delete(`/reportes/${id}`);
+        fetchSavedReports();
+      } catch (err) {
+        console.error('Error al eliminar reporte:', err);
+      }
+    }
   };
 
   /* ── KPI bar ── */
@@ -350,6 +450,96 @@ export default function Reportes() {
             </motion.div>
           );
         })}
+      </div>
+
+      {/* ── Historial de Reportes Guardados ── */}
+      <div className="rounded-[2rem] border border-white/20 bg-slate-950/45 p-6 shadow-2xl backdrop-blur-xl mt-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-pink-600/10 flex items-center justify-center text-pink-400">
+            <FileText size={20} />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-white">Historial de Reportes Guardados</h2>
+            <p className="text-xs text-white/50">Historial de reportes generados en el sistema</p>
+          </div>
+        </div>
+
+        <div className="responsive-table-container">
+          <table className="responsive-table">
+            <thead>
+              <tr>
+                <th>Reporte</th>
+                <th>Nombre del Archivo</th>
+                <th>Fecha de Creación</th>
+                <th className="text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {savedReports.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="p-10 text-center text-white/20 italic font-medium">
+                    No hay reportes guardados en el sistema. Genera uno para comenzar.
+                  </td>
+                </tr>
+              ) : (
+                savedReports.map((report) => {
+                  const category = REPORTS.find(r => r.id === report.tipo) || {
+                    title: 'Reporte',
+                    icon: FileText,
+                    gradient: 'from-pink-600 to-rose-700',
+                  };
+                  const ReportIcon = category.icon;
+                  return (
+                    <tr key={report.id} className="hover:bg-white/5 transition group">
+                      <td data-label="Reporte">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${category.gradient} flex items-center justify-center text-white shrink-0 shadow-sm`}>
+                            <ReportIcon size={16} />
+                          </div>
+                          <span className="font-bold text-white/90">{category.title}</span>
+                        </div>
+                      </td>
+                      <td data-label="Nombre del Archivo" className="text-sm text-white/80 font-medium font-mono">
+                        {report.nombre}.pdf
+                      </td>
+                      <td data-label="Fecha de Creación" className="text-sm text-white/60 font-medium">
+                        {new Date(report.creadoEn).toLocaleString('es-MX', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true,
+                        })}
+                      </td>
+                      <td data-label="Acciones" className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <a
+                            href={`${api.defaults.baseURL || 'http://localhost:3000'}${report.url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2.5 bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-emerald-500/30 text-white/60"
+                            title="Descargar PDF"
+                            download
+                          >
+                            <Download size={16} />
+                          </a>
+                          <button
+                            onClick={() => handleDeleteReport(report.id)}
+                            className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30 text-white/60"
+                            title="Eliminar Reporte"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* ══════════════════════════════════════════════

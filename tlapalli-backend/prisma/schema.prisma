@@ -130,3 +130,11 @@ model Actividad {
   ubicacion   String   // 'galeria' | 'audioteca' | 'auditorio'
   creadoEn    DateTime @default(now()) @map("creado_en")
 }
+
+model Reporte {
+  id        Int      @id @default(autoincrement())
+  tipo      String   // general, financiero, alumnos, talleres, actividades
+  nombre    String
+  url       String
+  creadoEn  DateTime @default(now()) @map("creado_en")
+}
