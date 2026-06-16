@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, TrendingUp, Users, BookOpen, Calendar,
-  Download, Loader2, AlertCircle, RefreshCw, CheckCircle2, Trash2
+  Download, Loader2, AlertCircle, RefreshCw, CheckCircle2, Trash2,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import api from '../services/api';
 import html2canvas from 'html2canvas-pro';
@@ -207,6 +208,15 @@ export default function Reportes() {
   const [generating, setGenerating] = useState(null);
   const [done, setDone]         = useState(null);
   const [savedReports, setSavedReports] = useState([]);
+  const [currentPage, setCurrentPage]   = useState(1);
+  const itemsPerPage = 5;
+
+  useEffect(() => {
+    const totalPages = Math.ceil(savedReports.length / itemsPerPage);
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [savedReports, currentPage]);
 
   useEffect(() => {
     fetchData();
@@ -288,14 +298,6 @@ export default function Reportes() {
       }
 
       const pdfBlob = pdf.output('blob');
-
-      // Descarga local
-      const fileURL = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = fileURL;
-      link.download = cleanFileName;
-      link.click();
-      URL.revokeObjectURL(fileURL);
 
       // Subida al backend
       const formData = new FormData();
@@ -482,7 +484,7 @@ export default function Reportes() {
                   </td>
                 </tr>
               ) : (
-                savedReports.map((report) => {
+                savedReports.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((report) => {
                   const category = REPORTS.find(r => r.id === report.tipo) || {
                     title: 'Reporte',
                     icon: FileText,
@@ -540,6 +542,50 @@ export default function Reportes() {
             </tbody>
           </table>
         </div>
+
+        {/* Paginador */}
+        {savedReports.length > itemsPerPage && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-white/5">
+            <p className="text-xs text-white/50">
+              Mostrando <span className="font-bold text-white">{((currentPage - 1) * itemsPerPage) + 1}</span> a{' '}
+              <span className="font-bold text-white">
+                {Math.min(currentPage * itemsPerPage, savedReports.length)}
+              </span>{' '}
+              de <span className="font-bold text-white">{savedReports.length}</span> reportes
+            </p>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-white rounded-xl border border-white/5 transition duration-200 cursor-pointer disabled:cursor-not-allowed"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              
+              {Array.from({ length: Math.ceil(savedReports.length / itemsPerPage) }, (_, idx) => idx + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-9 h-9 text-xs font-bold rounded-xl transition duration-200 border cursor-pointer ${
+                    currentPage === page
+                      ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white border-none shadow-md shadow-pink-500/20'
+                      : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border-white/5'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(savedReports.length / itemsPerPage)))}
+                disabled={currentPage === Math.ceil(savedReports.length / itemsPerPage)}
+                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-white rounded-xl border border-white/5 transition duration-200 cursor-pointer disabled:cursor-not-allowed"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ══════════════════════════════════════════════
