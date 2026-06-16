@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, TrendingUp, Users, BookOpen, Calendar,
   Download, Loader2, AlertCircle, RefreshCw, CheckCircle2, Trash2,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Search, Filter, X, CalendarDays, CalendarX
 } from 'lucide-react';
 import api from '../services/api';
 import html2canvas from 'html2canvas-pro';
@@ -199,6 +199,181 @@ const TablaPrint = ({ headers, rows }) => (
   </div>
 );
 
+/* ─── MiniCalendar personalizado ────────────────────────────────────────────── */
+const DIAS_SEMANA = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function MiniCalendar({ value, onChange, onClear }) {
+  const hoyDate = new Date();
+  const [open, setOpen]     = useState(false);
+  const [viewYear, setViewYear]   = useState(value ? new Date(value + 'T12:00:00').getFullYear()  : hoyDate.getFullYear());
+  const [viewMonth, setViewMonth] = useState(value ? new Date(value + 'T12:00:00').getMonth()     : hoyDate.getMonth());
+
+  // Sincronizar vista al cambiar valor externo
+  useEffect(() => {
+    if (value) {
+      const d = new Date(value + 'T12:00:00');
+      setViewYear(d.getFullYear());
+      setViewMonth(d.getMonth());
+    }
+  }, [value]);
+
+  const primerDia  = new Date(viewYear, viewMonth, 1).getDay();
+  const diasMes    = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const celdas     = Array.from({ length: primerDia + diasMes }, (_, i) =>
+    i < primerDia ? null : i - primerDia + 1
+  );
+
+  const seleccionado = value ? new Date(value + 'T12:00:00') : null;
+
+  const esMismoDia = (d) =>
+    seleccionado &&
+    seleccionado.getFullYear() === viewYear &&
+    seleccionado.getMonth()    === viewMonth &&
+    seleccionado.getDate()     === d;
+
+  const esHoy = (d) =>
+    hoyDate.getFullYear() === viewYear &&
+    hoyDate.getMonth()    === viewMonth &&
+    hoyDate.getDate()     === d;
+
+  const seleccionar = (d) => {
+    const mm = String(viewMonth + 1).padStart(2, '0');
+    const dd = String(d).padStart(2, '0');
+    onChange(`${viewYear}-${mm}-${dd}`);
+    setOpen(false);
+  };
+
+  const prevMes = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+    else setViewMonth(m => m - 1);
+  };
+  const nextMes = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+    else setViewMonth(m => m + 1);
+  };
+
+  const labelFecha = seleccionado
+    ? seleccionado.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+
+  return (
+    <div className="relative">
+      {/* Botón disparador */}
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200 ${
+          value
+            ? 'bg-pink-500/15 border-pink-500/40 text-pink-300 hover:bg-pink-500/25'
+            : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80'
+        }`}
+      >
+        <CalendarDays size={15} className={value ? 'text-pink-400' : 'text-white/30'} />
+        {value ? (
+          <span>{labelFecha}</span>
+        ) : (
+          <span>Filtrar por fecha</span>
+        )}
+        {value && (
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(e) => { e.stopPropagation(); onClear(); }}
+            onKeyDown={(e) => e.key === 'Enter' && (e.stopPropagation(), onClear())}
+            className="ml-1 p-0.5 rounded-full hover:bg-pink-500/30 text-pink-400/70 hover:text-pink-300 transition"
+          >
+            <X size={12} />
+          </span>
+        )}
+      </button>
+
+      {/* Popup calendario */}
+      <AnimatePresence>
+        {open && (
+          <>
+            {/* Overlay para cerrar */}
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="absolute left-0 top-[calc(100%+8px)] z-50 w-72 rounded-2xl border border-white/15 bg-slate-900/95 backdrop-blur-2xl shadow-2xl shadow-black/50 overflow-hidden"
+            >
+              {/* Cabecera del mes */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
+                <button
+                  onClick={prevMes}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition"
+                >
+                  <ChevronLeft size={15} />
+                </button>
+                <span className="text-sm font-black text-white tracking-wide">
+                  {MESES[viewMonth]} {viewYear}
+                </span>
+                <button
+                  onClick={nextMes}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition"
+                >
+                  <ChevronRight size={15} />
+                </button>
+              </div>
+
+              <div className="p-3">
+                {/* Encabezado días */}
+                <div className="grid grid-cols-7 mb-1">
+                  {DIAS_SEMANA.map(d => (
+                    <div key={d} className="text-center text-[10px] font-bold text-white/25 uppercase py-1">{d}</div>
+                  ))}
+                </div>
+
+                {/* Celdas del mes */}
+                <div className="grid grid-cols-7 gap-0.5">
+                  {celdas.map((d, idx) => (
+                    d === null ? (
+                      <div key={`empty-${idx}`} />
+                    ) : (
+                      <button
+                        key={d}
+                        onClick={() => seleccionar(d)}
+                        className={`w-full aspect-square rounded-xl text-[12px] font-bold transition-all duration-150 flex items-center justify-center ${
+                          esMismoDia(d)
+                            ? 'bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/30 scale-105'
+                            : esHoy(d)
+                            ? 'bg-white/10 text-white ring-1 ring-pink-500/40'
+                            : 'text-white/60 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        {d}
+                      </button>
+                    )
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer: ir a hoy */}
+              <div className="px-3 pb-3">
+                <button
+                  onClick={() => {
+                    const hh = String(hoyDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(hoyDate.getDate()).padStart(2, '0');
+                    onChange(`${hoyDate.getFullYear()}-${hh}-${dd}`);
+                    setOpen(false);
+                  }}
+                  className="w-full py-2 rounded-xl text-xs font-bold text-white/40 hover:text-pink-300 hover:bg-pink-500/10 border border-white/5 hover:border-pink-500/20 transition-all duration-200"
+                >
+                  Ir a hoy
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 /* ─── componente principal ────────────────────────────────────────────────── */
 export default function Reportes() {
   const [data, setData]         = useState(null);
@@ -209,14 +384,44 @@ export default function Reportes() {
   const [done, setDone]         = useState(null);
   const [savedReports, setSavedReports] = useState([]);
   const [currentPage, setCurrentPage]   = useState(1);
+  const [filtroTipo, setFiltroTipo]     = useState('todos');
+  const [busqueda, setBusqueda]         = useState('');
+  const [fechaFiltro, setFechaFiltro]   = useState('');
   const itemsPerPage = 5;
 
+  const reportesFiltrados = useMemo(() => {
+    return savedReports.filter((r) => {
+      const matchTipo    = filtroTipo === 'todos' || r.tipo === filtroTipo;
+      const termino      = busqueda.toLowerCase();
+      const matchBusqueda = termino === '' ||
+        r.nombre.toLowerCase().includes(termino) ||
+        (REPORTS.find(rep => rep.id === r.tipo)?.title || '').toLowerCase().includes(termino);
+
+      let matchFecha = true;
+      if (fechaFiltro) {
+        const fechaReporte = new Date(r.creadoEn);
+        const seleccionada = fechaFiltro; // 'YYYY-MM-DD'
+        const yy = fechaReporte.getFullYear();
+        const mm = String(fechaReporte.getMonth() + 1).padStart(2, '0');
+        const dd = String(fechaReporte.getDate()).padStart(2, '0');
+        matchFecha = `${yy}-${mm}-${dd}` === seleccionada;
+      }
+
+      return matchTipo && matchBusqueda && matchFecha;
+    });
+  }, [savedReports, filtroTipo, busqueda, fechaFiltro]);
+
   useEffect(() => {
-    const totalPages = Math.ceil(savedReports.length / itemsPerPage);
+    const totalPages = Math.ceil(reportesFiltrados.length / itemsPerPage);
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(totalPages);
     }
-  }, [savedReports, currentPage]);
+  }, [reportesFiltrados, currentPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filtroTipo, busqueda, fechaFiltro]);
 
   useEffect(() => {
     fetchData();
@@ -456,13 +661,78 @@ export default function Reportes() {
 
       {/* ── Historial de Reportes Guardados ── */}
       <div className="rounded-[2rem] border border-white/20 bg-slate-950/45 p-6 shadow-2xl backdrop-blur-xl mt-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-pink-600/10 flex items-center justify-center text-pink-400">
-            <FileText size={20} />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-pink-600/10 flex items-center justify-center text-pink-400">
+              <FileText size={20} />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-white">Historial de Reportes Guardados</h2>
+              <p className="text-xs text-white/50">
+                {reportesFiltrados.length} de {savedReports.length} reporte{savedReports.length !== 1 ? 's' : ''}
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-black text-white">Historial de Reportes Guardados</h2>
-            <p className="text-xs text-white/50">Historial de reportes generados en el sistema</p>
+        </div>
+
+        {/* ── Filtros ── */}
+        <div className="flex flex-col gap-3 mb-5">
+          {/* Fila 1: buscador + tipo */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Buscador */}
+            <div className="relative flex-1">
+              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Buscar por nombre o tipo..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                className="w-full pl-9 pr-9 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all duration-200"
+              />
+              {busqueda && (
+                <button
+                  onClick={() => setBusqueda('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Filtro por tipo */}
+            <div className="relative">
+              <Filter size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+              <select
+                value={filtroTipo}
+                onChange={(e) => setFiltroTipo(e.target.value)}
+                className="pl-9 pr-8 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white/80 focus:outline-none focus:border-pink-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[180px]"
+                style={{ backgroundImage: 'none' }}
+              >
+                <option value="todos" className="bg-slate-900">Todos los tipos</option>
+                {REPORTS.map((r) => (
+                  <option key={r.id} value={r.id} className="bg-slate-900">{r.title}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Fila 2: fecha exacta */}
+          <div className="flex flex-col sm:flex-row gap-3 items-center">
+            <MiniCalendar
+              value={fechaFiltro}
+              onChange={setFechaFiltro}
+              onClear={() => setFechaFiltro('')}
+            />
+
+            {/* Limpiar filtros */}
+            {(filtroTipo !== 'todos' || busqueda || fechaFiltro) && (
+              <button
+                onClick={() => { setFiltroTipo('todos'); setBusqueda(''); setFechaFiltro(''); }}
+                className="flex items-center gap-1.5 px-3 py-2.5 bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/20 rounded-xl text-xs font-bold text-pink-400 transition-all duration-200 whitespace-nowrap"
+              >
+                <X size={12} /> Limpiar filtros
+              </button>
+            )}
           </div>
         </div>
 
@@ -483,8 +753,23 @@ export default function Reportes() {
                     No hay reportes guardados en el sistema. Genera uno para comenzar.
                   </td>
                 </tr>
+              ) : reportesFiltrados.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="p-10 text-center">
+                    <div className="flex flex-col items-center gap-3 text-white/30">
+                      <Search size={32} className="opacity-40" />
+                      <p className="italic font-medium text-sm">No se encontraron reportes con los filtros aplicados.</p>
+                      <button
+                        onClick={() => { setFiltroTipo('todos'); setBusqueda(''); }}
+                        className="text-pink-400 hover:text-pink-300 text-xs font-bold underline transition"
+                      >
+                        Limpiar filtros
+                      </button>
+                    </div>
+                  </td>
+                </tr>
               ) : (
-                savedReports.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((report) => {
+                reportesFiltrados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((report) => {
                   const category = REPORTS.find(r => r.id === report.tipo) || {
                     title: 'Reporte',
                     icon: FileText,
@@ -544,14 +829,14 @@ export default function Reportes() {
         </div>
 
         {/* Paginador */}
-        {savedReports.length > itemsPerPage && (
+        {reportesFiltrados.length > itemsPerPage && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-white/5">
             <p className="text-xs text-white/50">
               Mostrando <span className="font-bold text-white">{((currentPage - 1) * itemsPerPage) + 1}</span> a{' '}
               <span className="font-bold text-white">
-                {Math.min(currentPage * itemsPerPage, savedReports.length)}
+                {Math.min(currentPage * itemsPerPage, reportesFiltrados.length)}
               </span>{' '}
-              de <span className="font-bold text-white">{savedReports.length}</span> reportes
+              de <span className="font-bold text-white">{reportesFiltrados.length}</span> reportes
             </p>
             <div className="flex items-center gap-1.5">
               <button
@@ -562,7 +847,7 @@ export default function Reportes() {
                 <ChevronLeft size={16} />
               </button>
               
-              {Array.from({ length: Math.ceil(savedReports.length / itemsPerPage) }, (_, idx) => idx + 1).map((page) => (
+              {Array.from({ length: Math.ceil(reportesFiltrados.length / itemsPerPage) }, (_, idx) => idx + 1).map((page) => (
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
@@ -577,8 +862,8 @@ export default function Reportes() {
               ))}
 
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(savedReports.length / itemsPerPage)))}
-                disabled={currentPage === Math.ceil(savedReports.length / itemsPerPage)}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(reportesFiltrados.length / itemsPerPage)))}
+                disabled={currentPage === Math.ceil(reportesFiltrados.length / itemsPerPage)}
                 className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-white rounded-xl border border-white/5 transition duration-200 cursor-pointer disabled:cursor-not-allowed"
               >
                 <ChevronRight size={16} />
