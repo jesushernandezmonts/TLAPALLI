@@ -22,7 +22,7 @@ export default function MisGrupos() {
   const [modalType, setModalType] = useState('grupo');
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ nombre: '', descripcion: '' });
-  const [alumnoForm, setAlumnoForm] = useState({ nombre: '', apellidoPaterno: '', apellidoMaterno: '', telefono: '', email: '', curp: '' });
+  const [alumnoForm, setAlumnoForm] = useState({ nombre: '', apellidoPaterno: '', apellidoMaterno: '', telefono: '' });
   const [saving, setSaving] = useState(false);
 
   // Toast state
@@ -90,7 +90,7 @@ export default function MisGrupos() {
         setFormData({ nombre: '', descripcion: '' });
       }
     } else if (type === 'alumno') {
-      setAlumnoForm({ nombre: '', apellidoPaterno: '', apellidoMaterno: '', telefono: '', email: '', curp: '' });
+      setAlumnoForm({ nombre: '', apellidoPaterno: '', apellidoMaterno: '', telefono: '' });
     }
     setShowModal(true);
   };
@@ -125,8 +125,8 @@ export default function MisGrupos() {
   };
 
   const handleSaveAlumno = async () => {
-    if (!alumnoForm.nombre.trim() || !alumnoForm.apellidoPaterno.trim()) {
-      showToast('Campos requeridos', 'Nombre y Apellido Paterno son requeridos', 'error');
+    if (!alumnoForm.nombre.trim() || !alumnoForm.apellidoPaterno.trim() || !alumnoForm.apellidoMaterno.trim() || !alumnoForm.telefono.trim()) {
+      showToast('Campos requeridos', 'Nombre, Apellidos y Teléfono son requeridos', 'error');
       return;
     }
 
@@ -134,7 +134,7 @@ export default function MisGrupos() {
       setSaving(true);
       await api.post(`/grupos/${expandedGrupo}/alumnos`, alumnoForm);
       await fetchAlumnosGrupo(expandedGrupo);
-      setAlumnoForm({ nombre: '', apellidoPaterno: '', apellidoMaterno: '', telefono: '', email: '', curp: '' });
+      setAlumnoForm({ nombre: '', apellidoPaterno: '', apellidoMaterno: '', telefono: '' });
       setShowModal(false);
       showToast('Alumno agregado', 'El alumno se agregó correctamente al grupo.', 'success');
     } catch (err) {
@@ -424,42 +424,23 @@ export default function MisGrupos() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Apellido Materno</label>
+              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Apellido Materno *</label>
               <input
                 type="text"
-                placeholder="Apellido Materno (opcional)"
+                placeholder="Apellido Materno"
                 value={alumnoForm.apellidoMaterno}
                 onChange={(e) => setAlumnoForm({ ...alumnoForm, apellidoMaterno: e.target.value })}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
               />
             </div>
+
             <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Teléfono</label>
+              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Teléfono *</label>
               <input
                 type="text"
-                placeholder="Teléfono (opcional)"
+                placeholder="Teléfono"
                 value={alumnoForm.telefono}
                 onChange={(e) => setAlumnoForm({ ...alumnoForm, telefono: e.target.value })}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Email</label>
-              <input
-                type="email"
-                placeholder="Email (opcional)"
-                value={alumnoForm.email}
-                onChange={(e) => setAlumnoForm({ ...alumnoForm, email: e.target.value })}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">CURP</label>
-              <input
-                type="text"
-                placeholder="CURP (opcional)"
-                value={alumnoForm.curp}
-                onChange={(e) => setAlumnoForm({ ...alumnoForm, curp: e.target.value })}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
               />
             </div>

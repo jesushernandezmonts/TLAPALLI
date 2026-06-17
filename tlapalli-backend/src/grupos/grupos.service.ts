@@ -76,7 +76,6 @@ export class GruposService {
         apellidoPaterno: createAlumnoDto.apellidoPaterno,
         apellidoMaterno: createAlumnoDto.apellidoMaterno,
         telefono: createAlumnoDto.telefono,
-        curp: createAlumnoDto.curp,
         instructorId,
       },
     });

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEmail } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateGrupoAlumnoDto {
   @IsString()
@@ -7,19 +7,9 @@ export class CreateGrupoAlumnoDto {
   @IsString()
   apellidoPaterno: string;
 
-  @IsOptional()
   @IsString()
-  apellidoMaterno?: string;
+  apellidoMaterno: string;
 
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @IsOptional()
   @IsString()
-  telefono?: string;
-
-  @IsOptional()
-  @IsString()
-  curp?: string;
+  telefono: string;
 }
