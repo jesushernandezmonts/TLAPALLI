@@ -4,8 +4,13 @@ import Modal from '../components/Modal';
 import AlumnoForm from '../components/AlumnoForm';
 import ConfirmModal from '../components/ConfirmModal';
 import AlumnoDetail from '../components/AlumnoDetail';
-import { Plus, Search, Edit3, Trash2, Power, Eye, CheckCircle, Filter, ChevronDown, AlertTriangle } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { Plus, Edit3, Trash2, Power, Eye, Filter } from 'lucide-react';
+import Toast from '../components/Toast';
+import StatCard from '../components/StatCard';
+import SearchBar from '../components/SearchBar';
+import Pagination from '../components/Pagination';
+import StatusBadge from '../components/StatusBadge';
+import FilterDropdown from '../components/FilterDropdown';
 
 function Alumnos() {
   const [alumnos, setAlumnos] = useState([]);
@@ -138,9 +143,12 @@ function Alumnos() {
   const showToast = (title, message, type = 'success') => {
     setToastType(type);
     setSuccessToast(title);
-    setToastMessage(message || '');
+      setToastMessage(message || '');
     setTimeout(() => setSuccessToast(''), 3000);
   };
+
+  // Create a toast object for the Toast component
+  const toast = successToast ? { title: successToast, message: toastMessage, type: toastType } : null;
 
   const handleEdit = (alumno) => {
     setEditAlumno(alumno);
@@ -235,39 +243,7 @@ function Alumnos() {
 
   return (
     <div className="space-y-8">
-      <AnimatePresence>
-        {successToast && (
-          <motion.div
-            initial={{ opacity: 0, x: -80 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 80 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
-            className={`fixed right-6 top-6 z-100 flex items-center gap-3 rounded-2xl bg-slate-950/90 px-5 py-4 text-white shadow-2xl backdrop-blur-xl ${
-              toastType === 'delete' || toastType === 'error'
-                ? 'border border-rose-500/25 shadow-rose-500/10'
-                : 'border border-emerald-500/20 shadow-emerald-500/10'
-            }`}
-          >
-            <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${
-              toastType === 'delete' || toastType === 'error'
-                ? 'border-rose-500/25 bg-rose-500/10 text-rose-400'
-                : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
-            }`}>
-              {toastType === 'delete' || toastType === 'error' ? <AlertTriangle size={22} /> : <CheckCircle size={22} />}
-            </div>
-            <div>
-              <p className="text-sm font-black">{successToast}</p>
-              <p className="text-xs font-medium text-white/50">
-                {toastMessage || (successToast === 'Alumno registrado'
-                  ? 'El alumno se registró correctamente.'
-                  : successToast === 'Alumno eliminado'
-                    ? 'El alumno se eliminó correctamente.'
-                  : 'La información del alumno se actualizó correctamente.')}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast toast={toast} />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.65)]">
@@ -281,15 +257,12 @@ function Alumnos() {
 
       {/* Barra de Controles Unificada */}
       <div className="relative z-30 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5">
-        <div className="relative flex-1 max-w-md w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-pink-400" />
-          <input
-            className="w-full rounded-2xl border border-white/15 bg-black/25 px-12 py-3 text-sm text-white shadow-inner shadow-black/20 placeholder-white/45 transition-all hover:border-white/30 hover:bg-black/35 focus:border-pink-400/70 focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-pink-500/25"
-            placeholder="Buscar por nombre o teléfono..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por nombre o teléfono..."
+          onClear={() => setCurrentPage(1)}
+        />
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <FilterDropdown
             icon={<Filter size={16} />}
@@ -482,32 +455,14 @@ function Alumnos() {
         </table>
       </div>
 
-      {!loading && filtered.length > alumnosPerPage && (
-        <div className="mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-slate-950/80 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-md">
-          <p className="text-xs font-bold uppercase tracking-wider text-white/80">
-            Mostrando {startIndex + 1}-{Math.min(startIndex + alumnosPerPage, filtered.length)} de {filtered.length} alumnos
-          </p>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
-              disabled={currentPage === 1}
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
-            >
-              Anterior
-            </button>
-            <span className="min-w-28 text-center text-xs font-black uppercase tracking-wider text-white/80">
-              Página <span className="text-emerald-400">{currentPage}</span> de {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
-              disabled={currentPage === totalPages}
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startIndex={startIndex}
+        itemsPerPage={alumnosPerPage}
+        filteredLength={filtered.length}
+        onPageChange={setCurrentPage}
+      />
 
       <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); fetchAlumnos(); }}
         title={editAlumno ? 'Editar Alumno' : 'Nuevo Alumno'}
@@ -545,42 +500,5 @@ function Alumnos() {
   );
 }
 
-function FilterDropdown({ value, options, isOpen, onToggle, onChange, icon, className = '' }) {
-  const selected = options.find(option => option.value === value) || options[0];
-
-  return (
-    <div data-filter-dropdown className={`relative w-full ${className}`}>
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/15 bg-black/25 px-4 py-3 text-left text-xs font-black text-white shadow-inner shadow-black/20 outline-none transition hover:border-white/30 hover:bg-black/35 focus:border-pink-500/50"
-      >
-        <span className="flex min-w-0 items-center gap-2">
-          {icon && <span className="text-white/40 shrink-0">{icon}</span>}
-          <span className="truncate">{selected?.label}</span>
-        </span>
-        <ChevronDown size={14} className={`shrink-0 text-white/40 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-      {isOpen && (
-        <div className="absolute left-0 top-full z-[999] mt-2 max-h-72 w-full overflow-y-auto rounded-2xl border border-pink-500/25 bg-slate-950 p-1.5 shadow-2xl shadow-black/60">
-          {options.map(option => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => onChange(option.value)}
-              className={`w-full rounded-xl px-3 py-2.5 text-left text-xs font-bold transition ${
-                option.value === value
-                  ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/20'
-                  : 'text-white/75 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
+ 
 export default Alumnos;

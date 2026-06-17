@@ -12,6 +12,7 @@ import AcceptInvitation from './pages/AcceptInvitation';
 import AuthSuccess from './pages/AuthSuccess';
 import Pagos from './pages/Pagos';
 import Reportes from './pages/Reportes';
+import MisGrupos from './pages/MisGrupos';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -41,7 +42,7 @@ function App() {
       {/* Rutas del PROFESOR */}
       <Route element={<PrivateRoute allowedRoles={['profesor']} />}>
         <Route element={<Layout />}>
-          <Route path="/mis-grupos" element={<div className="text-white p-8 text-center"><h2 className="text-2xl font-bold mb-2">Panel del Profesor</h2><p className="text-white/60">Próximamente</p></div>} />
+          <Route path="/mis-grupos" element={<MisGrupos />} />
           <Route path="/asistencia" element={<div className="text-white p-8 text-center"><h2 className="text-2xl font-bold mb-2">Pasar Lista</h2><p className="text-white/60">Próximamente</p></div>} />
           <Route path="/pagos" element={<Pagos />} />
         </Route>

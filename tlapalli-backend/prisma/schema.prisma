@@ -48,9 +48,12 @@ model Alumno {
   padecimientos    String?
   estatusActivo    Boolean       @default(true) @map("estatus_activo")
   fotoUrl          String?       @map("foto_url")
+  instructorId     Int?          @map("instructor_id")
+  instructor       Instructor?   @relation(fields: [instructorId], references: [id])
   inscripciones    Inscripcion[]
   pagos            Pago[]
   documentos       Documento[]
+  grupos           GrupoAlumno[] @relation("GrupoAlumnos")
 }
 
 model Documento {
@@ -87,6 +90,8 @@ model Instructor {
   usuario       Usuario?
   temarioUrl    String?  @map("temario_url")
   curriculumUrl String?  @map("curriculum_url")
+  grupos        Grupo[]
+  alumnos       Alumno[]
 }
 
 model Inscripcion {
@@ -137,4 +142,30 @@ model Reporte {
   nombre    String
   url       String
   creadoEn  DateTime @default(now()) @map("creado_en")
+}
+
+model Grupo {
+  id            Int       @id @default(autoincrement())
+  nombre        String
+  descripcion   String?
+  instructorId  Int       @map("instructor_id")
+  instructor    Instructor @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  creadoEn      DateTime  @default(now()) @map("creado_en")
+  actualizadoEn DateTime  @updatedAt @map("actualizado_en")
+  alumnos       GrupoAlumno[]
+
+  @@index([instructorId])
+}
+
+model GrupoAlumno {
+  id        Int      @id @default(autoincrement())
+  grupoId   Int      @map("grupo_id")
+  alumnoId  Int      @map("alumno_id")
+  grupo     Grupo    @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+  alumno    Alumno   @relation("GrupoAlumnos", fields: [alumnoId], references: [id], onDelete: Cascade)
+  creadoEn  DateTime @default(now()) @map("creado_en")
+
+  @@unique([grupoId, alumnoId])
+  @@index([grupoId])
+  @@index([alumnoId])
 }

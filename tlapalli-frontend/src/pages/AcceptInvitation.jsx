@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Loader2, AlertCircle, UserCheck } from 'lucide-react';
+import { Loader2, AlertCircle, UserCheck, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import api from '../services/api';
 
 const GoogleIcon = ({ className }) => (
@@ -18,6 +18,11 @@ function AcceptInvitation() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [profesor, setProfesor] = useState(null);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   const token = searchParams.get('token');
@@ -45,6 +50,30 @@ function AcceptInvitation() {
   const handleLinkGoogle = () => {
     if (!token) return;
     window.location.href = `http://localhost:3000/auth/google?state=${token}`;
+  };
+
+  const handleCreatePassword = async (e) => {
+    e.preventDefault();
+
+    if (password.length < 8) {
+      alert('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await api.post('/auth/activate-account', { token, password });
+      setSuccess(true);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al activar la cuenta');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -79,15 +108,35 @@ function AcceptInvitation() {
                 <AlertCircle className="w-10 h-10 text-red-400" />
               </motion.div>
               <h2 className="text-2xl font-black text-white mb-4">Enlace Inválido</h2>
-              <p className="text-white/70 text-sm mb-6 leading-relaxed">
-                {error}
-              </p>
+              <p className="text-white/70 text-sm mb-6 leading-relaxed">{error}</p>
               <Link 
                 to="/login" 
                 className="inline-flex items-center gap-2 text-pink-400 hover:text-pink-300 font-bold transition-colors"
               >
                 Volver al inicio de sesión →
               </Link>
+            </div>
+          ) : success ? (
+            <div className="text-center py-8">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30"
+              >
+                <UserCheck className="w-10 h-10 text-emerald-400" />
+              </motion.div>
+              <h2 className="text-2xl font-black text-white mb-4">¡Cuenta Activada!</h2>
+              <p className="text-white/70 text-sm mb-6 leading-relaxed">
+                Tu contraseña ha sido creada. Ya puedes iniciar sesión con tu correo y contraseña.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/login')}
+                className="w-full py-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 rounded-2xl font-black text-white transition-all"
+              >
+                Ir a Iniciar Sesión
+              </motion.button>
             </div>
           ) : (
             <div>
@@ -107,28 +156,88 @@ function AcceptInvitation() {
                 </p>
               </div>
 
-              <div className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-8 space-y-4">
-                <p className="text-sm text-white/70 text-center leading-relaxed">
-                  Para acceder a tu cuenta, debes vincular tu correo institucional o personal de Google. No necesitas crear ninguna contraseña.
-                </p>
-                <div className="bg-black/20 rounded-xl p-3 border border-white/5 text-center">
-                  <span className="text-xs text-white/40 block mb-1">Correo registrado:</span>
-                  <span className="text-sm font-semibold text-pink-300">{profesor?.email}</span>
-                </div>
+              {/* Email registrado */}
+              <div className="bg-black/20 rounded-xl p-3 border border-white/5 text-center mb-6">
+                <span className="text-xs text-white/40 block mb-1">Correo registrado:</span>
+                <span className="text-sm font-semibold text-pink-300">{profesor?.email}</span>
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleLinkGoogle}
-                className="w-full flex items-center justify-center gap-3 h-16 bg-white rounded-2xl font-black text-slate-900 hover:bg-slate-100 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] group"
-              >
-                <GoogleIcon className="w-6 h-6 transition-transform group-hover:scale-110" />
-                Vincular e Iniciar Sesión con Google
-              </motion.button>
+              {/* Tabs: Crear Contraseña / Google */}
+              <div className="space-y-4">
+                {/* Opción 1: Crear Contraseña */}
+                <form onSubmit={handleCreatePassword} className="space-y-4">
+                  <h3 className="text-white font-bold text-sm flex items-center gap-2">
+                    <Lock size={16} className="text-pink-400" /> Crear tu contraseña
+                  </h3>
+
+                  <div className="relative">
+                    <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Contraseña (mínimo 8 caracteres)"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+
+                  <div className="relative">
+                    <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Confirmar contraseña"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
+                    />
+                  </div>
+
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    disabled={saving || !password || !confirmPassword}
+                    className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 disabled:opacity-50 rounded-2xl font-black text-white transition-all"
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" /> Activando...
+                      </>
+                    ) : (
+                      'Activar Cuenta'
+                    )}
+                  </motion.button>
+                </form>
+
+                {/* Separador */}
+                <div className="relative flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/10" />
+                  </div>
+                  <span className="relative bg-transparent px-4 text-xs text-white/30 font-bold">O también</span>
+                </div>
+
+                {/* Opción 2: Vincular Google */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleLinkGoogle}
+                  className="w-full flex items-center justify-center gap-3 h-14 bg-white rounded-2xl font-black text-slate-900 hover:bg-slate-100 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] group"
+                >
+                  <GoogleIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+                  Vincular con Google
+                </motion.button>
+              </div>
 
               <p className="text-[10px] text-center text-white/30 mt-6">
-                Al hacer clic, serás redirigido a Google para autorizar la vinculación segura de tu cuenta.
+                Elige crear contraseña o vincula tu cuenta de Google.
               </p>
             </div>
           )}

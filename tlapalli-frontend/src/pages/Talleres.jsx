@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import TallerForm from '../components/TallerForm';
-import { Plus, Search, Edit3, Trash2, Calendar, AlertTriangle, CheckCircle, Eye, Users, DollarSign, TrendingUp, Palette, Music, Dumbbell, BookOpen, Laptop, Briefcase, Guitar, Piano, Drama, Mic, Heart, Sparkles, Power } from 'lucide-react';
+import { Plus, Edit3, Trash2, Calendar, Eye, Users, DollarSign, TrendingUp, Palette, Music, Dumbbell, BookOpen, Laptop, Briefcase, Guitar, Piano, Drama, Mic, Heart, Sparkles, Power } from 'lucide-react';
 
 // Mapea el nombre del taller a un ícono y color representativo
 const getTallerIcon = (nombreTaller) => {
@@ -44,7 +44,10 @@ const getTallerIcon = (nombreTaller) => {
   return { icon: Briefcase, color: 'text-orange-400', bg: 'bg-orange-500/10' };
 };
 import ConfirmModal from '../components/ConfirmModal';
-import { AnimatePresence, motion } from 'framer-motion';
+import Toast from '../components/Toast';
+import StatCard from '../components/StatCard';
+import SearchBar from '../components/SearchBar';
+import Pagination from '../components/Pagination';
 
 function Talleres() {
   const [talleres, setTalleres] = useState([]);
@@ -213,38 +216,20 @@ function Talleres() {
 
       {/* KPIs Resumen */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Talleres', value: totalTalleres, icon: Calendar, color: 'bg-white/15 border-white/25 text-white hover:shadow-white/20' },
-          { label: 'Alumnos Inscritos', value: totalAlumnos, icon: Users, color: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300 hover:shadow-emerald-500/20' },
-          { label: 'Talleres Llenos', value: talleresLlenos, icon: TrendingUp, color: 'bg-rose-500/20 border-rose-500/30 text-rose-300 hover:shadow-rose-500/20' },
-          { label: 'Ingresos Reales 💰', value: `$${ingresosReales.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: DollarSign, color: 'bg-amber-500/20 border-amber-500/30 text-amber-300 hover:shadow-amber-500/20' },
-        ].map(kpi => (
-          <motion.div 
-            key={kpi.label}
-            whileHover={{ scale: 1.02 }}
-            className={`rounded-2xl p-4 border backdrop-blur-md ${kpi.color} flex items-center gap-3 shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative group`}
-          >
-            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all" />
-            <kpi.icon size={22} className="opacity-90 shrink-0" />
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{kpi.label}</p>
-              <p className="text-lg md:text-xl font-black tracking-tighter truncate max-w-[140px] md:max-w-none">{kpi.value}</p>
-            </div>
-          </motion.div>
-        ))}
+        <StatCard icon={Calendar} label="Total Talleres" value={totalTalleres} color="white" />
+        <StatCard icon={Users} label="Alumnos Inscritos" value={totalAlumnos} color="emerald" />
+        <StatCard icon={TrendingUp} label="Talleres Llenos" value={talleresLlenos} color="rose" />
+        <StatCard icon={DollarSign} label="Ingresos Reales 💰" value={`$${ingresosReales.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} color="amber" />
       </div>
 
       {/* Barra de Controles Unificada en Glassmorphic */}
       <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5 mt-2">
-        <div className="relative flex-1 sm:max-w-xl w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-pink-400" />
-          <input
-            className="w-full rounded-2xl border border-white/15 bg-black/25 pl-12 pr-5 py-3 text-sm text-white shadow-inner shadow-black/20 placeholder-white/45 transition-all hover:border-white/30 hover:bg-black/35 focus:border-pink-400/70 focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-pink-500/25"
-            placeholder="Buscar taller..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <SearchBar
+          value={search}
+          onChange={(v) => { setSearch(v); }}
+          placeholder="Buscar taller..."
+          onClear={() => setCurrentPage(1)}
+        />
 
         <button 
           onClick={handleNew} 
@@ -376,32 +361,14 @@ function Talleres() {
         </table>
       </div>
 
-      {!loading && filtered.length > talleresPerPage && (
-        <div className="mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-slate-950/80 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-md">
-          <p className="text-xs font-bold uppercase tracking-wider text-white/80">
-            Mostrando {startIndex + 1}-{Math.min(startIndex + talleresPerPage, filtered.length)} de {filtered.length} talleres
-          </p>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
-              disabled={currentPage === 1}
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
-            >
-              Anterior
-            </button>
-            <span className="min-w-28 text-center text-xs font-black uppercase tracking-wider text-white/80">
-              Página <span className="text-emerald-400">{currentPage}</span> de {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
-              disabled={currentPage === totalPages}
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startIndex={startIndex}
+        itemsPerPage={talleresPerPage}
+        filteredLength={filtered.length}
+        onPageChange={setCurrentPage}
+      />
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}
              title={editTaller ? 'Editar Taller' : 'Nuevo Taller'}
@@ -571,33 +538,7 @@ function Talleres() {
       />
 
       {/* Toast Notification */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, x: -80 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 80 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
-            className={`fixed right-6 top-6 z-200 flex items-center gap-3 rounded-2xl bg-slate-950/90 px-5 py-4 text-white shadow-2xl backdrop-blur-xl ${
-              toast.type === 'delete' || toast.type === 'error'
-                ? 'border border-rose-500/25 shadow-rose-500/10'
-                : 'border border-emerald-500/20 shadow-emerald-500/10'
-            }`}
-          >
-            <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${
-              toast.type === 'delete' || toast.type === 'error'
-                ? 'border-rose-500/25 bg-rose-500/10 text-rose-400'
-                : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
-            }`}>
-              {toast.type === 'delete' || toast.type === 'error' ? <AlertTriangle size={22} /> : <CheckCircle size={22} />}
-            </div>
-            <div>
-              <p className="text-sm font-black">{toast.title}</p>
-              <p className="text-xs font-medium text-white/50">{toast.message}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast toast={toast} />
     </div>
   );
 }

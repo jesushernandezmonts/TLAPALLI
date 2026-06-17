@@ -36,15 +36,29 @@ async function main() {
     },
   });
 
-  // Profesor de prueba
+   // Crea instructor para Juan García
+  const instructor = await prisma.instructor.upsert({
+    where: { email: 'juan@email.com' },
+    update: {},
+    create: {
+      nombre: 'Juan García',
+      email: 'juan@email.com',
+      telefono: '5551234567',
+      estado: 'Activo',
+      activo: true,
+    },
+  });
+
+  // Profesor de prueba (vinculado a instructor)
   await prisma.usuario.upsert({
     where: { email: 'juan@email.com' },
-    update: { passwordHash: profHash, nombre: 'Juan García' },
+    update: { passwordHash: profHash, nombre: 'Juan García', instructorId: instructor.id },
     create: {
       nombre: 'Juan García',
       email: 'juan@email.com',
       passwordHash: profHash,
       rol: 'profesor',
+      instructorId: instructor.id,
     },
   });
 

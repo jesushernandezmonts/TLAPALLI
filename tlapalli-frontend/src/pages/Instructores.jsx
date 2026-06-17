@@ -2,10 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import InstructorForm from '../components/InstructorForm';
-import { Plus, Search, Edit3, Trash2, UserSquare2, Palette, Mail, Send, Power, RefreshCw, AlertTriangle, CheckCircle, X, ChevronDown, Loader2, Users, CheckCircle2, Clock, Ban, Filter, Eye, ArrowUpDown, ArrowUp, ArrowDown, FileText, ExternalLink } from 'lucide-react';
+import { Plus, Edit3, Trash2, UserSquare2, Palette, Mail, Send, Power, RefreshCw, Loader2, Users, CheckCircle2, Clock, Ban, Eye, FileText, ExternalLink, Filter } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
-import { AnimatePresence, motion } from 'framer-motion';
 import DocumentViewerModal from '../components/DocumentViewerModal';
+import Toast from '../components/Toast';
+import StatCard from '../components/StatCard';
+import SearchBar from '../components/SearchBar';
+import Pagination from '../components/Pagination';
+import StatusBadge from '../components/StatusBadge';
+import FilterDropdown from '../components/FilterDropdown';
 
 function Instructores() {
   const [instructores, setInstructores] = useState([]);
@@ -267,78 +272,38 @@ function Instructores() {
 
       {/* KPIs Resumen */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Total', value: instructores.length, icon: Users, color: 'bg-white/15 border-white/25 text-white hover:shadow-white/20' },
-          { label: 'Activos', value: instructores.filter(i => i.estado === 'Activo').length, icon: CheckCircle2, color: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300 hover:shadow-emerald-500/20' },
-          { label: 'Pendientes', value: instructores.filter(i => i.estado === 'Pendiente').length, icon: Clock, color: 'bg-amber-500/20 border-amber-500/30 text-amber-300 hover:shadow-amber-500/20' },
-          { label: 'Inactivos', value: instructores.filter(i => i.estado === 'Inactivo').length, icon: Ban, color: 'bg-rose-500/20 border-rose-500/30 text-rose-300 hover:shadow-rose-500/20' },
-        ].map(kpi => (
-          <motion.div 
-            key={kpi.label}
-            whileHover={{ scale: 1.02 }}
-            className={`rounded-2xl p-4 border backdrop-blur-md ${kpi.color} flex items-center gap-3 shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative group`}
-          >
-            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all" />
-            <kpi.icon size={22} className="opacity-90 shrink-0" />
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{kpi.label}</p>
-              <p className="text-xl font-black tracking-tighter">{kpi.value}</p>
-            </div>
-          </motion.div>
-        ))}
+        <StatCard icon={Users} label="Total" value={instructores.length} color="white" />
+        <StatCard icon={CheckCircle2} label="Activos" value={instructores.filter(i => i.estado === 'Activo').length} color="emerald" />
+        <StatCard icon={Clock} label="Pendientes" value={instructores.filter(i => i.estado === 'Pendiente').length} color="amber" />
+        <StatCard icon={Ban} label="Inactivos" value={instructores.filter(i => i.estado === 'Inactivo').length} color="rose" />
       </div>
 
       {/* Barra de Controles Unificada en Glassmorphic */}
       <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5 mt-2">
-        <div className="relative flex-1 sm:max-w-xl w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-pink-400" />
-          <input
-            className="w-full rounded-2xl border border-white/15 bg-black/25 pl-12 pr-5 py-3 text-sm text-white shadow-inner shadow-black/20 placeholder-white/45 transition-all hover:border-white/30 hover:bg-black/35 focus:border-pink-400/70 focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-pink-500/25"
-            placeholder="Buscar por nombre, teléfono o taller..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por nombre, teléfono o taller..."
+          onClear={() => setCurrentPage(1)}
+        />
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           {/* Filtro por Estado */}
           <div className="relative" ref={dropdownRef}>
-            <button
-              type="button"
-              onClick={() => setOpenDropdown(!openDropdown)}
-              className="w-full sm:w-auto flex items-center justify-between gap-4 rounded-2xl border border-white/15 bg-black/25 px-5 py-3 text-left text-sm font-medium text-white shadow-inner shadow-black/20 transition hover:border-white/30 hover:bg-black/35 focus:outline-none focus:ring-2 focus:ring-pink-500/25 min-w-44"
-            >
-              <span className="flex items-center gap-2">
-                <Filter size={16} strokeWidth={1.5} className="text-white/50" />
-                <span className="truncate">
-                  {estadoFilter === 'todos' ? 'Todos los Estados' : estadoFilter}
-                </span>
-              </span>
-              <ChevronDown size={14} strokeWidth={1.5} className={`shrink-0 text-white/40 transition-transform ${openDropdown ? 'rotate-180' : ''}`} />
-            </button>
-            {openDropdown && (
-              <div className="absolute left-0 sm:right-0 sm:left-auto top-full z-999 mt-2 w-full sm:w-48 overflow-hidden rounded-2xl border border-pink-500/25 bg-slate-950 p-1.5 shadow-2xl shadow-black/60 backdrop-blur-xl">
-                {[
-                  { value: 'todos', label: 'Todos' },
-                  { value: 'Activo', label: 'Activos' },
-                  { value: 'Pendiente', label: 'Pendientes' },
-                  { value: 'Inactivo', label: 'Inactivos' },
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => { setEstadoFilter(opt.value); setOpenDropdown(false); setCurrentPage(1); }}
-                    className={`w-full text-left px-4 py-2 text-xs font-bold rounded-xl transition ${
-                      estadoFilter === opt.value 
-                        ? 'bg-pink-600 text-white' 
-                        : 'text-white/70 hover:bg-white/5 hover:text-white'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
+            <FilterDropdown
+              icon={<Filter size={16} />}
+              value={estadoFilter}
+              options={[
+                { value: 'todos', label: 'Todos los Estados' },
+                { value: 'Activo', label: 'Activos' },
+                { value: 'Pendiente', label: 'Pendientes' },
+                { value: 'Inactivo', label: 'Inactivos' },
+              ]}
+              isOpen={openDropdown}
+              onToggle={() => setOpenDropdown(!openDropdown)}
+              onChange={(value) => { setEstadoFilter(value); setOpenDropdown(false); setCurrentPage(1); }}
+              className="sm:w-48"
+            />
           </div>
 
           {/* Botón Nuevo Instructor */}
@@ -408,9 +373,7 @@ function Instructores() {
                       </div>
                     </td>
                     <td data-label="Estado" className="text-center">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${badge.classes}`}>
-                        {badge.label}
-                      </span>
+                      <StatusBadge status={i.estado.toLowerCase()} label={i.estado} />
                     </td>
                     <td data-label="Acciones" className="text-right">
                       <div className="flex justify-end gap-1 sm:gap-2">
@@ -466,32 +429,14 @@ function Instructores() {
         </table>
       </div>
 
-      {!loading && filtered.length > instructoresPerPage && (
-        <div className="mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-slate-950/80 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-md">
-          <p className="text-xs font-bold uppercase tracking-wider text-white/80">
-            Mostrando {startIndex + 1}-{Math.min(startIndex + instructoresPerPage, filtered.length)} de {filtered.length} instructores
-          </p>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
-              disabled={currentPage === 1}
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
-            >
-              Anterior
-            </button>
-            <span className="min-w-28 text-center text-xs font-black uppercase tracking-wider text-white/80">
-              Página <span className="text-emerald-400">{currentPage}</span> de {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
-              disabled={currentPage === totalPages}
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startIndex={startIndex}
+        itemsPerPage={instructoresPerPage}
+        filteredLength={filtered.length}
+        onPageChange={setCurrentPage}
+      />
 
       {/* ConfirmModal */}
       <ConfirmModal
@@ -505,33 +450,7 @@ function Instructores() {
       />
 
       {/* Toast Notification */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, x: -80 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 80 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
-            className={`fixed right-6 top-6 z-200 flex items-center gap-3 rounded-2xl bg-slate-950/90 px-5 py-4 text-white shadow-2xl backdrop-blur-xl ${
-              toast.type === 'delete' || toast.type === 'error'
-                ? 'border border-rose-500/25 shadow-rose-500/10'
-                : 'border border-emerald-500/20 shadow-emerald-500/10'
-            }`}
-          >
-            <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${
-              toast.type === 'delete' || toast.type === 'error'
-                ? 'border-rose-500/25 bg-rose-500/10 text-rose-400'
-                : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
-            }`}>
-              {toast.type === 'delete' || toast.type === 'error' ? <AlertTriangle size={22} /> : <CheckCircle size={22} />}
-            </div>
-            <div>
-              <p className="text-sm font-black">{toast.title}</p>
-              <p className="text-xs font-medium text-white/50">{toast.message}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast toast={toast} />
 
       {/* Modal Detalle Instructor */}
       {detailInstructor && (
