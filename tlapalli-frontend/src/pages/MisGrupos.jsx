@@ -363,7 +363,7 @@ export default function MisGrupos() {
         {modalType === 'grupo' ? (
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Nombre *</label>
+              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Nombre</label>
               <input
                 type="text"
                 placeholder="Nombre del grupo"
@@ -404,7 +404,7 @@ export default function MisGrupos() {
         ) : (
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Nombre *</label>
+              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Nombre</label>
               <input
                 type="text"
                 placeholder="Nombre"
@@ -414,7 +414,7 @@ export default function MisGrupos() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Apellido Paterno *</label>
+              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Apellido Paterno</label>
               <input
                 type="text"
                 placeholder="Apellido Paterno"
@@ -424,7 +424,7 @@ export default function MisGrupos() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Apellido Materno *</label>
+              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Apellido Materno</label>
               <input
                 type="text"
                 placeholder="Apellido Materno"
@@ -435,7 +435,7 @@ export default function MisGrupos() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Teléfono *</label>
+              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Teléfono</label>
               <input
                 type="text"
                 placeholder="Teléfono"
