@@ -34,6 +34,14 @@ export default function Asistencia() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
+  const [isPastDate, setIsPastDate] = useState(false);
+
+  const checkIsPastDate = (dateStr) => {
+    const today = new Date();
+    const todayStart = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+    const selectedDate = new Date(dateStr + 'T00:00:00.000Z');
+    return selectedDate.getTime() < todayStart.getTime();
+  };
 
   const showToast = (title, message = '', type = 'success') => {
     setToast({ title, message, type });
@@ -92,6 +100,7 @@ export default function Asistencia() {
 
   const handleFechaChange = async (newFecha) => {
     setFecha(newFecha);
+    setIsPastDate(checkIsPastDate(newFecha));
     if (!selectedGrupoId) return;
     try {
       setLoadingAlumnos(true);
@@ -282,23 +291,30 @@ export default function Asistencia() {
                           Historial
                           {showHistorial ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                         </button>
-                        <motion.button
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
-                          onClick={handleSave}
-                          disabled={saving || !hasChanges()}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white font-bold text-sm transition ${
-                            hasChanges()
-                              ? `bg-gradient-to-r ${colors.from} ${colors.to} hover:brightness-110 shadow-lg`
-                              : 'bg-white/5 text-white/30 cursor-not-allowed'
-                          }`}
-                        >
-                          {saving ? (
-                            <><Loader2 size={14} className="animate-spin" /> Guardando...</>
-                          ) : (
-                            <><Save size={14} /> {hasChanges() ? 'Guardar Cambios' : 'Guardado'}</>
-                          )}
-                        </motion.button>
+                        {isPastDate ? (
+                          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold">
+                            <AlertCircle size={14} />
+                            Solo lectura — Fecha pasada
+                          </div>
+                        ) : (
+                          <motion.button
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={handleSave}
+                            disabled={saving || !hasChanges()}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white font-bold text-sm transition ${
+                              hasChanges()
+                                ? `bg-gradient-to-r ${colors.from} ${colors.to} hover:brightness-110 shadow-lg`
+                                : 'bg-white/5 text-white/30 cursor-not-allowed'
+                            }`}
+                          >
+                            {saving ? (
+                              <><Loader2 size={14} className="animate-spin" /> Guardando...</>
+                            ) : (
+                              <><Save size={14} /> {hasChanges() ? 'Guardar Cambios' : 'Guardado'}</>
+                            )}
+                          </motion.button>
+                        )}
                       </div>
                     </div>
 
@@ -399,14 +415,17 @@ export default function Asistencia() {
 
                                   {/* Asistencia */}
                                   <td className="px-4 py-3 text-center">
-                                    <label className="inline-flex items-center justify-center cursor-pointer">
+                                    <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
                                       <input
                                         type="checkbox"
                                         checked={estado === 'asistencia'}
-                                        onChange={() => setEstado(ga.id, 'asistencia')}
+                                        onChange={() => !isPastDate && setEstado(ga.id, 'asistencia')}
+                                        disabled={isPastDate}
                                         className="sr-only peer"
                                       />
                                       <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                                        isPastDate ? 'opacity-60 cursor-not-allowed' : ''
+                                      } ${
                                         estado === 'asistencia'
                                           ? 'bg-emerald-500 border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.35)]'
                                           : 'border-white/20 hover:border-emerald-400/50 bg-white/5'
@@ -420,14 +439,17 @@ export default function Asistencia() {
 
                                   {/* Falta */}
                                   <td className="px-4 py-3 text-center">
-                                    <label className="inline-flex items-center justify-center cursor-pointer">
+                                    <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
                                       <input
                                         type="checkbox"
                                         checked={estado === 'falta'}
-                                        onChange={() => setEstado(ga.id, 'falta')}
+                                        onChange={() => !isPastDate && setEstado(ga.id, 'falta')}
+                                        disabled={isPastDate}
                                         className="sr-only peer"
                                       />
                                       <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                                        isPastDate ? 'opacity-60 cursor-not-allowed' : ''
+                                      } ${
                                         estado === 'falta'
                                           ? 'bg-red-500 border-red-400 shadow-[0_0_12px_rgba(248,113,113,0.35)]'
                                           : 'border-white/20 hover:border-red-400/50 bg-white/5'

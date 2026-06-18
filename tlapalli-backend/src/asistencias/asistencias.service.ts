@@ -57,6 +57,16 @@ export class AsistenciasService {
     // Convertir fecha a Date (inicio del día)
     const fechaDate = new Date(fecha + 'T00:00:00.000Z');
 
+    // Validar ventana de edición: solo permitir modificar asistencias del día actual o futuro
+    const now = new Date();
+    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+    if (fechaDate.getTime() < todayStart.getTime()) {
+      throw new ForbiddenException(
+        'No puedes modificar asistencias de días anteriores. Solo puedes editar asistencias del día de hoy.',
+      );
+    }
+
     // Usar transacción para atomicidad
     return this.prisma.$transaction(async (tx) => {
       // Eliminar asistencias existentes para este grupo y fecha
