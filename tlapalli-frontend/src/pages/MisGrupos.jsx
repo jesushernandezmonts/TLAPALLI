@@ -252,7 +252,7 @@ export default function MisGrupos() {
       <SearchBar
         value={busqueda}
         onChange={setBusqueda}
-        placeholder="Buscar grupos..."
+        placeholder="Buscar grupo"
       />
 
       {/* Grid de Tarjetas de Grupos */}
@@ -262,143 +262,162 @@ export default function MisGrupos() {
           <p className="text-white/50">No tienes grupos aún</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {gruposFiltrados.map((grupo) => {
-            const colors = getColorForGrupo(grupo.id);
-            const initials = grupo.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-            const totalAlumnos = alumnosGrupo[grupo.id]?.length;
-            const isExpanded = expandedGrupo === grupo.id;
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {gruposFiltrados.map((grupo) => {
+              const colors = getColorForGrupo(grupo.id);
+              const initials = grupo.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+              const totalAlumnos = alumnosGrupo[grupo.id]?.length;
+              const isExpanded = expandedGrupo === grupo.id;
 
-            return (
-              <motion.div
-                key={grupo.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ y: -2 }}
-                className={`relative bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border ${colors.border} rounded-2xl overflow-hidden transition-all hover:shadow-xl ${colors.glow} group`}
-              >
-                {/* Accent bar top */}
-                <div className={`h-1 bg-gradient-to-r ${colors.from} ${colors.to}`} />
+              return (
+                <motion.div
+                  key={grupo.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ y: -2 }}
+                  className={`relative bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border ${colors.border} rounded-2xl overflow-hidden transition-all hover:shadow-xl ${colors.glow} group ${isExpanded ? 'ring-1 ring-white/20' : ''}`}
+                >
+                  {/* Accent bar top */}
+                  <div className={`h-1 bg-gradient-to-r ${colors.from} ${colors.to}`} />
 
-                {/* Card body */}
-                <div className="p-5">
-                  <div className="flex items-start gap-4">
-                    {/* Avatar con inicial */}
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                      <span className="text-white font-black text-sm">{initials}</span>
-                    </div>
+                  {/* Card body */}
+                  <div className="p-5">
+                    <div className="flex items-start gap-4">
+                      {/* Avatar con inicial */}
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                        <span className="text-white font-black text-sm">{initials}</span>
+                      </div>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-black text-white text-lg leading-tight truncate">{grupo.nombre}</h3>
-                      {grupo.descripcion && (
-                        <p className="text-white/50 text-xs mt-1 line-clamp-2">{grupo.descripcion}</p>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-1.5 flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => { e.stopPropagation(); handleOpenModal('grupo', grupo); }}
-                        className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition"
-                      >
-                        <Edit3 size={13} />
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => { e.stopPropagation(); handleDeleteGrupo(grupo.id); }}
-                        className="p-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg transition"
-                      >
-                        <Trash2 size={13} />
-                      </motion.button>
-                    </div>
-                  </div>
-
-                  {/* Bottom: Alumnos count + expand */}
-                  <div className="mt-4 flex items-center justify-between">
-                    <button
-                      onClick={() => handleExpandGrupo(grupo.id)}
-                      className={`flex items-center gap-2 px-3 py-1.5 ${colors.bg} ${colors.text} rounded-lg text-xs font-bold transition hover:brightness-125`}
-                    >
-                      <Users size={13} />
-                      {totalAlumnos !== undefined ? `${totalAlumnos} alumno${totalAlumnos !== 1 ? 's' : ''}` : 'Ver alumnos'}
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => { setExpandedGrupo(grupo.id); if (!alumnosGrupo[grupo.id]) fetchAlumnosGrupo(grupo.id); handleOpenModal('alumno'); }}
-                        className={`flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r ${colors.from} ${colors.to} text-white rounded-lg text-xs font-bold transition shadow-md`}
-                      >
-                        <Plus size={12} /> Agregar
-                      </motion.button>
-                      <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} className="cursor-pointer" onClick={() => handleExpandGrupo(grupo.id)}>
-                        <ChevronDown size={16} className="text-white/40 hover:text-white/70 transition" />
-                      </motion.div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contenido Expandido — Lista de alumnos */}
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="border-t border-white/5"
-                    >
-                      <div className="p-5 pt-4 space-y-3">
-                        <h4 className="font-bold text-white/70 text-xs uppercase tracking-wider flex items-center gap-2">
-                          <GraduationCap size={14} /> Alumnos del grupo
-                        </h4>
-
-                        {totalAlumnos === 0 ? (
-                          <p className="text-white/30 text-sm italic py-2">Sin alumnos registrados</p>
-                        ) : (
-                          <div className="space-y-2">
-                            {alumnosGrupo[grupo.id]?.map(alumno => (
-                              <motion.div
-                                key={alumno.id}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="flex items-center justify-between bg-white/5 hover:bg-white/8 border border-white/5 rounded-xl px-4 py-3 transition"
-                              >
-                                <div className="flex items-center gap-3 min-w-0">
-                                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0`}>
-                                    <span className="text-white font-bold text-[10px]">
-                                      {alumno.nombre?.[0]}{alumno.apellidoPaterno?.[0]}
-                                    </span>
-                                  </div>
-                                  <div className="min-w-0">
-                                    <p className="font-semibold text-white text-sm truncate">
-                                      {alumno.nombre} {alumno.apellidoPaterno} {alumno.apellidoMaterno}
-                                    </p>
-                                    {alumno.telefono && <p className="text-xs text-white/40 mt-0.5">{alumno.telefono}</p>}
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={() => handleDeleteAlumno(alumno.id)}
-                                  className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition flex-shrink-0"
-                                >
-                                  <Trash2 size={12} />
-                                </button>
-                              </motion.div>
-                            ))}
-                          </div>
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-black text-white text-lg leading-tight truncate">{grupo.nombre}</h3>
+                        {grupo.descripcion && (
+                          <p className="text-white/50 text-xs mt-1 line-clamp-2">{grupo.descripcion}</p>
                         )}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-        </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1.5 flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={(e) => { e.stopPropagation(); handleOpenModal('grupo', grupo); }}
+                          className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition"
+                        >
+                          <Edit3 size={13} />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={(e) => { e.stopPropagation(); handleDeleteGrupo(grupo.id); }}
+                          className="p-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg transition"
+                        >
+                          <Trash2 size={13} />
+                        </motion.button>
+                      </div>
+                    </div>
+
+                    {/* Bottom: Alumnos count + expand */}
+                    <div className="mt-4 flex items-center justify-between">
+                      <button
+                        onClick={() => handleExpandGrupo(grupo.id)}
+                        className={`flex items-center gap-2 px-3 py-1.5 ${colors.bg} ${colors.text} rounded-lg text-xs font-bold transition hover:brightness-125`}
+                      >
+                        <Users size={13} />
+                        {totalAlumnos !== undefined ? `${totalAlumnos} alumno${totalAlumnos !== 1 ? 's' : ''}` : 'Ver alumnos'}
+                      </button>
+
+                      <div className="flex items-center gap-2">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => { setExpandedGrupo(grupo.id); if (!alumnosGrupo[grupo.id]) fetchAlumnosGrupo(grupo.id); handleOpenModal('alumno'); }}
+                          className={`flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r ${colors.from} ${colors.to} text-white rounded-lg text-xs font-bold transition shadow-md`}
+                        >
+                          <Plus size={12} /> Agregar
+                        </motion.button>
+                        <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} className="cursor-pointer" onClick={() => handleExpandGrupo(grupo.id)}>
+                          <ChevronDown size={16} className="text-white/40 hover:text-white/70 transition" />
+                        </motion.div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Panel expandido debajo del grid — full width */}
+          <AnimatePresence>
+            {expandedGrupo && gruposFiltrados.find(g => g.id === expandedGrupo) && (() => {
+              const grupo = gruposFiltrados.find(g => g.id === expandedGrupo);
+              const colors = getColorForGrupo(grupo.id);
+              return (
+                <motion.div
+                  key={`expanded-${expandedGrupo}`}
+                  initial={{ opacity: 0, y: -10, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: 'auto' }}
+                  exit={{ opacity: 0, y: -10, height: 0 }}
+                  className={`bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border ${colors.border} rounded-2xl overflow-hidden`}
+                >
+                  <div className={`h-1 bg-gradient-to-r ${colors.from} ${colors.to}`} />
+                  <div className="p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-black text-white flex items-center gap-2">
+                        <GraduationCap size={18} /> {grupo.nombre}
+                        <span className={`text-xs font-bold ${colors.text} ${colors.bg} px-2 py-0.5 rounded-full ml-1`}>
+                          {alumnosGrupo[expandedGrupo]?.length || 0} alumnos
+                        </span>
+                      </h4>
+                      <button
+                        onClick={() => handleOpenModal('alumno')}
+                        className={`flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r ${colors.from} ${colors.to} text-white rounded-lg text-xs font-bold transition shadow-md`}
+                      >
+                        <Plus size={12} /> Agregar Alumno
+                      </button>
+                    </div>
+
+                    {alumnosGrupo[expandedGrupo]?.length === 0 ? (
+                      <p className="text-white/30 text-sm italic py-4 text-center">Sin alumnos registrados en este grupo</p>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {alumnosGrupo[expandedGrupo]?.map(alumno => (
+                          <motion.div
+                            key={alumno.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex items-center justify-between bg-white/5 hover:bg-white/8 border border-white/5 rounded-xl px-4 py-3 transition"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0`}>
+                                <span className="text-white font-bold text-[10px]">
+                                  {alumno.nombre?.[0]}{alumno.apellidoPaterno?.[0]}
+                                </span>
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-semibold text-white text-sm truncate">
+                                  {alumno.nombre} {alumno.apellidoPaterno} {alumno.apellidoMaterno}
+                                </p>
+                                {alumno.telefono && <p className="text-xs text-white/40 mt-0.5">{alumno.telefono}</p>}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteAlumno(alumno.id)}
+                              className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition flex-shrink-0"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })()}
+          </AnimatePresence>
+        </>
       )}
 
       {/* ConfirmModal para eliminaciones */}
