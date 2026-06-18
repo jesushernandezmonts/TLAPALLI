@@ -106,12 +106,16 @@ model Inscripcion {
 }
 
 model Asistencia {
-  id             Int         @id @default(autoincrement())
-  inscripcionId  Int         @map("inscripcion_id")
-  fecha          DateTime    @default(now())
-  estado         String      // asistencia, falta, retardo, justificada
+  id             Int          @id @default(autoincrement())
+  inscripcionId  Int?         @map("inscripcion_id")
+  fecha          DateTime     @default(now())
+  estado         String       // asistencia, falta
   observaciones  String?
-  inscripcion    Inscripcion @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
+  inscripcion    Inscripcion? @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
+
+  // Relación opcional con GrupoAlumno para pasar lista por grupos
+  grupoAlumnoId  Int?         @map("grupo_alumno_id")
+  grupoAlumno    GrupoAlumno? @relation(fields: [grupoAlumnoId], references: [id], onDelete: Cascade)
 }
 
 model Pago {
@@ -158,12 +162,13 @@ model Grupo {
 }
 
 model GrupoAlumno {
-  id        Int      @id @default(autoincrement())
-  grupoId   Int      @map("grupo_id")
-  alumnoId  Int      @map("alumno_id")
-  grupo     Grupo    @relation(fields: [grupoId], references: [id], onDelete: Cascade)
-  alumno    Alumno   @relation("GrupoAlumnos", fields: [alumnoId], references: [id], onDelete: Cascade)
-  creadoEn  DateTime @default(now()) @map("creado_en")
+  id          Int         @id @default(autoincrement())
+  grupoId     Int         @map("grupo_id")
+  alumnoId    Int         @map("alumno_id")
+  grupo       Grupo       @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+  alumno      Alumno      @relation("GrupoAlumnos", fields: [alumnoId], references: [id], onDelete: Cascade)
+  creadoEn    DateTime    @default(now()) @map("creado_en")
+  asistencias Asistencia[]
 
   @@unique([grupoId, alumnoId])
   @@index([grupoId])

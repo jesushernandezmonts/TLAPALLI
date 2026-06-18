@@ -13,6 +13,7 @@ import { PagosModule } from './pagos/pagos.module';
 import { ActividadesModule } from './actividades/actividades.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { GruposModule } from './grupos/grupos.module';
+import { AsistenciasModule } from './asistencias/asistencias.module';
 
 
 @Module({
@@ -31,6 +32,7 @@ import { GruposModule } from './grupos/grupos.module';
     ActividadesModule,
     ReportesModule,
     GruposModule,
+    AsistenciasModule,
   ],
 })
 export class AppModule {}
