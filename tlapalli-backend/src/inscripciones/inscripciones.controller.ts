@@ -1,9 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { InscripcionesService } from './inscripciones.service';
 import { CreateInscripcionDto } from './dto/create-inscripcion.dto';
 import { UpdateInscripcionDto } from './dto/update-inscripcion.dto';
+import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
+import { RolesGuard } from '../auth/strategies/roles.guard';
+import { Roles } from '../auth/strategies/roles.decorator';
 
 @Controller('inscripciones')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 export class InscripcionesController {
   constructor(private readonly inscripcionesService: InscripcionesService) {}
 

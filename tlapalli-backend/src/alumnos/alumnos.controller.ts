@@ -1,12 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { AlumnosService } from './alumnos.service';
 import { CreateAlumnoDto } from './dto/create-alumno.dto';
 import { UpdateAlumnoDto } from './dto/update-alumno.dto';
-
+import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
+import { RolesGuard } from '../auth/strategies/roles.guard';
+import { Roles } from '../auth/strategies/roles.decorator';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('Alumnos')
 @Controller('alumnos')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 export class AlumnosController {
   constructor(private readonly alumnosService: AlumnosService) {}
 

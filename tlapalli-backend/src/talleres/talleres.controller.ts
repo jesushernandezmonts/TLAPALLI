@@ -1,11 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { TalleresService } from './talleres.service';
 import { CreateTallerDto } from './dto/create-taller.dto';
 import { UpdateTallerDto } from './dto/update-taller.dto';
+import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
+import { RolesGuard } from '../auth/strategies/roles.guard';
+import { Roles } from '../auth/strategies/roles.decorator';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('Talleres')
 @Controller('talleres')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 export class TalleresController {
   constructor(private readonly talleresService: TalleresService) {}
 

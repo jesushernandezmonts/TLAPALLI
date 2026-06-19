@@ -42,6 +42,17 @@ export class GruposController {
     return this.gruposService.findAll(instructorId);
   }
 
+  // ===== ALUMNOS DISPONIBLES (debe ir ANTES de :id) =====
+
+  @Get('alumnos-disponibles')
+  findAlumnosDisponibles(@Request() req) {
+    const instructorId = req.user.instructorId;
+    if (!instructorId) {
+      throw new Error('Usuario no es instructor');
+    }
+    return this.gruposService.findAlumnosByInstructor(instructorId);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const instructorId = req.user.instructorId;

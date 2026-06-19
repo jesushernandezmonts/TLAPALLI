@@ -15,7 +15,7 @@ export class PagosService {
         alumnoId: dto.alumnoId,
         monto: dto.monto,
         mesCorrespondiente: dto.mesCorrespondiente,
-        metodoPago: dto.metodoPago || 'efectivo',
+        metodoPago: 'efectivo',
         registradoPor: usuarioId,
       },
       include: {

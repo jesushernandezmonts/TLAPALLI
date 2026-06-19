@@ -24,6 +24,7 @@ const getColorForGrupo = (id) => GRUPO_COLORS[id % GRUPO_COLORS.length];
 
 export default function MisGrupos() {
   const [grupos, setGrupos] = useState([]);
+  const [alumnosDisponibles, setAlumnosDisponibles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busqueda, setBusqueda] = useState('');
@@ -33,7 +34,8 @@ export default function MisGrupos() {
   const [modalType, setModalType] = useState('grupo');
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ nombre: '', descripcion: '' });
-  const [alumnoForm, setAlumnoForm] = useState({ nombre: '', apellidoPaterno: '', apellidoMaterno: '', telefono: '' });
+  const [selectedAlumnoId, setSelectedAlumnoId] = useState('');
+  const [busquedaAlumnos, setBusquedaAlumnos] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Toast state
@@ -54,7 +56,17 @@ export default function MisGrupos() {
 
   useEffect(() => {
     fetchGrupos();
+    fetchAlumnosDisponibles();
   }, []);
+
+  const fetchAlumnosDisponibles = async () => {
+    try {
+      const { data } = await api.get('/grupos/alumnos-disponibles');
+      setAlumnosDisponibles(data);
+    } catch (err) {
+      console.error('Error al cargar alumnos disponibles:', err);
+    }
+  };
 
   const fetchGrupos = async () => {
     try {
@@ -101,7 +113,8 @@ export default function MisGrupos() {
         setFormData({ nombre: '', descripcion: '' });
       }
     } else if (type === 'alumno') {
-      setAlumnoForm({ nombre: '', apellidoPaterno: '', apellidoMaterno: '', telefono: '' });
+      setSelectedAlumnoId('');
+      setBusquedaAlumnos('');
     }
     setShowModal(true);
   };
@@ -136,20 +149,20 @@ export default function MisGrupos() {
   };
 
   const handleSaveAlumno = async () => {
-    if (!alumnoForm.nombre.trim() || !alumnoForm.apellidoPaterno.trim() || !alumnoForm.apellidoMaterno.trim() || !alumnoForm.telefono.trim()) {
-      showToast('Campos requeridos', 'Nombre, Apellidos y Teléfono son requeridos', 'error');
+    if (!selectedAlumnoId) {
+      showToast('Selecciona un alumno', 'Debes seleccionar un alumno de la lista.', 'error');
       return;
     }
 
     try {
       setSaving(true);
-      await api.post(`/grupos/${expandedGrupo}/alumnos`, alumnoForm);
+      await api.post(`/grupos/${expandedGrupo}/alumnos`, { alumnoId: parseInt(selectedAlumnoId) });
       await fetchAlumnosGrupo(expandedGrupo);
-      setAlumnoForm({ nombre: '', apellidoPaterno: '', apellidoMaterno: '', telefono: '' });
+      await fetchAlumnosDisponibles();
       setShowModal(false);
       showToast('Alumno agregado', 'El alumno se agregó correctamente al grupo.', 'success');
     } catch (err) {
-      showToast('Error al crear', 'No se pudo agregar al alumno.', 'error');
+      showToast('Error al asignar', err.response?.data?.message || 'No se pudo agregar al alumno.', 'error');
     } finally {
       setSaving(false);
     }
@@ -478,46 +491,75 @@ export default function MisGrupos() {
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Buscador de alumnos */}
             <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Nombre</label>
+              <label className="block text-xs font-bold text-white/70 uppercase mb-2">
+                Buscar alumno
+              </label>
               <input
                 type="text"
-                placeholder="Nombre"
-                value={alumnoForm.nombre}
-                onChange={(e) => setAlumnoForm({ ...alumnoForm, nombre: e.target.value })}
+                placeholder="Escribe para buscar..."
+                value={busquedaAlumnos}
+                onChange={(e) => setBusquedaAlumnos(e.target.value)}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
               />
             </div>
+
+            {/* Lista de alumnos disponibles */}
             <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Apellido Paterno</label>
-              <input
-                type="text"
-                placeholder="Apellido Paterno"
-                value={alumnoForm.apellidoPaterno}
-                onChange={(e) => setAlumnoForm({ ...alumnoForm, apellidoPaterno: e.target.value })}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
-              />
+              <label className="block text-xs font-bold text-white/70 uppercase mb-2">
+                Seleccionar alumno
+              </label>
+              <div className="max-h-60 overflow-y-auto border border-white/10 rounded-lg divide-y divide-white/5 bg-black/20">
+                {alumnosDisponibles.length === 0 ? (
+                  <p className="text-white/30 text-sm italic text-center py-6">
+                    No hay alumnos disponibles. El admin debe inscribirlos primero a tu taller.
+                  </p>
+                ) : (
+                  alumnosDisponibles
+                    .filter(a => {
+                      const search = busquedaAlumnos.toLowerCase();
+                      return !search || 
+                        a.nombre?.toLowerCase().includes(search) ||
+                        a.apellidoPaterno?.toLowerCase().includes(search) ||
+                        a.apellidoMaterno?.toLowerCase().includes(search) ||
+                        a.curp?.toLowerCase().includes(search);
+                    })
+                    .map(alumno => (
+                      <button
+                        key={alumno.id}
+                        type="button"
+                        onClick={() => setSelectedAlumnoId(alumno.id)}
+                        className={`w-full text-left px-4 py-3 flex items-center gap-3 transition ${
+                          selectedAlumnoId === alumno.id
+                            ? 'bg-pink-500/20 text-white'
+                            : 'text-white/70 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                          selectedAlumnoId === alumno.id
+                            ? 'bg-pink-500 text-white'
+                            : 'bg-white/10 text-white/50'
+                        }`}>
+                          {alumno.nombre?.[0]}{alumno.apellidoPaterno?.[0]}
+                        </div>
+                        <div className="min-w-0 text-left">
+                          <p className="text-sm font-semibold truncate">
+                            {alumno.nombre} {alumno.apellidoPaterno} {alumno.apellidoMaterno || ''}
+                          </p>
+                          {alumno.curp && (
+                            <p className="text-[10px] text-white/40 truncate">{alumno.curp}</p>
+                          )}
+                        </div>
+                        {selectedAlumnoId === alumno.id && (
+                          <span className="ml-auto text-pink-400 text-xs font-bold">Seleccionado</span>
+                        )}
+                      </button>
+                    ))
+                )}
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Apellido Materno</label>
-              <input
-                type="text"
-                placeholder="Apellido Materno"
-                value={alumnoForm.apellidoMaterno}
-                onChange={(e) => setAlumnoForm({ ...alumnoForm, apellidoMaterno: e.target.value })}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-white/70 uppercase mb-2">Teléfono</label>
-              <input
-                type="text"
-                placeholder="Teléfono"
-                value={alumnoForm.telefono}
-                onChange={(e) => setAlumnoForm({ ...alumnoForm, telefono: e.target.value })}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
-              />
-            </div>
+
             <div className="flex gap-3 pt-2">
               <button onClick={handleCloseModal} className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg font-bold text-sm transition">
                 Cancelar
@@ -526,13 +568,13 @@ export default function MisGrupos() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSaveAlumno}
-                disabled={saving}
+                disabled={saving || !selectedAlumnoId}
                 className="flex-1 flex items-center justify-center gap-2 py-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 disabled:opacity-50 text-white rounded-lg font-bold text-sm transition"
               >
                 {saving ? (
-                  <><Loader2 size={14} className="animate-spin" /> Guardando...</>
+                  <><Loader2 size={14} className="animate-spin" /> Asignando...</>
                 ) : (
-                  'Guardar'
+                  'Asignar al Grupo'
                 )}
               </motion.button>
             </div>

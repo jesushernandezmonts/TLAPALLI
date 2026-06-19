@@ -16,7 +16,6 @@ function Pagos() {
     alumnoId: '',
     monto: '',
     mesCorrespondiente: new Date().toLocaleString('default', { month: 'long' }),
-    metodoPago: 'efectivo'
   });
 
   useEffect(() => {
@@ -46,7 +45,8 @@ function Pagos() {
       await api.post('/pagos', {
         ...form,
         alumnoId: parseInt(form.alumnoId),
-        monto: parseFloat(form.monto)
+        monto: parseFloat(form.monto),
+        metodoPago: 'efectivo',
       });
       setModalOpen(false);
       setForm({ ...form, alumnoId: '', monto: '' });
@@ -251,21 +251,9 @@ function Pagos() {
 
           <div className="space-y-1">
             <label className="text-sm text-white/60 ml-1">Método de Pago</label>
-            <div className="flex gap-2">
-              {['efectivo', 'transferencia', 'tarjeta'].map(m => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setForm({...form, metodoPago: m})}
-                  className={`flex-1 py-3 rounded-xl border font-bold uppercase text-[10px] transition-all ${
-                    form.metodoPago === m 
-                      ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' 
-                      : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'
-                  }`}
-                >
-                  {m}
-                </button>
-              ))}
+            <div className="px-4 py-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-3">
+              <span className="text-emerald-400 font-bold uppercase tracking-wider text-xs">Efectivo</span>
+              <span className="text-emerald-400/50 text-xs">(Único método disponible)</span>
             </div>
           </div>
 

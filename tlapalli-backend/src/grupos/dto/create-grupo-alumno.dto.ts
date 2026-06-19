@@ -1,15 +1,6 @@
-import { IsString } from 'class-validator';
+import { IsInt } from 'class-validator';
 
 export class CreateGrupoAlumnoDto {
-  @IsString()
-  nombre: string;
-
-  @IsString()
-  apellidoPaterno: string;
-
-  @IsString()
-  apellidoMaterno: string;
-
-  @IsString()
-  telefono: string;
+  @IsInt()
+  alumnoId: number;
 }

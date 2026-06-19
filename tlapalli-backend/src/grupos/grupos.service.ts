@@ -69,26 +69,23 @@ export class GruposService {
     // Verificar que el grupo pertenece al instructor
     await this.findOne(grupoId, instructorId);
 
-    // Crear alumno vinculado al instructor
-    const alumno = await this.prisma.alumno.create({
-      data: {
-        nombre: createAlumnoDto.nombre,
-        apellidoPaterno: createAlumnoDto.apellidoPaterno,
-        apellidoMaterno: createAlumnoDto.apellidoMaterno,
-        telefono: createAlumnoDto.telefono,
-        instructorId,
-      },
+    // Verificar que el alumno existe en la BD
+    const alumno = await this.prisma.alumno.findUnique({
+      where: { id: createAlumnoDto.alumnoId },
     });
+    if (!alumno) {
+      throw new NotFoundException(`Alumno con ID ${createAlumnoDto.alumnoId} no encontrado`);
+    }
 
-    // Agregar alumno al grupo
-    await this.prisma.grupoAlumno.create({
+    // Agregar alumno al grupo (ya no se crea el alumno, solo se asigna)
+    const grupoAlumno = await this.prisma.grupoAlumno.create({
       data: {
         grupoId,
         alumnoId: alumno.id,
       },
     });
 
-    return alumno;
+    return grupoAlumno;
   }
 
   async findAlumnosByGrupo(grupoId: number, instructorId: number) {
@@ -107,16 +104,16 @@ export class GruposService {
   }
 
   async removeAlumnoFromGrupo(grupoId: number, alumnoId: number, instructorId: number) {
-    // Verificar que el grupo pertenece al instructor
+    // Verificar que el grupo pertenece al instructor (suficiente autorización)
     await this.findOne(grupoId, instructorId);
 
-    // Verificar que el alumno pertenece al instructor
+    // Verificar que el alumno existe
     const alumno = await this.prisma.alumno.findUnique({
       where: { id: alumnoId },
     });
 
-    if (!alumno || alumno.instructorId !== instructorId) {
-      throw new ForbiddenException('No tienes permisos para eliminar este alumno');
+    if (!alumno) {
+      throw new NotFoundException('Alumno no encontrado');
     }
 
     // Remover alumno del grupo
@@ -134,19 +131,44 @@ export class GruposService {
     // Verificar que el grupo pertenece al instructor
     await this.findOne(grupoId, instructorId);
 
-    // Verificar que el alumno pertenece al instructor
-    const alumno = await this.prisma.alumno.findUnique({
-      where: { id: alumnoId },
+    // Solo permitir actualizar datos del grupo, no del alumno
+    // (los datos del alumno solo los modifica el admin)
+    throw new ForbiddenException('No tienes permisos para modificar datos del alumno');
+  }
+
+  async findAlumnosByInstructor(instructorId: number) {
+    // Obtener el instructor con su taller asignado
+    const instructor = await this.prisma.instructor.findUnique({
+      where: { id: instructorId },
+      include: { taller: true },
     });
 
-    if (!alumno || alumno.instructorId !== instructorId) {
-      throw new ForbiddenException('No tienes permisos para actualizar este alumno');
+    if (!instructor) {
+      throw new NotFoundException('Instructor no encontrado');
     }
 
-    return await this.prisma.alumno.update({
-      where: { id: alumnoId },
-      data: updateData,
+    if (!instructor.tallerId) {
+      return [];
+    }
+
+    // Traer todas las inscripciones activas del taller del instructor
+    const inscripciones = await this.prisma.inscripcion.findMany({
+      where: {
+        tallerId: instructor.tallerId,
+        estatusPago: { not: 'baja' },
+      },
+      include: { alumno: true },
     });
+
+    // Devolver solo los alumnos (sin duplicados)
+    const alumnosMap = new Map();
+    inscripciones.forEach(i => {
+      if (i.alumno && !alumnosMap.has(i.alumno.id)) {
+        alumnosMap.set(i.alumno.id, i.alumno);
+      }
+    });
+
+    return Array.from(alumnosMap.values());
   }
 }
 
