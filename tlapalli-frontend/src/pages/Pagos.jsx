@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Modal from '../components/Modal';
-import { CreditCard, Plus, Trash2, Search, Calendar, User } from 'lucide-react';
+import { CreditCard, Plus, Trash2, Search, Calendar, User, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function Pagos() {
+  const { user } = useAuth();
   const [pagos, setPagos] = useState([]);
   const [alumnos, setAlumnos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,8 +37,13 @@ function Pagos() {
   };
 
   const fetchAlumnos = async () => {
-    const { data } = await api.get('/alumnos');
-    setAlumnos(data);
+    try {
+      const { data } = await api.get('/grupos/alumnos-disponibles');
+      setAlumnos(data);
+    } catch (err) {
+      console.error('Error al cargar alumnos del taller', err);
+      setAlumnos([]);
+    }
   };
 
   const handleCreate = async (e) => {

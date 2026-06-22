@@ -10,17 +10,18 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 @ApiTags('Alumnos')
 @Controller('alumnos')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
 export class AlumnosController {
   constructor(private readonly alumnosService: AlumnosService) {}
 
   @Post()
+  @Roles('admin')
   @ApiOperation({ summary: 'Crear un nuevo alumno' })
   create(@Body() createAlumnoDto: CreateAlumnoDto) {
     return this.alumnosService.create(createAlumnoDto);
   }
 
   @Get()
+  @Roles('admin', 'profesor')
   findAll(@Query('skip') skip?: string, @Query('take') take?: string) {
     return this.alumnosService.findAll(
       skip ? parseInt(skip) : undefined,
@@ -29,21 +30,25 @@ export class AlumnosController {
   }
 
   @Get('count')
+  @Roles('admin', 'profesor')
   countAll() {
     return this.alumnosService.countAll();
   }
 
   @Get(':id')
+  @Roles('admin', 'profesor')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.alumnosService.findOne(id);
   }
 
   @Patch(':id')
+  @Roles('admin')
   update(@Param('id', ParseIntPipe) id: number, @Body() updateAlumnoDto: UpdateAlumnoDto) {
     return this.alumnosService.update(id, updateAlumnoDto);
   }
 
   @Delete(':id')
+  @Roles('admin')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.alumnosService.remove(id);
   }
