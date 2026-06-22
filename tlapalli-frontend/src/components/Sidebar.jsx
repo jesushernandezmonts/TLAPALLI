@@ -76,10 +76,6 @@ function Sidebar({ isOpen, onClose }) {
                 <Palette size={20} />
                 <span className="font-medium">Talleres</span>
               </NavLink>
-              <NavLink to="/pagos" onClick={onClose} className={linkClass}>
-                <CreditCard size={20} />
-                <span className="font-medium">Pagos</span>
-              </NavLink>
               <NavLink to="/reportes" onClick={onClose} className={linkClass}>
                 <BarChart3 size={20} />
                 <span className="font-medium">Reportes</span>

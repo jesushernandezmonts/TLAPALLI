@@ -11,13 +11,13 @@ export class PagosController {
   constructor(private readonly pagosService: PagosService) {}
 
   @Post()
-  @Roles('admin', 'profesor')
+  @Roles('profesor')
   create(@Body() dto: CreatePagoDto, @Req() req) {
     return this.pagosService.create(dto, req.user.id);
   }
 
   @Get()
-  @Roles('admin', 'profesor')
+  @Roles('profesor')
   findAll(@Query('skip') skip?: string, @Query('take') take?: string) {
     return this.pagosService.findAll(
       skip ? parseInt(skip) : undefined,
@@ -26,19 +26,19 @@ export class PagosController {
   }
 
   @Get('count')
-  @Roles('admin', 'profesor')
+  @Roles('profesor')
   countAll() {
     return this.pagosService.countAll();
   }
 
   @Get('alumno/:alumnoId')
-  @Roles('admin', 'profesor')
+  @Roles('profesor')
   findByAlumno(@Param('alumnoId', ParseIntPipe) alumnoId: number) {
     return this.pagosService.findByAlumno(alumnoId);
   }
 
   @Delete(':id')
-  @Roles('admin', 'profesor')
+  @Roles('profesor')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.pagosService.remove(id);
   }
