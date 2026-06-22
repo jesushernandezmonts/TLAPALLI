@@ -83,10 +83,6 @@ function Sidebar({ isOpen, onClose }) {
                 <BarChart3 size={20} />
                 <span className="font-medium">Reportes</span>
               </NavLink>
-              <NavLink to="/mi-perfil" onClick={onClose} className={linkClass}>
-                <User size={20} />
-                <span className="font-medium">Mi Perfil</span>
-              </NavLink>
             </>
           ) : (
             <>
@@ -101,10 +97,6 @@ function Sidebar({ isOpen, onClose }) {
               <NavLink to="/pagos" onClick={onClose} className={linkClass}>
                 <CreditCard size={20} />
                 <span className="font-medium">Pagos</span>
-              </NavLink>
-              <NavLink to="/mi-perfil" onClick={onClose} className={linkClass}>
-                <User size={20} />
-                <span className="font-medium">Mi Perfil</span>
               </NavLink>
             </>
           )}
