@@ -83,6 +83,7 @@ export class AuthService {
       email: usuario.email,
       rol: usuario.rol,
       instructorId: usuario.instructorId,
+      fotoUrl: usuario.fotoUrl,
     };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -101,6 +102,7 @@ export class AuthService {
         email: usuario.email,
         rol: usuario.rol,
         instructorId: usuario.instructorId,
+        fotoUrl: usuario.fotoUrl,
       },
     };
   }
@@ -216,6 +218,7 @@ export class AuthService {
       email: usuario.email,
       rol: usuario.rol,
       instructorId: usuario.instructorId,
+      fotoUrl: usuario.fotoUrl,
     };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -234,6 +237,7 @@ export class AuthService {
         email: usuario.email,
         rol: usuario.rol,
         instructorId: usuario.instructorId,
+        fotoUrl: usuario.fotoUrl,
       },
     };
   }
@@ -393,6 +397,7 @@ export class AuthService {
       email: token.usuario.email,
       rol: token.usuario.rol,
       instructorId: token.usuario.instructorId,
+      fotoUrl: token.usuario.fotoUrl,
     };
 
     const accessToken = this.jwtService.sign(payload, {

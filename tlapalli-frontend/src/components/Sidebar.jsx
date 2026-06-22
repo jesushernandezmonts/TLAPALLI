@@ -1,7 +1,8 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ConfirmModal from './ConfirmModal';
+import api from '../services/api';
 import { 
   LayoutDashboard, 
   Users, 
@@ -17,7 +18,9 @@ import {
 
 function Sidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [photoError, setPhotoError] = useState(false);
   
   const linkClass = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
@@ -80,6 +83,10 @@ function Sidebar({ isOpen, onClose }) {
                 <BarChart3 size={20} />
                 <span className="font-medium">Reportes</span>
               </NavLink>
+              <NavLink to="/mi-perfil" onClick={onClose} className={linkClass}>
+                <User size={20} />
+                <span className="font-medium">Mi Perfil</span>
+              </NavLink>
             </>
           ) : (
             <>
@@ -95,23 +102,39 @@ function Sidebar({ isOpen, onClose }) {
                 <CreditCard size={20} />
                 <span className="font-medium">Pagos</span>
               </NavLink>
+              <NavLink to="/mi-perfil" onClick={onClose} className={linkClass}>
+                <User size={20} />
+                <span className="font-medium">Mi Perfil</span>
+              </NavLink>
             </>
           )}
         </nav>
 
         {/* Información del usuario y logout */}
         <div className="border-t border-white/10 pt-4 mt-4">
-          <div className="flex items-center gap-3 mb-3 px-1">
+          <button
+            onClick={() => { navigate('/mi-perfil'); onClose(); }}
+            className="w-full flex items-center gap-3 mb-3 px-1 hover:bg-white/5 rounded-2xl py-2 transition-all group text-left"
+          >
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-pink-500 to-orange-500 p-[2px] flex-shrink-0">
-              <div className="w-full h-full rounded-[10px] bg-neutral-900 flex items-center justify-center">
-                <User size={16} className="text-white/80" />
+              <div className="w-full h-full rounded-[10px] bg-neutral-900 flex items-center justify-center overflow-hidden">
+                {user?.fotoUrl && !photoError ? (
+                  <img
+                    src={`${api.defaults.baseURL || 'http://localhost:3000'}${user.fotoUrl}`}
+                    alt={user?.nombre}
+                    className="w-full h-full object-cover"
+                    onError={() => setPhotoError(true)}
+                  />
+                ) : (
+                  <User size={16} className="text-white/80" />
+                )}
               </div>
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold text-white/90 truncate">{user?.nombre || user?.email}</span>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-xs font-bold text-white/90 truncate group-hover:text-pink-400 transition-colors">{user?.nombre || user?.email}</span>
               <span className="text-[10px] text-pink-400 font-bold uppercase tracking-wider">{user?.rol}</span>
             </div>
-          </div>
+          </button>
           <button 
             onClick={() => setLogoutConfirmOpen(true)}
             className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-red-600/20 hover:text-red-400 text-white/50 py-3 rounded-2xl border border-white/5 transition-all duration-300 font-semibold"

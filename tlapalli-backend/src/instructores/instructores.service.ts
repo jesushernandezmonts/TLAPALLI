@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInstructorDto } from './dto/create-instructor.dto';
 import { UpdateInstructorDto } from './dto/update-instructor.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { MailerService } from '../mail/mailer.service';
@@ -329,5 +330,45 @@ export class InstructoresService {
     } catch (e) {
       console.error('No se pudo borrar el archivo físico:', e);
     }
+  }
+
+  async updateMyProfile(userId: number, dto: UpdateProfileDto) {
+    const usuario = await this.prisma.usuario.findUnique({ where: { id: userId } });
+    if (!usuario) throw new NotFoundException('Usuario no encontrado');
+
+    const data: any = {};
+    if (dto.nombre) data.nombre = dto.nombre;
+
+    const updated = await this.prisma.usuario.update({
+      where: { id: userId },
+      data,
+      select: { id: true, nombre: true, email: true, rol: true, fotoUrl: true },
+    });
+
+    // Si el usuario es instructor, también actualizar su nombre en instructor
+    if (usuario.instructorId) {
+      await this.prisma.instructor.update({
+        where: { id: usuario.instructorId },
+        data: { nombre: dto.nombre },
+      });
+    }
+
+    return updated;
+  }
+
+  async updateMyFoto(userId: number, fotoUrl: string) {
+    const usuario = await this.prisma.usuario.findUnique({ where: { id: userId } });
+    if (!usuario) throw new NotFoundException('Usuario no encontrado');
+
+    // Borrar foto anterior si existe
+    if (usuario.fotoUrl) {
+      this.deletePhysicalFile(usuario.fotoUrl);
+    }
+
+    return this.prisma.usuario.update({
+      where: { id: userId },
+      data: { fotoUrl },
+      select: { id: true, nombre: true, email: true, rol: true, fotoUrl: true },
+    });
   }
 }

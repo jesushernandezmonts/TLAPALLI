@@ -14,6 +14,7 @@ import Pagos from './pages/Pagos';
 import Reportes from './pages/Reportes';
 import MisGrupos from './pages/MisGrupos';
 import Asistencia from './pages/Asistencia';
+import MiPerfil from './pages/MiPerfil';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -37,6 +38,7 @@ function App() {
           <Route path="/talleres" element={<Talleres />} />
           <Route path="/inscripciones" element={<Inscripciones />} />
           <Route path="/reportes" element={<Reportes />} />
+          <Route path="/mi-perfil" element={<MiPerfil />} />
         </Route>
       </Route>
 
@@ -46,6 +48,7 @@ function App() {
           <Route path="/mis-grupos" element={<MisGrupos />} />
           <Route path="/asistencia" element={<Asistencia />} />
           <Route path="/pagos" element={<Pagos />} />
+          <Route path="/mi-perfil" element={<MiPerfil />} />
         </Route>
       </Route>
 

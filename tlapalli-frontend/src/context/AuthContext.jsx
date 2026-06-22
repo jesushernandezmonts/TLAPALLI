@@ -42,6 +42,7 @@ export function AuthProvider({ children }) {
           rol: payload.rol,
           nombre: payload.nombre,
           instructorId: payload.instructorId,
+          fotoUrl: payload.fotoUrl,
         });
       } catch (err) {
         // No hay sesión activa
@@ -86,6 +87,7 @@ export function AuthProvider({ children }) {
         rol: payload.rol,
         nombre: payload.nombre,
         instructorId: payload.instructorId,
+        fotoUrl: payload.fotoUrl,
       };
       setUser(userData);
       setLoading(false);
