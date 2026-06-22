@@ -158,6 +158,11 @@ input[type="number"] {
 }
 
 @media print {
+  @page {
+    margin: 8mm 8mm 12mm 8mm;
+    size: letter portrait;
+  }
+
   #root {
     display: none !important;
   }
@@ -174,7 +179,7 @@ input[type="number"] {
 
   #print-section {
     display: block !important;
-    position: relative !important;
+    position: static !important;
     width: 100%;
     margin: 0;
     padding: 0;
@@ -182,19 +187,39 @@ input[type="number"] {
     color: #1a1a1a !important;
   }
 
-  /* Asegurar saltos de línea elegantes en tablas grandes */
-  table { page-break-inside: auto; border-collapse: collapse; }
-  tr { page-break-inside: avoid; page-break-after: auto; }
-  td, th { page-break-inside: avoid; }
-  thead { display: table-header-group; }
-  tfoot { display: table-footer-group; }
+  /* Quitar padding del contenedor principal del reporte (PrintPage) */
+  #print-section > div {
+    padding: 0 !important;
+  }
+  #print-section [class*="p-"] {
+    padding: 0 !important;
+  }
 
-  /* Repetir marca de agua en todas las páginas */
-  .watermark-print {
+  /* Hacer que el contenido llene todo el ancho */
+  #print-section table {
+    width: 100% !important;
+  }
+  #print-section th {
+    padding: 4px 6px !important;
+    font-size: 8px !important;
+  }
+  #print-section td {
+    padding: 3px 6px !important;
+    font-size: 9px !important;
+  }
+
+  /* Marca de agua centrada - no debe ocupar espacio */
+  #print-section .watermark-print {
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     z-index: -1 !important;
   }
+
+  /* Evitar saltos de página dentro de tablas */
+  table { page-break-inside: auto; border-collapse: collapse; }
+  tr { page-break-inside: avoid; }
+  td, th { page-break-inside: avoid; }
+  thead { display: table-header-group; }
 }

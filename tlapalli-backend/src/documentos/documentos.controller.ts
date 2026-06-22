@@ -50,6 +50,11 @@ export class DocumentosController {
   }
 
 
+  @Get('all-grouped')
+  findAllGrouped() {
+    return this.documentosService.findAllGrouped();
+  }
+
   @Get('alumno/:alumnoId')
   findByAlumno(@Param('alumnoId', ParseIntPipe) alumnoId: number) {
     return this.documentosService.findByAlumno(alumnoId);

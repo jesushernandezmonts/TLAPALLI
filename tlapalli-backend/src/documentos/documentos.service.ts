@@ -18,6 +18,21 @@ export class DocumentosService {
     });
   }
 
+  async findAllGrouped() {
+    const documentos = await this.prisma.documento.findMany({
+      orderBy: { subidoEn: 'desc' },
+    });
+    // Agrupar por alumnoId
+    const grouped: Record<number, typeof documentos> = {};
+    for (const doc of documentos) {
+      if (!grouped[doc.alumnoId]) {
+        grouped[doc.alumnoId] = [];
+      }
+      grouped[doc.alumnoId].push(doc);
+    }
+    return grouped;
+  }
+
   findByAlumno(alumnoId: number) {
     return this.prisma.documento.findMany({
       where: { alumnoId },

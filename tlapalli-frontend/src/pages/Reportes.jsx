@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, TrendingUp, Users, BookOpen, Calendar,
   Download, Loader2, AlertCircle, RefreshCw, CheckCircle2, Trash2,
-  ChevronLeft, ChevronRight, Search, Filter, X, CalendarDays, CalendarX
+  ChevronLeft, ChevronRight, Search, Filter, X, CalendarDays, CalendarX,
+  Printer
 } from 'lucide-react';
 import api from '../services/api';
 import html2canvas from 'html2canvas-pro';
@@ -98,37 +99,36 @@ const Flower = ({ className = 'w-16 h-16' }) => (
 /* ─── cabecera oficial reutilizable ──────────────────────────────────────────── */
 const PrintHeader = ({ titulo, asunto }) => (
   <>
-    <div className="flex justify-between items-start border-b border-neutral-200 pb-6">
+    <div className="flex justify-between items-start border-b border-neutral-200 pb-3">
       <div className="text-center flex flex-col items-center select-none">
-        <Flower className="w-14 h-14 text-[#801D38]" />
-        <div className="text-[#801D38] font-black text-lg tracking-[0.2em] leading-none mt-2">TLAXCALA</div>
-        <div className="text-[8px] font-black text-[#D4AF37] tracking-[0.1em] mt-1.5">UNA NUEVA HISTORIA</div>
-        <div className="text-[7px] font-bold text-neutral-400 tracking-[0.2em] mt-0.5">2021 - 2027</div>
+        <Flower className="w-10 h-10 text-[#801D38]" />
+        <div className="text-[#801D38] font-black text-sm tracking-[0.2em] leading-none mt-1">TLAXCALA</div>
+        <div className="text-[6px] font-black text-[#D4AF37] tracking-[0.1em]">UNA NUEVA HISTORIA</div>
+        <div className="text-[5px] font-bold text-neutral-400 tracking-[0.2em]">2021 - 2027</div>
       </div>
       <div className="text-center flex flex-col items-center pt-2">
         <p className="font-black text-neutral-900 text-sm uppercase tracking-tight">{titulo}</p>
-        <p className="text-[10px] text-neutral-500 mt-1">Centro Cultural Huamantla</p>
+        <p className="text-[10px] text-neutral-500">Centro Cultural Huamantla</p>
       </div>
-      <div className="text-right text-[10px] text-neutral-600 leading-normal font-sans">
-        <p className="font-bold text-neutral-900 text-xs uppercase tracking-tight">Centro Cultural Huamantla</p>
+      <div className="text-right text-[9px] text-neutral-600 leading-normal font-sans">
+        <p className="font-bold text-neutral-900 text-[11px] uppercase tracking-tight">Centro Cultural Huamantla</p>
         <p>Parque Juárez No.14</p>
         <p>Tel: 2 47 47 2 13 11</p>
-        <p className="font-semibold text-[#801D38] mt-1">Área: Coordinación</p>
+        <p className="font-semibold text-[#801D38]">Área: Coordinación</p>
       </div>
     </div>
-    <div className="text-right text-xs space-y-1 pt-2 font-sans">
+    <div className="text-right text-[10px] space-y-0.5 pt-1.5 font-sans">
       <p className="font-bold text-neutral-900">Asunto: <span className="font-medium text-neutral-700">{asunto}</span></p>
       <p className="text-neutral-500">Huamantla, Tlax., a {hoy()}</p>
     </div>
-    <div className="text-xs pt-4 font-sans">
+    <div className="text-xs pt-3 font-sans">
       <p className="font-black text-neutral-900 uppercase">C. COORDINADOR DEL CENTRO CULTURAL HUAMANTLA</p>
       <p className="font-black text-[#801D38] tracking-[0.2em] mt-1">P R E S E N T E .</p>
     </div>
   </>
 );
-
 const PrintFooter = () => (
-  <div className="border-t border-neutral-200 pt-6 flex justify-between items-center text-[8px] text-neutral-400 z-10 font-sans">
+  <div className="border-t border-neutral-200 pt-3 flex justify-between items-center text-[8px] text-neutral-400 z-10 font-sans">
     <p>c. c. p. Archivo / Centro Cultural Huamantla</p>
     <div className="flex items-center gap-2 select-none">
       <div className="text-left leading-none">
@@ -143,19 +143,19 @@ const PrintFooter = () => (
 const PrintPage = ({ children }) => (
   <div className="bg-white text-neutral-800 font-sans text-[11px]">
     {/* Top colorful bars */}
-    <div className="flex h-2.5 w-full">
+    <div className="flex h-1.5 w-full">
       <div className="bg-[#4D8C3E] w-1/3" />
       <div className="bg-[#F29C38] w-1/3" />
       <div className="bg-[#8A244E] w-1/3" />
     </div>
 
-    <div className="p-16 relative bg-white select-text">
+    <div className="p-4 md:p-6 relative bg-white select-text overflow-hidden">
       {/* Faded Watermark in background */}
-      <div className="watermark-print opacity-[0.03] pointer-events-none select-none">
-        <Flower className="w-[600px] h-[600px] text-[#801D38]" />
+      <div className="watermark-print absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none z-0">
+        <Flower className="w-[300px] h-[300px] text-[#801D38]" />
       </div>
       
-      <div className="relative z-10 space-y-6">
+      <div className="relative z-10 space-y-3">
         {children}
       </div>
 
@@ -165,7 +165,7 @@ const PrintPage = ({ children }) => (
 );
 
 const PrintSignOff = () => (
-  <div className="pt-16 text-center text-xs space-y-14 font-sans">
+  <div className="pt-5 text-center text-[10px] space-y-5 font-sans">
     <p className="font-bold text-neutral-700 uppercase tracking-widest">A t e n t a m e n t e</p>
     <div>
       <p className="font-bold text-neutral-950">Mtro. Manuel de la Vega Moreno</p>
@@ -175,11 +175,11 @@ const PrintSignOff = () => (
 );
 
 const TablaPrint = ({ headers, rows }) => (
-  <div className="pt-4">
+  <div className="pt-2">
     <table className="w-full text-left text-[10px] border-collapse border border-neutral-300 font-sans">
       <thead>
         <tr className="bg-[#801D38] text-white font-bold uppercase tracking-wider text-[9px]">
-          {headers.map((h, idx) => <th key={idx} className="border border-neutral-300 p-2.5">{h}</th>)}
+          {headers.map((h, idx) => <th key={idx} className="border border-neutral-300 p-2 text-[8px]">{h}</th>)}
         </tr>
       </thead>
       <tbody className="divide-y divide-neutral-200">
@@ -188,7 +188,7 @@ const TablaPrint = ({ headers, rows }) => (
         ) : rows.map((cells, i) => (
           <tr key={i} className="hover:bg-neutral-50/50">
             {cells.map((c, j) => (
-              <td key={j} className={`border border-neutral-300 p-2.5 ${j === 0 ? 'font-bold text-neutral-900' : 'text-neutral-600'}`}>
+              <td key={j} className={`border border-neutral-300 p-2 ${j === 0 ? 'font-bold text-neutral-900' : 'text-neutral-600'}`}>
                 {c}
               </td>
             ))}
@@ -386,7 +386,8 @@ export default function Reportes() {
   const [currentPage, setCurrentPage]   = useState(1);
   const [filtroTipo, setFiltroTipo]     = useState('todos');
   const [busqueda, setBusqueda]         = useState('');
-  const [fechaFiltro, setFechaFiltro]   = useState('');
+  const [fechaFiltro, setFechaFiltro]         = useState('');
+  const [previewReport, setPreviewReport]     = useState(null);
   const itemsPerPage = 5;
 
   const reportesFiltrados = useMemo(() => {
@@ -536,6 +537,15 @@ export default function Reportes() {
       }
     }
   };
+
+  const handleModalPrint = useCallback((tipo) => {
+    setPrinting(tipo);
+    setPreviewReport(null); // cerrar modal
+    setTimeout(() => {
+      window.print();
+      setPrinting(null);
+    }, 500);
+  }, []);
 
   /* ── KPI bar ── */
   const kpis = data ? [
@@ -801,16 +811,13 @@ export default function Reportes() {
                       </td>
                       <td data-label="Acciones" className="text-right">
                         <div className="flex justify-end gap-2">
-                          <a
-                            href={`${api.defaults.baseURL || 'http://localhost:3000'}${report.url}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2.5 bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-emerald-500/30 text-white/60"
-                            title="Descargar PDF"
-                            download
+                          <button
+                            onClick={() => setPreviewReport(report)}
+                            className="p-2.5 bg-white/5 hover:bg-pink-500/20 hover:text-pink-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-pink-500/30 text-white/60"
+                            title="Vista previa del reporte"
                           >
-                            <Download size={16} />
-                          </a>
+                            <FileText size={16} />
+                          </button>
                           <button
                             onClick={() => handleDeleteReport(report.id)}
                             className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30 text-white/60"
@@ -887,6 +894,15 @@ export default function Reportes() {
         </div>,
         document.body
       )}
+
+      {previewReport && data && (
+        <ReportPreviewModal
+          report={previewReport}
+          data={data}
+          onClose={() => setPreviewReport(null)}
+          onPrint={handleModalPrint}
+        />
+      )}
     </div>
   );
 }
@@ -901,13 +917,13 @@ function PrintGeneral({ data: d }) {
   return (
     <PrintPage>
       <PrintHeader titulo="REPORTE GENERAL DE ADMINISTRACIÓN" asunto="Reporte General de Administración del Centro Cultural" />
-      <p className="text-xs text-neutral-700 leading-relaxed text-justify indent-8 pt-2 font-sans">
+      <p className="text-xs text-neutral-700 leading-relaxed text-justify indent-4 pt-1 font-sans">
         Por medio de la presente, se hace entrega del reporte general de administración correspondiente al Centro Cultural Huamantla, con información actualizada al día {hoy()}. A continuación se muestra la relación detallada de los registros actuales:
       </p>
 
       {/* KPIs */}
-      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-3 mt-4">Resumen Ejecutivo</h3>
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-2 mt-3">Resumen Ejecutivo</h3>
+      <div className="grid grid-cols-4 gap-2 mb-4">
         {[
           ['Total de Alumnos', r.totalAlumnos],
           ['Alumnos Activos', r.alumnosActivos],
@@ -917,7 +933,7 @@ function PrintGeneral({ data: d }) {
           ['Actividades', r.totalActividades],
           ['Ingresos Totales', fmt(r.ingresosTotales)],
         ].map(([label, val]) => (
-          <div key={label} className="border border-neutral-300 rounded p-3 text-center bg-neutral-50">
+          <div key={label} className="border border-neutral-300 rounded p-2 text-center bg-neutral-50">
             <p className="text-base font-black text-[#801D38]">{val}</p>
             <p className="text-[9px] text-neutral-500 uppercase tracking-wide mt-0.5">{label}</p>
           </div>
@@ -925,7 +941,7 @@ function PrintGeneral({ data: d }) {
       </div>
 
       {/* Talleres top */}
-      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-2 mt-4">Talleres Registrados</h3>
+      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-1 mt-3">Talleres Registrados</h3>
       <TablaPrint
         headers={['Taller', 'Instructor', 'Alumnos Inscritos', 'Cupo Máx.', 'Disponible', 'Costo Mensual']}
         rows={d.talleres.map(t => [
@@ -947,26 +963,26 @@ function PrintFinanciero({ data: d }) {
   return (
     <PrintPage>
       <PrintHeader titulo="REPORTE FINANCIERO" asunto="Reporte de Ingresos y Métodos de Pago" />
-      <p className="text-xs text-neutral-700 leading-relaxed text-justify indent-8 pt-2 font-sans">
+      <p className="text-xs text-neutral-700 leading-relaxed text-justify indent-4 pt-1 font-sans">
         A continuación se presenta el reporte financiero detallado del Centro Cultural Huamantla con corte al día {hoy()}.
       </p>
 
-      <div className="grid grid-cols-3 gap-3 mb-5 mt-4">
-        <div className="border border-neutral-300 rounded p-3 text-center bg-neutral-50 col-span-1">
+      <div className="grid grid-cols-3 gap-2 mb-3 mt-2">
+        <div className="border border-neutral-300 rounded p-2 text-center bg-neutral-50 col-span-1">
           <p className="text-base font-black text-[#801D38]">{fmt(total)}</p>
           <p className="text-[9px] text-neutral-500 uppercase tracking-wide mt-0.5">Total Ingresos</p>
         </div>
-        <div className="border border-neutral-300 rounded p-3 text-center bg-neutral-50">
+        <div className="border border-neutral-300 rounded p-2 text-center bg-neutral-50">
           <p className="text-base font-black text-[#801D38]">{d.pagos.length}</p>
           <p className="text-[9px] text-neutral-500 uppercase tracking-wide mt-0.5">Transacciones</p>
         </div>
-        <div className="border border-neutral-300 rounded p-3 text-center bg-neutral-50">
+        <div className="border border-neutral-300 rounded p-2 text-center bg-neutral-50">
           <p className="text-base font-black text-[#801D38]">{metodos.length}</p>
           <p className="text-[9px] text-neutral-500 uppercase tracking-wide mt-0.5">Métodos de Pago</p>
         </div>
       </div>
 
-      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-2 mt-4">Ingresos por Método de Pago</h3>
+      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-1 mt-3">Ingresos por Método de Pago</h3>
       <TablaPrint
         headers={['Método', 'Total Recaudado', '% del Total']}
         rows={metodos.map(([m, v]) => [
@@ -976,15 +992,15 @@ function PrintFinanciero({ data: d }) {
         ])}
       />
 
-      <div className="mt-6" />
-      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-2 mt-4">Ingresos por Mes</h3>
+      <div className="mt-3" />
+      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-1 mt-2">Ingresos por Mes</h3>
       <TablaPrint
         headers={['Mes', 'Total Recaudado']}
         rows={meses.map(([m, v]) => [m, fmt(v)])}
       />
 
-      <div className="mt-6" />
-      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-2 mt-4">Historial de Pagos</h3>
+      <div className="mt-3" />
+      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-1 mt-2">Historial de Pagos</h3>
       <TablaPrint
         headers={['Alumno', 'Monto', 'Mes', 'Método', 'Fecha', 'Registrado por']}
         rows={d.pagos.map(p => [
@@ -1003,17 +1019,17 @@ function PrintAlumnos({ data: d }) {
   return (
     <PrintPage>
       <PrintHeader titulo="REPORTE DE ALUMNOS" asunto="Listado de Alumnos Inscritos por Taller" />
-      <p className="text-xs text-neutral-700 leading-relaxed text-justify indent-8 pt-2 font-sans">
+      <p className="text-xs text-neutral-700 leading-relaxed text-justify indent-4 pt-1 font-sans">
         A continuación se presenta la relación de alumnos inscritos en los talleres del Centro Cultural Huamantla con corte al {hoy()}.
       </p>
 
-      <div className="grid grid-cols-3 gap-3 mb-5 mt-4">
+      <div className="grid grid-cols-3 gap-2 mb-3 mt-2">
         {[
           ['Total Alumnos', d.resumen.totalAlumnos],
           ['Activos', d.resumen.alumnosActivos],
           ['Inactivos', d.resumen.alumnosInactivos],
         ].map(([l, v]) => (
-          <div key={l} className="border border-neutral-300 rounded p-3 text-center bg-neutral-50">
+          <div key={l} className="border border-neutral-300 rounded p-2 text-center bg-neutral-50">
             <p className="text-base font-black text-[#801D38]">{v}</p>
             <p className="text-[9px] text-neutral-500 uppercase tracking-wide mt-0.5">{l}</p>
           </div>
@@ -1039,11 +1055,11 @@ function PrintTalleres({ data: d }) {
   return (
     <PrintPage>
       <PrintHeader titulo="REPORTE DE TALLERES E INSTRUCTORES" asunto="Información de Talleres y Personal Docente" />
-      <p className="text-xs text-neutral-700 leading-relaxed text-justify indent-8 pt-2 font-sans">
+      <p className="text-xs text-neutral-700 leading-relaxed text-justify indent-4 pt-1 font-sans">
         A continuación se detalla la información de los talleres activos y el personal docente del Centro Cultural Huamantla al {hoy()}.
       </p>
 
-      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-2 mt-4">Talleres</h3>
+      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-1 mt-3">Talleres</h3>
       <TablaPrint
         headers={['Taller', 'Instructor', 'Inscritos', 'Cupo Máx.', 'Disponible', 'Costo Mens.', 'Horario']}
         rows={d.talleres.map(t => [
@@ -1052,8 +1068,8 @@ function PrintTalleres({ data: d }) {
         ])}
       />
 
-      <div className="mt-6" />
-      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-2 mt-4">Instructores</h3>
+      <div className="mt-3" />
+      <h3 className="font-black text-[#801D38] uppercase tracking-widest text-[9px] mb-1 mt-2">Instructores</h3>
       <TablaPrint
         headers={['Nombre', 'Taller Asignado', 'Email', 'Teléfono', 'Estado']}
         rows={d.instructores.map(i => [
@@ -1071,7 +1087,7 @@ function PrintActividades({ data: d }) {
   return (
     <PrintPage>
       <PrintHeader titulo="REPORTE DE ACTIVIDADES CULTURALES" asunto="Reporte General de Actividades" />
-      <p className="text-xs text-neutral-700 leading-relaxed text-justify indent-8 pt-2 font-sans">
+      <p className="text-xs text-neutral-700 leading-relaxed text-justify indent-4 pt-1 font-sans">
         Por medio de la presente, se hace entrega del reporte oficial correspondiente a las actividades, talleres y eventos internos y externos programados en las distintas áreas de este Centro Cultural (Galería, Audioteca y Auditorio). A continuación se muestra la relación detallada de los registros actuales:
       </p>
 
@@ -1094,5 +1110,102 @@ function PrintActividades({ data: d }) {
 
       <PrintSignOff />
     </PrintPage>
+  );
+}
+
+/* ── Report Preview Modal ── */
+function ReportPreviewModal({ report, data, onClose, onPrint }) {
+  const pdfUrl = `${api.defaults.baseURL || 'http://localhost:3000'}${report.url}`;
+
+  const reportComponent = {
+    general: <PrintGeneral data={data} />,
+    financiero: <PrintFinanciero data={data} />,
+    alumnos: <PrintAlumnos data={data} />,
+    talleres: <PrintTalleres data={data} />,
+    actividades: <PrintActividades data={data} />,
+  };
+
+  const handlePrint = () => {
+    if (onPrint) {
+      onPrint(report.tipo);
+    }
+  };
+
+  return createPortal(
+    <>
+      {/* Overlay */}
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8">
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+        
+        {/* Modal */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.92, y: 20 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="relative w-full max-w-[900px] max-h-[90vh] bg-gradient-to-b from-slate-900 to-slate-950 rounded-3xl border border-white/15 shadow-2xl shadow-black/60 overflow-hidden flex flex-col"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 bg-black/30">
+            <div className="flex items-center gap-3">
+              <FileText size={20} className="text-pink-400" />
+              <div>
+                <h3 className="text-base font-black text-white">{report.nombre}</h3>
+                <p className="text-[10px] text-white/50 font-medium">
+                  {new Date(report.creadoEn).toLocaleString('es-MX', {
+                    day: '2-digit', month: 'long', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit',
+                  })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={handlePrint}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20"
+              >
+                <Printer size={14} />
+                Imprimir
+              </button>
+              <a
+                href={pdfUrl}
+                download
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/20"
+              >
+                <Download size={14} />
+                PDF
+              </a>
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-xl hover:bg-white/10 text-white/50 hover:text-white transition-all duration-200"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          </div>
+
+          {/* Content: Scrollable report preview */}
+          <div className="overflow-y-auto bg-[#f5f5f0]">
+            <div className="mx-auto max-w-[800px]">
+              {reportComponent[report.tipo] || (
+                <div className="p-10 text-center text-neutral-500">Tipo de reporte no disponible</div>
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="px-4 py-1.5 border-t border-white/10 bg-black/30 flex items-center justify-between">
+            <p className="text-xs text-white/40">Vista previa del reporte · Puede diferir del PDF final</p>
+            <button
+              onClick={onClose}
+              className="text-xs font-bold text-white/50 hover:text-white transition"
+            >
+              Cerrar
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </>,
+    document.body
   );
 }

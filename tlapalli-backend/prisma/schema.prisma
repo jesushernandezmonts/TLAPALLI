@@ -48,8 +48,6 @@ model Alumno {
   padecimientos    String?
   estatusActivo    Boolean       @default(true) @map("estatus_activo")
   fotoUrl          String?       @map("foto_url")
-  instructorId     Int?          @map("instructor_id")
-  instructor       Instructor?   @relation(fields: [instructorId], references: [id])
   inscripciones    Inscripcion[]
   pagos            Pago[]
   documentos       Documento[]
@@ -91,7 +89,6 @@ model Instructor {
   temarioUrl    String?  @map("temario_url")
   curriculumUrl String?  @map("curriculum_url")
   grupos        Grupo[]
-  alumnos       Alumno[]
 }
 
 model Inscripcion {

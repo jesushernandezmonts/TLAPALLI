@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, IsOptional } from 'class-validator';
 
 export class CreatePagoDto {
   @IsNumber()
@@ -9,4 +9,8 @@ export class CreatePagoDto {
 
   @IsString()
   mesCorrespondiente: string;
+
+  @IsOptional()
+  @IsString()
+  metodoPago?: string;
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req, ParseIntPipe, Query } from '@nestjs/common';
 import { PagosService } from './pagos.service';
 import { CreatePagoDto } from './dto/create-pago.dto';
 import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
@@ -18,8 +18,17 @@ export class PagosController {
 
   @Get()
   @Roles('admin', 'profesor')
-  findAll() {
-    return this.pagosService.findAll();
+  findAll(@Query('skip') skip?: string, @Query('take') take?: string) {
+    return this.pagosService.findAll(
+      skip ? parseInt(skip) : undefined,
+      take ? parseInt(take) : undefined,
+    );
+  }
+
+  @Get('count')
+  @Roles('admin', 'profesor')
+  countAll() {
+    return this.pagosService.countAll();
   }
 
   @Get('alumno/:alumnoId')

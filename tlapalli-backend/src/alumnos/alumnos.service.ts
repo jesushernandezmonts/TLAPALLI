@@ -27,12 +27,20 @@ export class AlumnosService {
     }
   }
 
-  async findAll() {
-    return this.prisma.alumno.findMany({
+  async findAll(skip?: number, take?: number) {
+    const params: any = {
       include: {
-        inscripciones: true, // opcional: para ver en qué talleres está
+        inscripciones: true,
       },
-    });
+      orderBy: { id: 'desc' },
+    };
+    if (skip !== undefined) params.skip = skip;
+    if (take !== undefined) params.take = take;
+    return this.prisma.alumno.findMany(params);
+  }
+
+  async countAll() {
+    return this.prisma.alumno.count();
   }
 
   async findOne(id: number) {

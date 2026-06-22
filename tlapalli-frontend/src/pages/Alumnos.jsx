@@ -55,20 +55,11 @@ function Alumnos() {
     const fetchDocumentosTodosAlumnos = async () => {
       try {
         setLoadingDocumentos(true);
-        const documentosMap = {};
-        await Promise.all(
-          alumnos.map(async (alumno) => {
-            try {
-              const { data } = await api.get(`/documentos/alumno/${alumno.id}`);
-              documentosMap[alumno.id] = data;
-            } catch (err) {
-              documentosMap[alumno.id] = [];
-            }
-          })
-        );
-        setDocumentosPorAlumno(documentosMap);
+        const { data } = await api.get('/documentos/all-grouped');
+        setDocumentosPorAlumno(data || {});
       } catch (err) {
         console.error('Error al cargar documentos de alumnos', err);
+        setDocumentosPorAlumno({});
       } finally {
         setLoadingDocumentos(false);
       }

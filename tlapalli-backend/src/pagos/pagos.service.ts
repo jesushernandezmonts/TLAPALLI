@@ -15,7 +15,7 @@ export class PagosService {
         alumnoId: dto.alumnoId,
         monto: dto.monto,
         mesCorrespondiente: dto.mesCorrespondiente,
-        metodoPago: 'efectivo',
+        metodoPago: dto.metodoPago || 'efectivo',
         registradoPor: usuarioId,
       },
       include: {
@@ -27,8 +27,8 @@ export class PagosService {
     });
   }
 
-  findAll() {
-    return this.prisma.pago.findMany({
+  findAll(skip?: number, take?: number) {
+    const params: any = {
       include: {
         alumno: true,
         usuario: {
@@ -36,14 +36,24 @@ export class PagosService {
         },
       },
       orderBy: { fechaPago: 'desc' },
-    });
+    };
+    if (skip !== undefined) params.skip = skip;
+    if (take !== undefined) params.take = take;
+    return this.prisma.pago.findMany(params);
   }
 
-  async findByAlumno(alumnoId: number) {
-    return this.prisma.pago.findMany({
+  async countAll() {
+    return this.prisma.pago.count();
+  }
+
+  async findByAlumno(alumnoId: number, skip?: number, take?: number) {
+    const params: any = {
       where: { alumnoId },
       orderBy: { fechaPago: 'desc' },
-    });
+    };
+    if (skip !== undefined) params.skip = skip;
+    if (take !== undefined) params.take = take;
+    return this.prisma.pago.findMany(params);
   }
 
   async remove(id: number) {

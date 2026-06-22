@@ -56,6 +56,9 @@ export class TalleresService {
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.taller.delete({ where: { id } });
+    return this.prisma.taller.update({
+      where: { id },
+      data: { activo: false },
+    });
   }
 }

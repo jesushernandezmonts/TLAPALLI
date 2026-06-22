@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
 import { AlumnosService } from './alumnos.service';
 import { CreateAlumnoDto } from './dto/create-alumno.dto';
 import { UpdateAlumnoDto } from './dto/update-alumno.dto';
@@ -21,8 +21,16 @@ export class AlumnosController {
   }
 
   @Get()
-  findAll() {
-    return this.alumnosService.findAll();
+  findAll(@Query('skip') skip?: string, @Query('take') take?: string) {
+    return this.alumnosService.findAll(
+      skip ? parseInt(skip) : undefined,
+      take ? parseInt(take) : undefined,
+    );
+  }
+
+  @Get('count')
+  countAll() {
+    return this.alumnosService.countAll();
   }
 
   @Get(':id')
