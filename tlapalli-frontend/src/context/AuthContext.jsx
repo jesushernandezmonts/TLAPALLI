@@ -26,7 +26,8 @@ export function AuthProvider({ children }) {
       // Si estamos en la página de éxito de OAuth o hay un token en la URL, 
       // dejamos que AuthSuccess maneje la sesión inicial para evitar conflictos.
       const params = new URLSearchParams(window.location.search);
-      if (window.location.pathname.includes('/auth/success') || params.has('token')) {
+      const publicPaths = ['/auth/success', '/login', '/forgot-password', '/reset-password', '/activar-cuenta', '/accept-invitation'];
+      if (publicPaths.some(p => window.location.pathname.includes(p)) || params.has('token')) {
         // Dejamos que loading continúe en true para evitar redirección prematura en PrivateRoute
         return;
       }

@@ -17,7 +17,7 @@ export class PagosController {
   }
 
   @Get()
-  @Roles('profesor')
+  @Roles('admin', 'profesor')
   findAll(@Query('skip') skip?: string, @Query('take') take?: string) {
     return this.pagosService.findAll(
       skip ? parseInt(skip) : undefined,
@@ -26,13 +26,13 @@ export class PagosController {
   }
 
   @Get('count')
-  @Roles('profesor')
+  @Roles('admin', 'profesor')
   countAll() {
     return this.pagosService.countAll();
   }
 
   @Get('alumno/:alumnoId')
-  @Roles('profesor')
+  @Roles('admin', 'profesor')
   findByAlumno(@Param('alumnoId', ParseIntPipe) alumnoId: number) {
     return this.pagosService.findByAlumno(alumnoId);
   }
