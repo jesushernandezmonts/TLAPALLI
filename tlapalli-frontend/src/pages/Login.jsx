@@ -7,10 +7,10 @@ import { Link } from 'react-router-dom';
 
 const GoogleIcon = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24">
-    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.07-3.71 1.07-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-    <path d="M5.84 14.11c-.22-.67-.35-1.39-.35-2.11s.13-1.44.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05"/>
-    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84c.87-2.6 3.3-4.51 6.16-4.51z" fill="#EA4335"/>
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.07-3.71 1.07-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+    <path d="M5.84 14.11c-.22-.67-.35-1.39-.35-2.11s.13-1.44.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05" />
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84c.87-2.6 3.3-4.51 6.16-4.51z" fill="#EA4335" />
   </svg>
 );
 
@@ -150,8 +150,8 @@ function Login() {
                 </button>
               </div>
               <div className="flex justify-end">
-                <Link 
-                  to="/forgot-password" 
+                <Link
+                  to="/forgot-password"
                   className="text-xs text-pink-400 hover:text-pink-300 transition-colors font-medium"
                 >
                   ¿Olvidaste tu contraseña?
@@ -202,7 +202,7 @@ function Login() {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-orange-600 to-pink-600 bg-[length:200%_auto] group-hover:bg-right transition-all duration-500" />
               <span className="relative flex items-center justify-center gap-2">
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Iniciar Sesión"}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Iniciar sesión"}
               </span>
             </motion.button>
 
@@ -216,7 +216,7 @@ function Login() {
             </div>
 
             <motion.button
-              whileHover={{ 
+              whileHover={{
                 scale: 1.02,
                 boxShadow: "0 0 20px rgba(236, 72, 153, 0.3)"
               }}
@@ -226,7 +226,7 @@ function Login() {
               className="w-full flex items-center justify-center gap-3 h-12 bg-white/10 hover:bg-white/15 border border-white/20 hover:border-pink-500/50 rounded-2xl font-bold text-white transition-all shadow-lg"
             >
               <GoogleIcon className="w-5 h-5" />
-              <span>Iniciar Sesión con Google</span>
+              <span>Iniciar sesión con Google</span>
             </motion.button>
           </form>
         </div>
