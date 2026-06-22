@@ -82,6 +82,7 @@ export class AuthService {
       sub: usuario.id,
       email: usuario.email,
       rol: usuario.rol,
+      nombre: usuario.nombre,
       instructorId: usuario.instructorId,
       fotoUrl: usuario.fotoUrl,
     };
@@ -217,6 +218,7 @@ export class AuthService {
       sub: usuario.id,
       email: usuario.email,
       rol: usuario.rol,
+      nombre: usuario.nombre,
       instructorId: usuario.instructorId,
       fotoUrl: usuario.fotoUrl,
     };
@@ -428,6 +430,7 @@ export class AuthService {
       sub: token.usuario.id,
       email: token.usuario.email,
       rol: token.usuario.rol,
+      nombre: token.usuario.nombre,
       instructorId: token.usuario.instructorId,
       fotoUrl: token.usuario.fotoUrl,
     };

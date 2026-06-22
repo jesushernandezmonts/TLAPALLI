@@ -86,7 +86,7 @@ export class InstructoresService {
   async findOne(id: number) {
     const instructor = await this.prisma.instructor.findUnique({
       where: { id },
-      include: { taller: true, usuario: { select: { id: true, email: true, googleId: true } } },
+      include: { taller: true, usuario: { select: { id: true, email: true, googleId: true, fotoUrl: true } } },
     });
     if (!instructor) throw new NotFoundException('Instructor no encontrado');
     return instructor;

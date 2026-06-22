@@ -83,7 +83,7 @@ function MiPerfil() {
         if (prev?.esAdmin) {
           return { ...prev, usuario: { ...prev.usuario, fotoUrl: data.fotoUrl } };
         }
-        return prev;
+        return { ...prev, usuario: { ...prev.usuario, fotoUrl: data.fotoUrl } };
       });
       // Update AuthContext user
       setUser(prev => ({ ...prev, fotoUrl: data.fotoUrl }));
@@ -177,12 +177,12 @@ function MiPerfil() {
     }
   };
 
-  // Compute foto URL helper
+  // Compute foto URL helper - works for both admin and instructor
   const getFotoUrl = () => {
     if (profile?.esAdmin) {
       return profile.usuario?.fotoUrl || null;
     }
-    return null;
+    return profile?.usuario?.fotoUrl || null;
   };
 
   const fotoUrl = previewUrl || (getFotoUrl() ? `${api.defaults.baseURL || 'http://localhost:3000'}${getFotoUrl()}` : null);
@@ -194,6 +194,12 @@ function MiPerfil() {
     return profile?.nombre || profile?.email || 'Instructor';
   };
   const initials = getNameForInitials().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'A';
+
+  // Get current name
+  const getCurrentName = () => {
+    if (profile?.esAdmin) return profile.usuario?.nombre || '';
+    return profile?.nombre || '';
+  };
 
   if (loading) return (
     <div className="flex items-center justify-center h-[60vh]">
@@ -539,47 +545,101 @@ function MiPerfil() {
         <div className="h-1.5 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-cyan-500" />
         <div className="p-6 md:p-10">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            <div className="relative flex-shrink-0">
-              <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-pink-500 via-fuchsia-500 to-cyan-500 p-[3px] shadow-2xl shadow-pink-500/30">
-                <div className="w-full h-full rounded-[calc(1rem-3px)] bg-slate-900 flex items-center justify-center">
-                  <span className="text-4xl font-black text-white">{initialsProf}</span>
+            {/* Avatar - clickeable con preview (también para profesor) */}
+            <div className="relative flex-shrink-0 group">
+              <button
+                onClick={handleSelectPhoto}
+                disabled={uploadingPhoto}
+                className="block relative"
+                title="Cambiar foto de perfil"
+              >
+                <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-pink-500 via-fuchsia-500 to-cyan-500 p-[3px] shadow-2xl shadow-pink-500/30 transition-all duration-300 group-hover:scale-105 group-hover:shadow-pink-500/50">
+                  <div className="w-full h-full rounded-[calc(1rem-3px)] overflow-hidden bg-slate-900 flex items-center justify-center relative">
+                    {fotoUrl ? (
+                      <img
+                        src={fotoUrl}
+                        alt={instructor.nombre}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <span className="text-4xl font-black text-white">{initialsProf}</span>
+                    )}
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[calc(1rem-3px)]">
+                      {uploadingPhoto ? (
+                        <Loader2 className="w-7 h-7 animate-spin text-white" />
+                      ) : previewUrl ? (
+                        <Check className="w-7 h-7 text-emerald-400" />
+                      ) : (
+                        <Camera className="w-7 h-7 text-white" />
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              {instructor.activo && (
-                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full border-4 border-slate-900 flex items-center justify-center">
-                  <BadgeCheck size={14} className="text-white" />
-                </div>
-              )}
+                {instructor.activo && (
+                  <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full border-4 border-slate-900 flex items-center justify-center">
+                    <BadgeCheck size={14} className="text-white" />
+                  </div>
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handleFileSelected}
+                className="hidden"
+              />
             </div>
             <div className="flex-1 text-center sm:text-left space-y-2 mt-2">
-              <h2 className="text-3xl font-black text-white">{instructor.nombre}</h2>
-              <p className="text-pink-400 font-bold text-sm uppercase tracking-widest">
-                {instructor.taller?.nombreTaller || 'Instructor'}
-              </p>
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-white/50 text-sm mt-4">
-                <div className="flex items-center gap-2">
-                  <Mail size={16} className="text-pink-400/60" />
-                  <span>{instructor.email || 'Sin correo'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone size={16} className="text-pink-400/60" />
-                  <span>{instructor.telefono || 'Sin teléfono'}</span>
-                </div>
-              </div>
-              {/* Botón cambiar contraseña para profesor */}
-              <div className="mt-4">
-                <button
-                  onClick={openPasswordModal}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-pink-500/20 text-white/70 hover:text-pink-400 rounded-xl border border-white/10 hover:border-pink-500/30 transition-all text-sm font-bold"
-                >
-                  <Lock size={14} />
-                  Cambiar Contraseña
-                </button>
+              {/* Name with edit button */}
+              <div className="flex items-center justify-center sm:justify-start gap-3">
+                {editMode ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editNombre}
+                      onChange={(e) => setEditNombre(e.target.value)}
+                      className="bg-black/40 border border-white/20 rounded-xl px-4 py-2 text-2xl font-black text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 w-full max-w-xs"
+                      placeholder="Tu nombre"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveName();
+                        if (e.key === 'Escape') cancelEditName();
+                      }}
+                    />
+                    <button
+                      onClick={saveName}
+                      disabled={savingName}
+                      className="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 transition-all"
+                      title="Guardar"
+                    >
+                      {savingName ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                    </button>
+                    <button
+                      onClick={cancelEditName}
+                      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 border border-white/10 transition-all"
+                      title="Cancelar"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <h2 className="text-3xl font-black text-white">{instructor.nombre}</h2>
+                    <button
+                      onClick={startEditName}
+                      className="p-2 rounded-xl bg-white/5 hover:bg-pink-500/20 text-white/40 hover:text-pink-400 border border-white/10 hover:border-pink-500/30 transition-all"
+                      title="Editar nombre"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
