@@ -38,7 +38,6 @@ function App() {
           <Route path="/talleres" element={<Talleres />} />
           <Route path="/inscripciones" element={<Inscripciones />} />
           <Route path="/reportes" element={<Reportes />} />
-          <Route path="/mi-perfil" element={<MiPerfil />} />
         </Route>
       </Route>
 
@@ -48,6 +47,12 @@ function App() {
           <Route path="/mis-grupos" element={<MisGrupos />} />
           <Route path="/asistencia" element={<Asistencia />} />
           <Route path="/pagos" element={<Pagos />} />
+        </Route>
+      </Route>
+
+      {/* Mi Perfil - accesible para ambos roles */}
+      <Route element={<PrivateRoute allowedRoles={['admin', 'profesor']} />}>
+        <Route element={<Layout />}>
           <Route path="/mi-perfil" element={<MiPerfil />} />
         </Route>
       </Route>
