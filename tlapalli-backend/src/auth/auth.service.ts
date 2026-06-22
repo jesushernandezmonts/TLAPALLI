@@ -369,6 +369,38 @@ export class AuthService {
     return { message: 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión.' };
   }
 
+  // ========== CHANGE PASSWORD (authenticated user) ==========
+  async changePassword(userId: number, currentPassword: string, newPassword: string) {
+    const usuario = await this.prisma.usuario.findUnique({ where: { id: userId } });
+    if (!usuario) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+
+    // Si no tiene passwordHash (solo Google), no puede cambiar con este método
+    if (!usuario.passwordHash) {
+      throw new BadRequestException('Tu cuenta usa Google. No puedes cambiar contraseña aquí.');
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, usuario.passwordHash);
+    if (!isMatch) {
+      throw new BadRequestException('La contraseña actual es incorrecta');
+    }
+
+    const SALT_ROUNDS = 12;
+    const hash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    await this.prisma.usuario.update({
+      where: { id: userId },
+      data: {
+        passwordHash: hash,
+        intentosFallidos: 0,
+        bloqueadoHasta: null,
+      },
+    });
+
+    return { message: 'Contraseña actualizada exitosamente' };
+  }
+
   // ========== REFRESH TOKEN ==========
   async refreshTokens(refreshTokenStr: string) {
     const token = await this.prisma.refreshToken.findUnique({

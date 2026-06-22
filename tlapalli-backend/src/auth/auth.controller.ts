@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import type { Request, Response } from 'express';
 import { GoogleAuthGuard } from './strategies/google-auth.guard';
+import { JwtAuthGuard } from './strategies/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -71,6 +72,24 @@ export class AuthController {
     });
 
     return { accessToken: result.accessToken };
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @Req() req,
+    @Body('currentPassword') currentPassword: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    if (!currentPassword || !newPassword) {
+      throw new BadRequestException('La contraseña actual y la nueva son requeridas');
+    }
+    const validacion = this.authService.validarFortalezaPassword(newPassword);
+    if (!validacion.valida) {
+      throw new BadRequestException(validacion.mensaje);
+    }
+    return this.authService.changePassword(req.user.id, currentPassword, newPassword);
   }
 
   @Post('logout')
