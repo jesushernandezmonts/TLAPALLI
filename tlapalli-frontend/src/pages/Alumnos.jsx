@@ -4,7 +4,7 @@ import Modal from '../components/Modal';
 import AlumnoForm from '../components/AlumnoForm';
 import ConfirmModal from '../components/ConfirmModal';
 import AlumnoDetail from '../components/AlumnoDetail';
-import { Plus, Edit3, Trash2, Power, Eye, Filter } from 'lucide-react';
+import { Plus, Edit3, Trash2, Power, Eye, Filter, KeyRound, Mail, X, Loader2 } from 'lucide-react';
 import Toast from '../components/Toast';
 import StatCard from '../components/StatCard';
 import SearchBar from '../components/SearchBar';
@@ -34,6 +34,10 @@ function Alumnos() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
   const [openFilter, setOpenFilter] = useState(null);
+  const [accesoModalOpen, setAccesoModalOpen] = useState(false);
+  const [accesoAlumno, setAccesoAlumno] = useState(null);
+  const [accesoEmail, setAccesoEmail] = useState('');
+  const [accesoLoading, setAccesoLoading] = useState(false);
   const alumnosPerPage = 8;
 
   // Documentos obligatorios
@@ -177,6 +181,28 @@ function Alumnos() {
       showToast('Cambios guardados', null, 'success');
     } else {
       showToast('Alumno registrado', null, 'success');
+    }
+  };
+
+  const handleCrearAcceso = (alumno) => {
+    setAccesoAlumno(alumno);
+    setAccesoEmail('');
+    setAccesoModalOpen(true);
+  };
+
+  const confirmCrearAcceso = async () => {
+    if (!accesoAlumno || !accesoEmail.trim()) return;
+    setAccesoLoading(true);
+    try {
+      await api.patch(`/auth/alumno/crear-acceso/${accesoAlumno.id}`, { email: accesoEmail.trim() });
+      setAccesoModalOpen(false);
+      setAccesoAlumno(null);
+      setAccesoEmail('');
+      showToast('Acceso creado', `Se envió el correo de activación a ${accesoEmail.trim()}`, 'success');
+    } catch (err) {
+      showToast('Error al crear acceso', err.response?.data?.message || 'No se pudo crear el acceso.', 'error');
+    } finally {
+      setAccesoLoading(false);
     }
   };
 
@@ -407,6 +433,13 @@ function Alumnos() {
                   <td data-label="Acciones" className="text-right">
                     <div className="flex justify-end gap-1 sm:gap-2">
                       <button
+                        onClick={() => handleCrearAcceso(a)}
+                        className="p-2.5 bg-white/5 hover:bg-violet-500/20 hover:text-violet-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-violet-500/30"
+                        title="Crear acceso al portal del alumno"
+                      >
+                        <KeyRound size={16} />
+                      </button>
+                      <button
                         onClick={() => setViewAlumno({ ...a, displayId: startIndex + index + 1 })}
                         className="p-2.5 bg-white/5 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-purple-500/30"
                         title="Ver Ficha y Expediente"
@@ -487,6 +520,77 @@ function Alumnos() {
           : 'El alumno volverá a quedar marcado como activo. ¿Deseas continuar?'}
         confirmText={alumnoToToggle?.estatusActivo ? 'Sí, desactivar' : 'Sí, activar'}
       />
+
+      {/* Modal: Crear Acceso Alumno */}
+      {accesoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setAccesoModalOpen(false)} />
+          <div className="relative w-full max-w-md bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl p-6 space-y-5">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center">
+                  <KeyRound size={18} className="text-violet-400" />
+                </div>
+                <div>
+                  <h2 className="text-base font-black text-white">Crear Acceso al Portal</h2>
+                  <p className="text-xs text-white/50 font-medium mt-0.5">
+                    {accesoAlumno ? `${accesoAlumno.nombre} ${accesoAlumno.apellidoPaterno || ''}`.trim() : ''}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAccesoModalOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Descripción */}
+            <p className="text-sm text-white/60 leading-relaxed">
+              Se enviará un correo al alumno con un enlace para que active su cuenta y cree su contraseña.
+            </p>
+
+            {/* Input email */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-white/60 uppercase tracking-wider flex items-center gap-1.5">
+                <Mail size={12} /> Correo electrónico del alumno
+              </label>
+              <input
+                type="email"
+                value={accesoEmail}
+                onChange={(e) => setAccesoEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && confirmCrearAcceso()}
+                placeholder="correo@ejemplo.com"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all"
+                autoFocus
+              />
+            </div>
+
+            {/* Botones */}
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => setAccesoModalOpen(false)}
+                className="flex-1 py-3 rounded-xl border border-white/10 bg-white/5 text-white/70 text-sm font-bold hover:bg-white/10 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmCrearAcceso}
+                disabled={!accesoEmail.trim() || accesoLoading}
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-violet-600/25"
+              >
+                {accesoLoading ? (
+                  <><Loader2 size={15} className="animate-spin" /> Enviando...</>
+                ) : (
+                  <><Mail size={15} /> Enviar acceso</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
