@@ -20,27 +20,26 @@ function AlumnoLayout() {
   };
 
   return (
-    <div className="min-h-screen relative flex font-['Outfit']">
-      {/* Fondo overlay semitransparente para que se vea el huamantla-bg.jpg */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-slate-950/80 to-black/70 z-0" />
-      <div className="relative z-10 flex w-full">
+    <div className="flex h-screen bg-transparent text-white font-['Outfit'] overflow-hidden">
       <AlumnoSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         alumno={alumno}
         onLogout={handleLogout}
       />
-      <main className="flex-1 flex flex-col min-h-screen">
-        <header className="lg:hidden flex items-center gap-4 p-4 border-b border-white/10 bg-black/20 backdrop-blur-xl">
-          <button onClick={() => setSidebarOpen(true)} className="text-white/60 hover:text-white p-2 rounded-xl hover:bg-white/10 transition">
-            <Menu size={24} />
-          </button>
-          <span className="text-lg font-black text-white tracking-tighter">TLAPALLI</span>
-        </header>
-        <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <Outlet context={{ alumno }} />
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col min-w-0 relative">
+        {/* Botón flotante para móvil (igual al admin) */}
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="lg:hidden fixed top-6 left-6 z-30 p-3 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl text-white/60 hover:text-white transition-all shadow-2xl"
+        >
+          <Menu size={24} />
+        </button>
+        <main className="flex-1 overflow-auto p-4 md:p-8 pt-20 lg:pt-8">
+          <div className="max-w-7xl mx-auto">
+            <Outlet context={{ alumno }} />
+          </div>
+        </main>
       </div>
     </div>
   );
