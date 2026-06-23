@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, ShieldAlert } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, ShieldAlert, GraduationCap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const GoogleIcon = ({ className }) => (
@@ -228,6 +228,27 @@ function Login() {
               <GoogleIcon className="w-5 h-5" />
               <span>Iniciar sesión con Google</span>
             </motion.button>
+
+            {/* Separador y link al portal del alumno */}
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-transparent px-2 text-white/30 font-medium">¿Eres alumno?</span>
+              </div>
+            </div>
+
+            <Link to="/alumno/login">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center justify-center gap-2 h-12 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-pink-500/40 rounded-2xl font-bold text-white/70 hover:text-white transition-all text-sm"
+              >
+                <GraduationCap className="w-5 h-5 text-pink-400" />
+                <span>Acceder al Portal del Alumno</span>
+              </motion.div>
+            </Link>
           </form>
         </div>
 

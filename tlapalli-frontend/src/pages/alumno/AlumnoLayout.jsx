@@ -20,7 +20,7 @@ function AlumnoLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-neutral-950 to-slate-900 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-neutral-950 to-slate-900 flex font-['Outfit']">
       <AlumnoSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -28,11 +28,11 @@ function AlumnoLayout() {
         onLogout={handleLogout}
       />
       <main className="flex-1 flex flex-col min-h-screen">
-        <header className="lg:hidden flex items-center gap-4 p-4 border-b border-white/10">
-          <button onClick={() => setSidebarOpen(true)} className="text-white/60 hover:text-white p-2">
+        <header className="lg:hidden flex items-center gap-4 p-4 border-b border-white/10 bg-black/20 backdrop-blur-xl">
+          <button onClick={() => setSidebarOpen(true)} className="text-white/60 hover:text-white p-2 rounded-xl hover:bg-white/10 transition">
             <Menu size={24} />
           </button>
-          <span className="text-lg font-black text-white">TLAPALLI</span>
+          <span className="text-lg font-black text-white tracking-tighter">TLAPALLI</span>
         </header>
         <div className="flex-1 p-4 md:p-8 overflow-y-auto">
           <Outlet context={{ alumno }} />
