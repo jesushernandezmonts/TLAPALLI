@@ -4,9 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import {
   Plus, Search, Trash2, Eye, Loader2, HeartHandshake,
   Target, User, Calendar, CheckCircle2, AlertCircle, X,
-  BookOpen, TrendingUp, BarChart3, Clock
+  BookOpen, TrendingUp, BarChart3, Clock, CheckCircle, ThumbsUp, ThumbsDown,
 } from 'lucide-react';
 import Modal from '../components/Modal';
+import { motion } from 'framer-motion';
 
 function ServicioSocial() {
   const { user } = useAuth();
@@ -20,6 +21,10 @@ function ServicioSocial() {
   const [createOpen, setCreateOpen] = useState(false);
   const [addHorasOpen, setAddHorasOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('lista');
+
+  // Actividades pendientes
+  const [pendientes, setPendientes] = useState([]);
+  const [loadingPendientes, setLoadingPendientes] = useState(false);
 
   // Form para nuevo registro
   const [newSS, setNewSS] = useState({
@@ -44,6 +49,12 @@ function ServicioSocial() {
     fetchAlumnos();
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'pendientes') {
+      fetchPendientes();
+    }
+  }, [activeTab]);
+
   const fetchData = async () => {
     try {
       const [recordsRes, statsRes] = await Promise.all([
@@ -56,6 +67,18 @@ function ServicioSocial() {
       console.error('Error fetching data', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPendientes = async () => {
+    setLoadingPendientes(true);
+    try {
+      const { data } = await api.get('/servicio-social/actividades/pendientes');
+      setPendientes(data);
+    } catch (err) {
+      console.error('Error fetching pendientes', err);
+    } finally {
+      setLoadingPendientes(false);
     }
   };
 
@@ -101,6 +124,29 @@ function ServicioSocial() {
       fetchData();
     } catch (err) {
       alert(err.response?.data?.message || 'Error al registrar horas');
+    }
+  };
+
+  const handleAprobar = async (id) => {
+    try {
+      await api.patch(`/servicio-social/actividades/${id}/aprobar`);
+      fetchPendientes();
+      if (selectedRecord) {
+        const { data } = await api.get(`/servicio-social/${selectedRecord.id}`);
+        setSelectedRecord(data);
+      }
+      fetchData();
+    } catch (err) {
+      alert('Error al aprobar');
+    }
+  };
+
+  const handleRechazar = async (id) => {
+    try {
+      await api.patch(`/servicio-social/actividades/${id}/rechazar`);
+      fetchPendientes();
+    } catch (err) {
+      alert('Error al rechazar');
     }
   };
 
@@ -224,81 +270,177 @@ function ServicioSocial() {
         </div>
       )}
 
-      {/* Search */}
-      <div className="relative w-full max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5" />
-        <input
-          className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-amber-500/50 transition-all"
-          placeholder="Buscar por alumno..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-white/10 pb-4">
+        <button
+          onClick={() => setActiveTab('lista')}
+          className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all ${
+            activeTab === 'lista'
+              ? 'bg-amber-600/20 text-amber-400 border border-amber-500/30'
+              : 'text-white/50 hover:text-white/80 hover:bg-white/5 border border-transparent'
+          }`}
+        >
+          Registros
+        </button>
+        <button
+          onClick={() => setActiveTab('pendientes')}
+          className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 ${
+            activeTab === 'pendientes'
+              ? 'bg-amber-600/20 text-amber-400 border border-amber-500/30'
+              : 'text-white/50 hover:text-white/80 hover:bg-white/5 border border-transparent'
+          }`}
+        >
+          <Clock size={16} />
+          Pendientes
+          {pendientes.length > 0 && (
+            <span className="px-1.5 py-0.5 bg-amber-500/20 border border-amber-500/30 rounded-full text-[10px] font-black text-amber-400">
+              {pendientes.length}
+            </span>
+          )}
+        </button>
       </div>
 
-      {/* Table */}
-      <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-white/5 border-b border-white/10">
-                <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Alumno</th>
-                <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Progreso</th>
-                <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Estatus</th>
-                <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Actividades</th>
-                <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filteredRecords.length === 0 ? (
-                <tr><td colSpan="5" className="p-12 text-center text-white/30 italic">No hay registros de servicio social.</td></tr>
-              ) : (
-                filteredRecords.map(r => {
-                  const progreso = Math.min(100, Math.round((r.horasCompletadas / r.horasRequeridas) * 100));
-                  return (
-                    <tr key={r.id} className="hover:bg-white/5 transition-colors">
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                            <User size={20} className="text-amber-400" />
-                          </div>
-                          <div>
-                            <p className="font-bold text-white/90">{r.alumno?.nombre} {r.alumno?.apellidoPaterno}</p>
-                            <p className="text-[10px] text-white/30">{r.institucion || '—'}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 bg-white/10 rounded-full h-2 max-w-[120px]">
-                            <div className="bg-gradient-to-r from-amber-500 to-orange-400 h-2 rounded-full transition-all" style={{ width: `${progreso}%` }} />
-                          </div>
-                          <span className="text-xs font-bold text-white/70 whitespace-nowrap">{r.horasCompletadas}/{r.horasRequeridas}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusColors[r.estatus] || 'bg-white/10 text-white/60'}`}>
-                          {statusLabels[r.estatus] || r.estatus}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-white/50 text-sm">{r._count?.actividades || 0}</td>
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex gap-1 justify-end">
-                          <button onClick={() => openDetail(r.id)} className="p-2 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all" title="Ver detalle">
-                            <Eye size={18} />
-                          </button>
-                          <button onClick={() => openAddHoras(r.id)} className="p-2 hover:bg-emerald-500/20 hover:text-emerald-400 rounded-xl transition-all" title="Agregar horas">
-                            <Plus size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+      {activeTab === 'lista' && (
+        <>
+          {/* Search */}
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5" />
+            <input
+              className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-amber-500/50 transition-all"
+              placeholder="Buscar por alumno..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          {/* Table */}
+          <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl overflow-hidden shadow-xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-white/5 border-b border-white/10">
+                    <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Alumno</th>
+                    <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Progreso</th>
+                    <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Estatus</th>
+                    <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Actividades</th>
+                    <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {filteredRecords.length === 0 ? (
+                    <tr><td colSpan="5" className="p-12 text-center text-white/30 italic">No hay registros de servicio social.</td></tr>
+                  ) : (
+                    filteredRecords.map(r => {
+                      const progreso = Math.min(100, Math.round((r.horasCompletadas / r.horasRequeridas) * 100));
+                      return (
+                        <tr key={r.id} className="hover:bg-white/5 transition-colors">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                                <User size={20} className="text-amber-400" />
+                              </div>
+                              <div>
+                                <p className="font-bold text-white/90">{r.alumno?.nombre} {r.alumno?.apellidoPaterno}</p>
+                                <p className="text-[10px] text-white/30">{r.institucion || '—'}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="flex-1 bg-white/10 rounded-full h-2 max-w-[120px]">
+                                <div className="bg-gradient-to-r from-amber-500 to-orange-400 h-2 rounded-full transition-all" style={{ width: `${progreso}%` }} />
+                              </div>
+                              <span className="text-xs font-bold text-white/70 whitespace-nowrap">{r.horasCompletadas}/{r.horasRequeridas}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusColors[r.estatus] || 'bg-white/10 text-white/60'}`}>
+                              {statusLabels[r.estatus] || r.estatus}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-white/50 text-sm">{r._count?.actividades || 0}</td>
+                          <td className="py-4 px-6 text-right">
+                            <div className="flex gap-1 justify-end">
+                              <button onClick={() => openDetail(r.id)} className="p-2 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all" title="Ver detalle">
+                                <Eye size={18} />
+                              </button>
+                              <button onClick={() => openAddHoras(r.id)} className="p-2 hover:bg-emerald-500/20 hover:text-emerald-400 rounded-xl transition-all" title="Agregar horas">
+                                <Plus size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Tab: Pendientes */}
+      {activeTab === 'pendientes' && (
+        <div className="space-y-4">
+          {loadingPendientes ? (
+            <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-amber-500" /></div>
+          ) : pendientes.length === 0 ? (
+            <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-12 text-center">
+              <CheckCircle2 size={48} className="mx-auto text-emerald-400/40 mb-4" />
+              <p className="text-white/40 font-medium">No hay actividades pendientes de aprobación.</p>
+              <p className="text-white/30 text-sm mt-2">Los alumnos pueden registrar horas y tú las apruebas desde aquí.</p>
+            </div>
+          ) : (
+            pendientes.map((act) => (
+              <motion.div
+                key={act.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-black/40 backdrop-blur-2xl border border-amber-500/20 rounded-2xl p-6 shadow-xl"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                        <User size={20} className="text-amber-400" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-white/90">
+                          {act.servicioSocial?.alumno?.nombre} {act.servicioSocial?.alumno?.apellidoPaterno}
+                        </p>
+                        <p className="text-[10px] text-white/40">Alumno</p>
+                      </div>
+                    </div>
+                    <h4 className="font-bold text-white/90 text-sm mt-3">{act.descripcion}</h4>
+                    {act.comentarios && <p className="text-xs text-white/50 mt-1">{act.comentarios}</p>}
+                    <div className="flex items-center gap-3 mt-2 text-xs text-white/40">
+                      <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(act.fecha).toLocaleDateString()}</span>
+                      <span className="text-amber-400 font-black">{act.horas} hrs</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => handleAprobar(act.id)}
+                      className="px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 rounded-xl text-xs font-bold transition-all border border-emerald-500/30 flex items-center gap-1.5"
+                      title="Aprobar"
+                    >
+                      <ThumbsUp size={14} /> Aprobar
+                    </button>
+                    <button
+                      onClick={() => handleRechazar(act.id)}
+                      className="px-4 py-2 bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 rounded-xl text-xs font-bold transition-all border border-rose-500/30 flex items-center gap-1.5"
+                      title="Rechazar"
+                    >
+                      <ThumbsDown size={14} /> Rechazar
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          )}
         </div>
-      </div>
+      )}
 
       {/* Modal: Nuevo Registro */}
       <Modal isOpen={createOpen} onClose={() => setCreateOpen(false)} title="Registrar Servicio Social">
@@ -449,12 +591,22 @@ function ServicioSocial() {
                   {selectedRecord.actividades.map(act => (
                     <div key={act.id} className="flex items-start justify-between bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all">
                       <div className="flex-1">
-                        <p className="font-bold text-white/90 text-sm">{act.descripcion}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-bold text-white/90 text-sm">{act.descripcion}</p>
+                          {act.estatus === 'pendiente' && (
+                            <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[8px] font-black uppercase">Pendiente</span>
+                          )}
+                          {act.estatus === 'rechazada' && (
+                            <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[8px] font-black uppercase">Rechazada</span>
+                          )}
+                        </div>
                         {act.comentarios && <p className="text-xs text-white/50 mt-1">{act.comentarios}</p>}
                         <p className="text-xs text-white/40 mt-1">📅 {new Date(act.fecha).toLocaleDateString()}</p>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="text-amber-400 font-black">{act.horas} hrs</span>
+                        <span className={`font-black ${act.estatus === 'aprobada' ? 'text-emerald-400' : act.estatus === 'rechazada' ? 'text-rose-400' : 'text-amber-400'}`}>
+                          {act.horas} hrs
+                        </span>
                         <button onClick={() => handleDeleteActividad(act.id)} className="p-1.5 text-white/20 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all">
                           <Trash2 size={14} />
                         </button>

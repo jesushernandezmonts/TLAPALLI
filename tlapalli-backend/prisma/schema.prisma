@@ -212,6 +212,8 @@ model ActividadServicioSocial {
   horas           Int
   descripcion     String
   comentarios     String?
+  estatus         String         @default("aprobada") // pendiente, aprobada, rechazada
+  evidenciaUrl    String?        @map("evidencia_url")
   creadoEn        DateTime       @default(now()) @map("creado_en")
 
   @@index([servicioSocialId])

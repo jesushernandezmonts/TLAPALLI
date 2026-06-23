@@ -14,4 +14,12 @@ export class CreateActividadDto {
   @IsOptional()
   @IsString()
   comentarios?: string;
+
+  @IsOptional()
+  @IsString()
+  evidenciaUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  estatus?: string; // 'pendiente' | 'aprobada' (default aprobada for admin)
 }
