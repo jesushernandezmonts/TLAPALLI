@@ -20,7 +20,10 @@ function AlumnoLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-neutral-950 to-slate-900 flex font-['Outfit']">
+    <div className="min-h-screen relative flex font-['Outfit']">
+      {/* Fondo overlay semitransparente para que se vea el huamantla-bg.jpg */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-slate-950/80 to-black/70 z-0" />
+      <div className="relative z-10 flex w-full">
       <AlumnoSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -38,6 +41,7 @@ function AlumnoLayout() {
           <Outlet context={{ alumno }} />
         </div>
       </main>
+      </div>
     </div>
   );
 }
