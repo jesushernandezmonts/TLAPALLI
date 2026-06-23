@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { setAccessToken } from '../../services/api';
 import { jwtDecode } from 'jwt-decode';
-import { Eye, EyeOff, Loader2, LogIn } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Mail, Lock, LogIn, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function AlumnoLogin() {
   const navigate = useNavigate();
@@ -29,76 +30,144 @@ function AlumnoLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-neutral-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-500/30">
-            <span className="text-white font-black text-3xl">A</span>
+    <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-['Outfit']">
+      {/* Fondo con imagen + gradiente igual al sistema */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-900/60 via-purple-900/60 to-orange-900/60 z-10" />
+        <motion.div
+          initial={{ scale: 1.1 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 10, repeat: Infinity, repeatType: 'reverse' }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/huamantla-bg.jpg')" }}
+        />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className="relative z-20 w-full max-w-lg px-4"
+      >
+        <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2rem] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
+
+          {/* Header */}
+          <div className="flex flex-col items-center mb-6">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-16 h-16 mb-3 rounded-2xl overflow-hidden shadow-2xl border border-white/30"
+            >
+              <img src="/tlapalli-logo.png" alt="Tlapalli Logo" className="w-full h-full object-cover" />
+            </motion.div>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-100 to-zinc-400 drop-shadow-sm">
+              TLAPALLI
+            </h1>
+            <p className="text-white/60 mt-1 font-medium tracking-widest uppercase text-[10px]">
+              Portal del Alumno — Centro Cultural Huamantla
+            </p>
           </div>
-          <h1 className="text-3xl font-black text-white">Portal del Alumno</h1>
-          <p className="mt-2 text-white/50 font-medium">TLAPALLI — Centro Cultural Huamantla</p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Error */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                  className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl text-left"
+                >
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-red-300">Error de Acceso</p>
+                    <p className="text-xs text-red-200/80 leading-relaxed mt-0.5">{error}</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Correo */}
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-white/80 ml-1">Correo</label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@correo.com"
+                  className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
+                  required
+                  autoComplete="email"
+                />
+              </div>
+            </div>
+
+            {/* Contraseña */}
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-white/80 ml-1">Contraseña</label>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-white/10 border border-white/20 rounded-2xl pl-12 pr-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
+                  required
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Botón Iniciar Sesión */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={loading}
+              className="w-full relative group h-12 overflow-hidden rounded-2xl font-bold text-white transition-all shadow-lg disabled:opacity-60"
+              type="submit"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-orange-600 to-pink-600 bg-[length:200%_auto] group-hover:bg-right transition-all duration-500" />
+              <span className="relative flex items-center justify-center gap-2">
+                {loading ? (
+                  <><Loader2 className="w-5 h-5 animate-spin" /> Iniciando sesión...</>
+                ) : (
+                  <><LogIn className="w-5 h-5" /> Iniciar Sesión</>
+                )}
+              </span>
+            </motion.button>
+
+            {/* Volver */}
+            <div className="text-center pt-1">
+              <Link
+                to="/login"
+                className="text-xs text-white/40 hover:text-pink-400 transition-colors font-medium"
+              >
+                ← Volver al inicio de sesión principal
+              </Link>
+            </div>
+          </form>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-8 shadow-xl space-y-6">
-          {error && (
-            <div className="bg-rose-950/60 border border-rose-500/30 text-rose-300 text-sm font-bold p-4 rounded-xl">
-              {error}
-            </div>
-          )}
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-white/60 uppercase tracking-wider ml-1">Correo electrónico</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@correo.com"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all"
-              required
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-white/60 uppercase tracking-wider ml-1">Contraseña</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all pr-12"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <><Loader2 size={18} className="animate-spin" /> Iniciando sesión...</>
-            ) : (
-              <><LogIn size={18} /> Iniciar Sesión</>
-            )}
-          </button>
-
-          <div className="text-center pt-2">
-            <Link to="/login" className="text-xs text-white/40 hover:text-violet-400 transition-colors font-medium">
-              ← Volver al inicio de sesión principal
-            </Link>
-          </div>
-        </form>
-      </div>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="text-center text-white/40 mt-8 text-sm"
+        >
+          © 2026 Tlapalli. Todos los derechos reservados.
+        </motion.p>
+      </motion.div>
     </div>
   );
 }
