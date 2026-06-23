@@ -50,6 +50,13 @@ export class AlumnosController {
     return this.alumnosService.getAlumnoServicioSocial(req.user.id);
   }
 
+  @Get('me/tipo')
+  @UseGuards(AlumnoJwtAuthGuard)
+  @ApiOperation({ summary: 'Detectar tipo de alumno: talleres, servicio_social, ambos o ninguno' })
+  getMiTipo(@Req() req) {
+    return this.alumnosService.getTipoAlumno(req.user.id);
+  }
+
   // ========== ENDPOINTS ADMIN/INSTRUCTOR ==========
 
   @Post()

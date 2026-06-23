@@ -101,6 +101,23 @@ export class AlumnosService {
     });
   }
 
+  /** Detecta automáticamente qué tiene el alumno: talleres, servicio_social, ambos o ninguno */
+  async getTipoAlumno(id: number) {
+    const inscripciones = await this.prisma.inscripcion.count({ where: { alumnoId: id } });
+    const servicioSocial = await this.prisma.servicioSocial.count({ where: { alumnoId: id } });
+
+    const tieneTalleres = inscripciones > 0;
+    const tieneSS = servicioSocial > 0;
+
+    let tipo: string;
+    if (tieneTalleres && tieneSS) tipo = 'ambos';
+    else if (tieneTalleres) tipo = 'talleres';
+    else if (tieneSS) tipo = 'servicio_social';
+    else tipo = 'ninguno';
+
+    return { tipo, inscripciones, servicioSocial };
+  }
+
   // ========== MÉTODOS ADMIN/INSTRUCTOR ==========
 
   async create(dto: CreateAlumnoDto) {
