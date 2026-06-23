@@ -9,6 +9,100 @@ import { join } from 'path';
 export class AlumnosService {
   constructor(private prisma: PrismaService) {}
 
+  // ========== MÉTODOS PARA ALUMNO AUTENTICADO ==========
+
+  async getAlumnoPerfil(id: number) {
+    const alumno = await this.prisma.alumno.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        nombre: true,
+        apellidoPaterno: true,
+        apellidoMaterno: true,
+        curp: true,
+        fechaNacimiento: true,
+        telefono: true,
+        padecimientos: true,
+        email: true,
+        fotoUrl: true,
+      },
+    });
+    if (!alumno) throw new NotFoundException('Alumno no encontrado');
+    return alumno;
+  }
+
+  async getAlumnoTalleres(id: number) {
+    const inscripciones = await this.prisma.inscripcion.findMany({
+      where: { alumnoId: id },
+      include: {
+        taller: {
+          select: {
+            id: true,
+            nombreTaller: true,
+            horarioDescripcion: true,
+            costoMensual: true,
+          },
+        },
+      },
+      orderBy: { fechaInscripcion: 'desc' },
+    });
+    return inscripciones;
+  }
+
+  async getAlumnoPagos(id: number) {
+    return this.prisma.pago.findMany({
+      where: { alumnoId: id },
+      orderBy: { fechaPago: 'desc' },
+    });
+  }
+
+  async getAlumnoAsistencias(id: number) {
+    // Asistencias a través de inscripciones y grupoAlumno
+    const inscripciones = await this.prisma.inscripcion.findMany({
+      where: { alumnoId: id },
+      select: { id: true },
+    });
+    const inscripcionIds = inscripciones.map(i => i.id);
+
+    const grupoAlumno = await this.prisma.grupoAlumno.findMany({
+      where: { alumnoId: id },
+      select: { id: true },
+    });
+    const grupoAlumnoIds = grupoAlumno.map(g => g.id);
+
+    return this.prisma.asistencia.findMany({
+      where: {
+        OR: [
+          { inscripcionId: { in: inscripcionIds } },
+          { grupoAlumnoId: { in: grupoAlumnoIds } },
+        ],
+      },
+      include: {
+        inscripcion: {
+          include: { taller: { select: { nombreTaller: true } } },
+        },
+        grupoAlumno: {
+          include: { grupo: { select: { nombre: true } } },
+        },
+      },
+      orderBy: { fecha: 'desc' },
+    });
+  }
+
+  async getAlumnoServicioSocial(id: number) {
+    return this.prisma.servicioSocial.findMany({
+      where: { alumnoId: id },
+      include: {
+        actividades: {
+          orderBy: { fecha: 'desc' },
+        },
+      },
+      orderBy: { creadoEn: 'desc' },
+    });
+  }
+
+  // ========== MÉTODOS ADMIN/INSTRUCTOR ==========
+
   async create(dto: CreateAlumnoDto) {
     const { fechaNacimiento, ...rest } = dto;
     const fecha = fechaNacimiento ? new Date(fechaNacimiento) : undefined;

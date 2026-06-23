@@ -14,6 +14,7 @@ import { ActividadesModule } from './actividades/actividades.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { GruposModule } from './grupos/grupos.module';
 import { AsistenciasModule } from './asistencias/asistencias.module';
+import { ServicioSocialModule } from './servicio-social/servicio-social.module';
 
 
 @Module({
@@ -33,6 +34,7 @@ import { AsistenciasModule } from './asistencias/asistencias.module';
     ReportesModule,
     GruposModule,
     AsistenciasModule,
+    ServicioSocialModule,
   ],
 })
 export class AppModule {}

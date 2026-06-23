@@ -15,6 +15,208 @@ export class AuthService {
     private mailerService: MailerService,
   ) {}
 
+  // ========== ALUMNO LOGIN ==========
+  async alumnoLogin(email: string, password: string) {
+    const alumno = await this.prisma.alumno.findUnique({ where: { email } });
+    if (!alumno) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    if (!alumno.authActivo) {
+      throw new ForbiddenException('Tu acceso al sistema no está activado. Contacta al administrador.');
+    }
+
+    if (!alumno.estatusActivo) {
+      throw new ForbiddenException('El alumno está dado de baja. Contacta al administrador.');
+    }
+
+    if (!alumno.passwordHash) {
+      throw new UnauthorizedException('Tu cuenta aún no tiene contraseña. Contacta al administrador para activarla.');
+    }
+
+    const isMatch = await bcrypt.compare(password, alumno.passwordHash);
+    if (!isMatch) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    // Generar tokens
+    const payload = {
+      sub: alumno.id,
+      email: alumno.email,
+      nombre: alumno.nombre,
+      tipo: 'alumno',
+      fotoUrl: alumno.fotoUrl,
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_SECRET'),
+      expiresIn: this.configService.get('JWT_EXPIRATION') || '15m',
+    });
+
+    const refreshToken = await this.generarAlumnoRefreshToken(alumno.id);
+
+    return {
+      accessToken,
+      refreshToken: refreshToken.token,
+      alumno: {
+        id: alumno.id,
+        nombre: alumno.nombre,
+        email: alumno.email,
+        fotoUrl: alumno.fotoUrl,
+      },
+    };
+  }
+
+  // ========== REFRESH TOKEN ALUMNO ==========
+  async alumnoRefreshTokens(refreshTokenStr: string) {
+    const token = await this.prisma.alumnoRefreshToken.findUnique({
+      where: { token: refreshTokenStr },
+      include: { alumno: true },
+    });
+
+    if (!token || token.revocado || token.expiraEn < new Date()) {
+      throw new UnauthorizedException('Refresh token inválido o expirado');
+    }
+
+    // Revocar el viejo
+    await this.prisma.alumnoRefreshToken.update({
+      where: { id: token.id },
+      data: { revocado: true },
+    });
+
+    // Generar nuevos
+    const payload = {
+      sub: token.alumno.id,
+      email: token.alumno.email,
+      nombre: token.alumno.nombre,
+      tipo: 'alumno',
+      fotoUrl: token.alumno.fotoUrl,
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_SECRET'),
+      expiresIn: '15m',
+    });
+
+    const newRefreshToken = await this.generarAlumnoRefreshToken(token.alumno.id);
+
+    return {
+      accessToken,
+      refreshToken: newRefreshToken.token,
+    };
+  }
+
+  // ========== LOGOUT ALUMNO ==========
+  async alumnoLogout(refreshTokenStr: string) {
+    await this.prisma.alumnoRefreshToken.updateMany({
+      where: { token: refreshTokenStr },
+      data: { revocado: true },
+    });
+    return { message: 'Sesión cerrada exitosamente' };
+  }
+
+  // ========== CREAR ACCESO PARA ALUMNO (admin) ==========
+  async crearAccesoAlumno(alumnoId: number, email: string) {
+    // Verificar que el alumno existe
+    const alumno = await this.prisma.alumno.findUnique({ where: { id: alumnoId } });
+    if (!alumno) {
+      throw new BadRequestException('Alumno no encontrado');
+    }
+
+    // Verificar que el email no esté ya usado por otro alumno
+    const existeEmail = await this.prisma.alumno.findUnique({ where: { email } });
+    if (existeEmail && existeEmail.id !== alumnoId) {
+      throw new BadRequestException('El email ya está siendo usado por otro alumno');
+    }
+
+    // Verificar que el email no esté usado por un usuario del sistema
+    const existeUsuario = await this.prisma.usuario.findUnique({ where: { email } });
+    if (existeUsuario) {
+      throw new BadRequestException('El email ya está registrado como usuario del sistema');
+    }
+
+    // Generar token de invitación
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días
+
+    // Guardar email y token
+    await this.prisma.alumno.update({
+      where: { id: alumnoId },
+      data: {
+        email,
+        authActivo: false,
+        passwordHash: null,
+        resetToken: token,
+        resetTokenExp: expires,
+      },
+    });
+
+    // Enviar correo de activación
+    await this.mailerService.sendAlumnoActivationEmail(email, token, alumno.nombre);
+
+    return {
+      message: 'Correo de activación enviado exitosamente',
+      alumno: {
+        id: alumno.id,
+        nombre: alumno.nombre,
+        apellidoPaterno: alumno.apellidoPaterno,
+        email,
+      },
+    };
+  }
+
+  // ========== ACTIVAR CUENTA ALUMNO ==========
+  async activarCuentaAlumno(token: string, newPassword: string) {
+    const alumno = await this.prisma.alumno.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExp: { gt: new Date() },
+      },
+    });
+
+    if (!alumno) {
+      throw new BadRequestException('El enlace de activación es inválido o ha expirado. Solicita al administrador que te reenvíe uno nuevo.');
+    }
+
+    if (!alumno.estatusActivo) {
+      throw new BadRequestException('El alumno está dado de baja. Contacta al administrador.');
+    }
+
+    const SALT_ROUNDS = 12;
+    const hash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    await this.prisma.alumno.update({
+      where: { id: alumno.id },
+      data: {
+        passwordHash: hash,
+        resetToken: null,
+        resetTokenExp: null,
+        authActivo: true,
+      },
+    });
+
+    return { message: 'Cuenta activada exitosamente. Ya puedes iniciar sesión.' };
+  }
+
+  // ========== HELPER: Generar Refresh Token para Alumno ==========
+  private async generarAlumnoRefreshToken(alumnoId: number) {
+    // Limpiar tokens viejos
+    await this.prisma.alumnoRefreshToken.deleteMany({
+      where: {
+        alumnoId,
+        OR: [{ revocado: true }, { expiraEn: { lt: new Date() } }],
+      },
+    });
+
+    return this.prisma.alumnoRefreshToken.create({
+      data: {
+        token: crypto.randomBytes(64).toString('hex'),
+        alumnoId,
+        expiraEn: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
+      },
+    });
+  }
+
   // ========== REGISTRO (solo admin crea usuarios) ==========
   async register(nombre: string, email: string, password: string, instructorId?: number) {
     const existe = await this.prisma.usuario.findUnique({ where: { email } });

@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller';
 import { PassportModule } from '@nestjs/passport';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { AlumnoJwtStrategy } from './strategies/alumno-jwt.strategy';
 import { MailModule } from '../mail/mail.module';
 
 @Module({
@@ -21,7 +22,7 @@ import { MailModule } from '../mail/mail.module';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, GoogleStrategy, JwtStrategy],
+  providers: [AuthService, GoogleStrategy, JwtStrategy, AlumnoJwtStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

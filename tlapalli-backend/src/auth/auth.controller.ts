@@ -1,13 +1,111 @@
-import { Controller, Post, Get, Body, Req, Res, HttpCode, HttpStatus, BadRequestException, UseGuards, Query } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, Res, HttpCode, HttpStatus, BadRequestException, UseGuards, Query, Patch, Param, ParseIntPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import type { Request, Response } from 'express';
 import { GoogleAuthGuard } from './strategies/google-auth.guard';
 import { JwtAuthGuard } from './strategies/jwt-auth.guard';
+import { RolesGuard } from './strategies/roles.guard';
+import { Roles } from './strategies/roles.decorator';
+import { AlumnoLoginDto } from './dto/alumno-login.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  // ========== ALUMNO AUTH ==========
+
+  @Post('alumno/login')
+  @HttpCode(HttpStatus.OK)
+  async alumnoLogin(
+    @Body() dto: AlumnoLoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.alumnoLogin(dto.email, dto.password);
+
+    res.cookie('alumnoRefreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    return {
+      accessToken: result.accessToken,
+      alumno: result.alumno,
+    };
+  }
+
+  @Post('alumno/refresh')
+  @HttpCode(HttpStatus.OK)
+  async alumnoRefresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = req.cookies?.alumnoRefreshToken;
+    if (!refreshToken) {
+      throw new BadRequestException('Refresh token no encontrado');
+    }
+
+    const result = await this.authService.alumnoRefreshTokens(refreshToken);
+
+    res.cookie('alumnoRefreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    return { accessToken: result.accessToken };
+  }
+
+  @Post('alumno/logout')
+  @HttpCode(HttpStatus.OK)
+  async alumnoLogout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = req.cookies?.alumnoRefreshToken;
+    if (refreshToken) {
+      await this.authService.alumnoLogout(refreshToken);
+    }
+    res.clearCookie('alumnoRefreshToken');
+    return { message: 'Sesión cerrada' };
+  }
+
+  // ========== ADMIN: Crear acceso para alumno ==========
+
+  @Patch('alumno/crear-acceso/:alumnoId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async crearAccesoAlumno(
+    @Param('alumnoId', ParseIntPipe) alumnoId: number,
+    @Body('email') email: string,
+  ) {
+    if (!email) {
+      throw new BadRequestException('El email es requerido');
+    }
+    return this.authService.crearAccesoAlumno(alumnoId, email);
+  }
+
+  // ========== ACTIVAR CUENTA ALUMNO ==========
+  @Post('alumno/activar-cuenta')
+  async activarCuentaAlumno(
+    @Body('token') token: string,
+    @Body('password') password: string,
+  ) {
+    if (!token || !password) {
+      throw new BadRequestException('Token y contraseña son requeridos');
+    }
+    const validacion = this.authService.validarFortalezaPassword(password);
+    if (!validacion.valida) {
+      throw new BadRequestException(validacion.mensaje);
+    }
+    return this.authService.activarCuentaAlumno(token, password);
+  }
+
+  // ========== EXISTING AUTH METHODS ==========
 
   @Post('register')
   async register(
@@ -16,7 +114,6 @@ export class AuthController {
     @Body('password') password: string,
     @Body('instructorId') instructorId?: number,
   ) {
-    // Validar contraseña fuerte
     const validacion = this.authService.validarFortalezaPassword(password);
     if (!validacion.valida) {
       throw new BadRequestException(validacion.mensaje);
@@ -33,16 +130,14 @@ export class AuthController {
   ) {
     const result = await this.authService.login(email, password);
 
-    // Guardar refresh token en cookie httpOnly
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // solo HTTPS en producción
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/',
     });
 
-    // No devolver el refresh token en el cuerpo
     return {
       accessToken: result.accessToken,
       usuario: result.usuario,
@@ -62,7 +157,6 @@ export class AuthController {
 
     const result = await this.authService.refreshTokens(refreshToken);
 
-    // Actualizar cookie
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -117,7 +211,6 @@ export class AuthController {
     try {
       const result = await this.authService.googleLogin(req);
 
-      // Guardar refresh token en cookie httpOnly
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -126,7 +219,6 @@ export class AuthController {
         path: '/',
       });
 
-      // Redirigir al frontend con el accessToken en la URL
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       return res.redirect(`${frontendUrl}/auth/success?token=${result.accessToken}`);
     } catch (error) {
@@ -142,13 +234,12 @@ export class AuthController {
     return this.authService.validateInvitation(token);
   }
 
-  // ========== ACTIVAR CUENTA (Opción B) ==========
+  // ========== ACTIVAR CUENTA ==========
   @Post('activate-account')
   async activateAccount(
     @Body('token') token: string,
     @Body('password') password: string,
   ) {
-    // Validar contraseña fuerte
     const validacion = this.authService.validarFortalezaPassword(password);
     if (!validacion.valida) {
       throw new BadRequestException(validacion.mensaje);
@@ -164,7 +255,6 @@ export class AuthController {
 
   @Post('reset-password')
   async resetPassword(@Body('token') token: string, @Body('password') password: string) {
-    // Validar contraseña fuerte
     const validacion = this.authService.validarFortalezaPassword(password);
     if (!validacion.valida) {
       throw new BadRequestException(validacion.mensaje);

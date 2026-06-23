@@ -639,6 +639,7 @@ function MiPerfil() {
               </div>
             </div>
           </div>
+          </div>
         </motion.div>
 
       <motion.div

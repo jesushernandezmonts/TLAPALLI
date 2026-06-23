@@ -109,4 +109,33 @@ export class MailerService {
 
     await this.sendMail(email, 'Invitación a unirte como Profesor - TLAPALLI', html);
   }
+
+  async sendAlumnoActivationEmail(email: string, token: string, nombre: string) {
+    const frontendUrl = this.configService.get('FRONTEND_URL');
+    const activationUrl = `${frontendUrl}/alumno/activar-cuenta?token=${token}`;
+
+    const html = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; padding: 0; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb;">
+        <div style="background: linear-gradient(135deg, #7c3aed, #4f46e5); padding: 40px 30px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">TLAPALLI</h1>
+          <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 3px;">Centro Cultural Huamantla</p>
+        </div>
+        <div style="padding: 40px 30px; background: #fefefe;">
+          <h2 style="color: #1a1a2e; font-size: 22px; margin: 0 0 16px;">¡Bienvenido a TLAPALLI!</h2>
+          <p style="color: #555; font-size: 15px; line-height: 1.6;">¡Hola, <strong>${nombre}</strong>!</p>
+          <p style="color: #555; font-size: 15px; line-height: 1.6;">El administrador te ha registrado en el <strong>Portal del Alumno</strong> de TLAPALLI. Para acceder, crea tu contraseña haciendo clic en el siguiente botón:</p>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${activationUrl}" style="background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 15px; display: inline-block;">Activar mi Cuenta</a>
+          </div>
+          <p style="font-size: 12px; color: #999;">O copia y pega este enlace en tu navegador:</p>
+          <p style="font-size: 12px; color: #7c3aed; word-break: break-all;">${activationUrl}</p>
+        </div>
+        <div style="background: #f8f4ff; padding: 20px 30px; border-top: 1px solid #e5e7eb;">
+          <p style="font-size: 11px; color: #999; margin: 0;">⏰ Este enlace expirará en 7 días. Si no reconoces este registro, puedes ignorar este correo.</p>
+        </div>
+      </div>
+    `;
+
+    await this.sendMail(email, 'Activa tu cuenta - Portal del Alumno TLAPALLI', html);
+  }
 }

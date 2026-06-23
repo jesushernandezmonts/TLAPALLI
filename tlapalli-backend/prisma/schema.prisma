@@ -49,10 +49,20 @@ model Alumno {
   padecimientos    String?
   estatusActivo    Boolean       @default(true) @map("estatus_activo")
   fotoUrl          String?       @map("foto_url")
+  // Autenticación para alumnos
+  email            String?       @unique
+  passwordHash     String?       @map("password_hash")
+  authActivo       Boolean       @default(false) @map("auth_activo")
+  resetToken       String?       @unique @map("reset_token")
+  resetTokenExp    DateTime?     @map("reset_token_exp")
+  // Relaciones existentes
   inscripciones    Inscripcion[]
   pagos            Pago[]
   documentos       Documento[]
   grupos           GrupoAlumno[] @relation("GrupoAlumnos")
+  // Nuevas relaciones
+  servicioSocial   ServicioSocial[]
+  alumnoRefreshTokens AlumnoRefreshToken[]
 }
 
 model Documento {
@@ -170,5 +180,52 @@ model GrupoAlumno {
 
   @@unique([grupoId, alumnoId])
   @@index([grupoId])
+  @@index([alumnoId])
+}
+
+// === SERVICIO SOCIAL ===
+model ServicioSocial {
+  id                Int                        @id @default(autoincrement())
+  alumnoId          Int                        @map("alumno_id")
+  alumno            Alumno                     @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
+  horasRequeridas   Int                        @default(480) @map("horas_requeridas")
+  horasCompletadas  Int                        @default(0) @map("horas_completadas")
+  estatus           String                     @default("en_curso") // en_curso, completado, suspendido, baja
+  institucion       String?                    // Institución donde se presta el servicio
+  programa          String?                    // Nombre del programa o área
+  fechaInicio       DateTime?                  @map("fecha_inicio")
+  fechaFin          DateTime?                  @map("fecha_fin")
+  supervisor        String?                    // Nombre del supervisor
+  observaciones     String?
+  actividades       ActividadServicioSocial[]
+  creadoEn          DateTime                   @default(now()) @map("creado_en")
+  actualizadoEn     DateTime                   @updatedAt @map("actualizado_en")
+
+  @@index([alumnoId])
+}
+
+model ActividadServicioSocial {
+  id              Int            @id @default(autoincrement())
+  servicioSocialId Int           @map("servicio_social_id")
+  servicioSocial  ServicioSocial @relation(fields: [servicioSocialId], references: [id], onDelete: Cascade)
+  fecha           DateTime       @default(now())
+  horas           Int
+  descripcion     String
+  comentarios     String?
+  creadoEn        DateTime       @default(now()) @map("creado_en")
+
+  @@index([servicioSocialId])
+}
+
+// === REFRESH TOKENS PARA ALUMNOS ===
+model AlumnoRefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  alumnoId  Int      @map("alumno_id")
+  alumno    Alumno   @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
+  expiraEn  DateTime @map("expira_en")
+  revocado  Boolean  @default(false)
+  creadoEn  DateTime @default(now()) @map("creado_en")
+
   @@index([alumnoId])
 }

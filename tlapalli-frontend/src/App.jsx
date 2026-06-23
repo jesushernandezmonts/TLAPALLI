@@ -15,8 +15,21 @@ import Reportes from './pages/Reportes';
 import MisGrupos from './pages/MisGrupos';
 import Asistencia from './pages/Asistencia';
 import MiPerfil from './pages/MiPerfil';
+import ServicioSocial from './pages/ServicioSocial';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
+
+// Alumno pages
+import AlumnoLogin from './pages/alumno/AlumnoLogin';
+import AlumnoDashboard from './pages/alumno/AlumnoDashboard';
+import AlumnoTalleres from './pages/alumno/AlumnoTalleres';
+import AlumnoPagos from './pages/alumno/AlumnoPagos';
+import AlumnoAsistencias from './pages/alumno/AlumnoAsistencias';
+import AlumnoPerfil from './pages/alumno/AlumnoPerfil';
+import AlumnoServicioSocial from './pages/alumno/AlumnoServicioSocial';
+import AlumnoActivarCuenta from './pages/alumno/AlumnoActivarCuenta';
+import AlumnoLayout from './pages/alumno/AlumnoLayout';
+import AlumnoPrivateRoute from './pages/alumno/AlumnoPrivateRoute';
 
 function App() {
   return (
@@ -38,6 +51,7 @@ function App() {
           <Route path="/talleres" element={<Talleres />} />
           <Route path="/inscripciones" element={<Inscripciones />} />
           <Route path="/reportes" element={<Reportes />} />
+          <Route path="/servicio-social" element={<ServicioSocial />} />
         </Route>
       </Route>
 
@@ -54,6 +68,20 @@ function App() {
       <Route element={<PrivateRoute allowedRoles={['admin', 'profesor']} />}>
         <Route element={<Layout />}>
           <Route path="/mi-perfil" element={<MiPerfil />} />
+        </Route>
+      </Route>
+
+      {/* Rutas del ALUMNO */}
+      <Route path="/alumno/login" element={<AlumnoLogin />} />
+      <Route path="/alumno/activar-cuenta" element={<AlumnoActivarCuenta />} />
+      <Route element={<AlumnoPrivateRoute />}>
+        <Route element={<AlumnoLayout />}>
+          <Route path="/alumno/dashboard" element={<AlumnoDashboard />} />
+          <Route path="/alumno/talleres" element={<AlumnoTalleres />} />
+          <Route path="/alumno/pagos" element={<AlumnoPagos />} />
+          <Route path="/alumno/asistencias" element={<AlumnoAsistencias />} />
+          <Route path="/alumno/perfil" element={<AlumnoPerfil />} />
+          <Route path="/alumno/servicio-social" element={<AlumnoServicioSocial />} />
         </Route>
       </Route>
 
