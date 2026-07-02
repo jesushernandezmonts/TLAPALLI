@@ -1,0 +1,19 @@
+name: tlapalli
+service:
+  name: backend
+  port: 3000
+  routes:
+    - path: /
+  source:
+    dir: tlapalli-backend
+  build:
+    builder: buildpacks
+  run:
+    command: node dist/main
+    health:
+      path: /api/health
+    env:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"

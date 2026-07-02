@@ -43,17 +43,21 @@ export class DocumentosService {
   async remove(id: number) {
     const doc = await this.prisma.documento.findUnique({ where: { id } });
     if (!doc) throw new NotFoundException('Documento no encontrado');
-    
-    // Intentar borrar el archivo físico del servidor
-    const physicalPath = join(process.cwd(), doc.url);
+
+    // Intentar borrar el archivo de Cloudinary
     try {
-      if (fs.existsSync(physicalPath)) {
-        fs.unlinkSync(physicalPath);
+      const publicId = doc.url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/)?.[1];
+      if (publicId) {
+        // Cloudinary no lanza error si el archivo no existe
+        await import('cloudinary').then(({ v2: cloudinary }) => {
+          // La configuración se toma del módulo global
+          return cloudinary.uploader.destroy(publicId);
+        });
       }
     } catch (e) {
-      console.error('No se pudo borrar el archivo físico:', e);
+      console.error('No se pudo borrar el archivo de Cloudinary:', e);
     }
-    
+
     return this.prisma.documento.delete({ where: { id } });
   }
 

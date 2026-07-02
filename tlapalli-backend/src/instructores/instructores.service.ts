@@ -6,8 +6,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { MailerService } from '../mail/mailer.service';
-import { join } from 'path';
-import * as fs from 'fs';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 
 @Injectable()
@@ -15,6 +14,7 @@ export class InstructoresService {
   constructor(
     private prisma: PrismaService,
     private mailerService: MailerService,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   async create(dto: CreateInstructorDto) {
@@ -192,12 +192,14 @@ export class InstructoresService {
       await this.prisma.usuario.delete({ where: { id: usuario.id } });
     }
 
-    // Borrar archivos físicos
+    // Borrar archivos de Cloudinary
     if (instructor.curriculumUrl) {
-      this.deletePhysicalFile(instructor.curriculumUrl);
+      const publicId = this.cloudinaryService.extractPublicIdFromUrl(instructor.curriculumUrl);
+      if (publicId) await this.cloudinaryService.deleteFile(publicId);
     }
     if (instructor.temarioUrl) {
-      this.deletePhysicalFile(instructor.temarioUrl);
+      const publicId = this.cloudinaryService.extractPublicIdFromUrl(instructor.temarioUrl);
+      if (publicId) await this.cloudinaryService.deleteFile(publicId);
     }
 
     return this.prisma.instructor.delete({ where: { id } });
@@ -273,10 +275,12 @@ export class InstructoresService {
     return { message: 'Enlace enviado exitosamente' };
   }
 
-  async updateCvUrl(id: number, url: string) {
+  async updateCvUrl(id: number, url: string, cloudinaryService?: CloudinaryService) {
     const instructor = await this.findOne(id);
     if (instructor.curriculumUrl) {
-      this.deletePhysicalFile(instructor.curriculumUrl);
+      const svc = cloudinaryService || this.cloudinaryService;
+      const publicId = svc.extractPublicIdFromUrl(instructor.curriculumUrl);
+      if (publicId) await svc.deleteFile(publicId);
     }
     return this.prisma.instructor.update({
       where: { id },
@@ -285,10 +289,12 @@ export class InstructoresService {
     });
   }
 
-  async updateTemarioUrl(id: number, url: string) {
+  async updateTemarioUrl(id: number, url: string, cloudinaryService?: CloudinaryService) {
     const instructor = await this.findOne(id);
     if (instructor.temarioUrl) {
-      this.deletePhysicalFile(instructor.temarioUrl);
+      const svc = cloudinaryService || this.cloudinaryService;
+      const publicId = svc.extractPublicIdFromUrl(instructor.temarioUrl);
+      if (publicId) await svc.deleteFile(publicId);
     }
     return this.prisma.instructor.update({
       where: { id },
@@ -300,7 +306,8 @@ export class InstructoresService {
   async removeCv(id: number) {
     const instructor = await this.findOne(id);
     if (instructor.curriculumUrl) {
-      this.deletePhysicalFile(instructor.curriculumUrl);
+      const publicId = this.cloudinaryService.extractPublicIdFromUrl(instructor.curriculumUrl);
+      if (publicId) await this.cloudinaryService.deleteFile(publicId);
     }
     return this.prisma.instructor.update({
       where: { id },
@@ -312,7 +319,8 @@ export class InstructoresService {
   async removeTemario(id: number) {
     const instructor = await this.findOne(id);
     if (instructor.temarioUrl) {
-      this.deletePhysicalFile(instructor.temarioUrl);
+      const publicId = this.cloudinaryService.extractPublicIdFromUrl(instructor.temarioUrl);
+      if (publicId) await this.cloudinaryService.deleteFile(publicId);
     }
     return this.prisma.instructor.update({
       where: { id },
@@ -321,16 +329,7 @@ export class InstructoresService {
     });
   }
 
-  private deletePhysicalFile(relativeUrl: string) {
-    const physicalPath = join(process.cwd(), relativeUrl);
-    try {
-      if (fs.existsSync(physicalPath)) {
-        fs.unlinkSync(physicalPath);
-      }
-    } catch (e) {
-      console.error('No se pudo borrar el archivo físico:', e);
-    }
-  }
+
 
   async updateMyProfile(userId: number, dto: UpdateProfileDto) {
     const usuario = await this.prisma.usuario.findUnique({ where: { id: userId } });
@@ -356,13 +355,15 @@ export class InstructoresService {
     return updated;
   }
 
-  async updateMyFoto(userId: number, fotoUrl: string) {
+  async updateMyFoto(userId: number, fotoUrl: string, cloudinaryService?: CloudinaryService) {
     const usuario = await this.prisma.usuario.findUnique({ where: { id: userId } });
     if (!usuario) throw new NotFoundException('Usuario no encontrado');
 
     // Borrar foto anterior si existe
     if (usuario.fotoUrl) {
-      this.deletePhysicalFile(usuario.fotoUrl);
+      const svc = cloudinaryService || this.cloudinaryService;
+      const publicId = svc.extractPublicIdFromUrl(usuario.fotoUrl);
+      if (publicId) await svc.deleteFile(publicId);
     }
 
     return this.prisma.usuario.update({

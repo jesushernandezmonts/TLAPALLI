@@ -15,6 +15,8 @@ import { ReportesModule } from './reportes/reportes.module';
 import { GruposModule } from './grupos/grupos.module';
 import { AsistenciasModule } from './asistencias/asistencias.module';
 import { ServicioSocialModule } from './servicio-social/servicio-social.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { HealthController } from './health/health.controller';
 
 
 @Module({
@@ -35,6 +37,8 @@ import { ServicioSocialModule } from './servicio-social/servicio-social.module';
     GruposModule,
     AsistenciasModule,
     ServicioSocialModule,
+    CloudinaryModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

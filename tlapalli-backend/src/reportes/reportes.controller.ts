@@ -1,37 +1,31 @@
-import { Controller, Post, Get, Param, Delete, UseInterceptors, UploadedFile, Body, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Get, Param, Delete, UseInterceptors, UploadedFile, Body, ParseIntPipe, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ReportesService } from './reportes.service';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import * as fs from 'fs';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { memoryStorage } from 'multer';
 
 @Controller('reportes')
 export class ReportesController {
-  constructor(private readonly reportesService: ReportesService) {}
+  constructor(
+    private readonly reportesService: ReportesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('archivo', {
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        const uploadPath = './uploads/reportes';
-        if (!fs.existsSync(uploadPath)) {
-          fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-      },
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'reporte-' + uniqueSuffix + extname(file.originalname));
-      },
-    }),
+    storage: memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
   }))
-  upload(
+  async upload(
     @UploadedFile() file: Express.Multer.File,
     @Body('tipo') tipo: string,
     @Body('nombre') nombre: string,
   ) {
-    const url = `/uploads/reportes/${file.filename}`;
-    return this.reportesService.create(tipo, nombre, url);
+    if (!file) {
+      throw new BadRequestException('No se recibió el archivo');
+    }
+    const result = await this.cloudinaryService.uploadFile(file, 'reportes');
+    return this.reportesService.create(tipo, nombre, result.secureUrl);
   }
 
   @Get()

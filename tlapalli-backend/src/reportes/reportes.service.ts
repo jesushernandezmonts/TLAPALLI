@@ -1,7 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import * as fs from 'fs';
-import { join } from 'path';
 
 @Injectable()
 export class ReportesService {
@@ -29,17 +27,16 @@ export class ReportesService {
       throw new NotFoundException('Reporte no encontrado');
     }
 
-    // El URL guardado tiene formato '/uploads/reportes/nombre.pdf'
-    // Quitamos la barra inicial si la tiene para resolver la ruta relativa correcta
-    const relativeUrl = report.url.startsWith('/') ? report.url.slice(1) : report.url;
-    const filePath = join(process.cwd(), relativeUrl);
-
+    // Intentar borrar de Cloudinary
     try {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      const publicId = report.url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/)?.[1];
+      if (publicId) {
+        await import('cloudinary').then(({ v2: cloudinary }) => {
+          return cloudinary.uploader.destroy(publicId);
+        });
       }
     } catch (err) {
-      console.error(`Error al eliminar archivo de reporte de disco: ${filePath}`, err);
+      console.error('Error al eliminar archivo de Cloudinary:', err);
     }
 
     return this.prisma.reporte.delete({ where: { id } });

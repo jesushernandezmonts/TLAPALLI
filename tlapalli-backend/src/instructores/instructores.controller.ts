@@ -1,16 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseInterceptors, UploadedFile, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseInterceptors, UploadedFile, UseGuards, Request, BadRequestException } from '@nestjs/common';
 import { InstructoresService } from './instructores.service';
 import { CreateInstructorDto } from './dto/create-instructor.dto';
 import { UpdateInstructorDto } from './dto/update-instructor.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import * as fs from 'fs';
+import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
 import { RolesGuard } from '../auth/strategies/roles.guard';
 import { Roles } from '../auth/strategies/roles.decorator';
 import { PrismaService } from '../prisma/prisma.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('instructores')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -18,6 +17,7 @@ export class InstructoresController {
   constructor(
     private readonly instructoresService: InstructoresService,
     private readonly prisma: PrismaService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   @Get('me')
@@ -58,19 +58,7 @@ export class InstructoresController {
   @Post('me/upload-foto')
   @Roles('admin', 'profesor')
   @UseInterceptors(FileInterceptor('foto', {
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        const uploadPath = './uploads/perfiles';
-        if (!fs.existsSync(uploadPath)) {
-          fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-      },
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'perfil-' + uniqueSuffix + extname(file.originalname));
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
         cb(new Error('Solo se permiten imágenes (jpg, jpeg, png, gif, webp)'), false);
@@ -84,9 +72,12 @@ export class InstructoresController {
     @Request() req,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    if (!file) {
+      throw new BadRequestException('No se recibió la imagen');
+    }
+    const result = await this.cloudinaryService.uploadFile(file, 'perfiles');
     const userId = req.user.id;
-    const fotoUrl = `/uploads/perfiles/${file.filename}`;
-    return this.instructoresService.updateMyFoto(userId, fotoUrl);
+    return this.instructoresService.updateMyFoto(userId, result.secureUrl, this.cloudinaryService);
   }
 
   @Post()
@@ -134,51 +125,35 @@ export class InstructoresController {
   @Post(':id/upload-cv')
   @Roles('admin')
   @UseInterceptors(FileInterceptor('cv', {
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        const uploadPath = './uploads/instructores/cv';
-        if (!fs.existsSync(uploadPath)) {
-          fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-      },
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + extname(file.originalname));
-      },
-    }),
+    storage: memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   }))
-  uploadCv(
+  async uploadCv(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const url = `/uploads/instructores/cv/${file.filename}`;
-    return this.instructoresService.updateCvUrl(id, url);
+    if (!file) {
+      throw new BadRequestException('No se recibió el archivo');
+    }
+    const result = await this.cloudinaryService.uploadFile(file, 'instructores/cv');
+    return this.instructoresService.updateCvUrl(id, result.secureUrl, this.cloudinaryService);
   }
 
   @Post(':id/upload-temario')
   @Roles('admin')
   @UseInterceptors(FileInterceptor('temario', {
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        const uploadPath = './uploads/instructores/temario';
-        if (!fs.existsSync(uploadPath)) {
-          fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-      },
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + extname(file.originalname));
-      },
-    }),
+    storage: memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   }))
-  uploadTemario(
+  async uploadTemario(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const url = `/uploads/instructores/temario/${file.filename}`;
-    return this.instructoresService.updateTemarioUrl(id, url);
+    if (!file) {
+      throw new BadRequestException('No se recibió el archivo');
+    }
+    const result = await this.cloudinaryService.uploadFile(file, 'instructores/temario');
+    return this.instructoresService.updateTemarioUrl(id, result.secureUrl, this.cloudinaryService);
   }
 
   @Delete(':id/cv')
