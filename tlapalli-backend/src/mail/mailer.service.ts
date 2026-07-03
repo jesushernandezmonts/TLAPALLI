@@ -25,9 +25,10 @@ export class MailerService {
         pass: smtpPass,
       },
       tls: {
-        rejectUnauthorized: false, // Evita errores de certificado en algunos servidores
+        rejectUnauthorized: false,
+        family: 4, // Forzar IPv4 (Render no soporta IPv6 saliente)
       },
-      connectionTimeout: 10000, // 10 segundos de timeout
+      connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 15000,
     });
