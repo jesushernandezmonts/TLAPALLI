@@ -168,7 +168,7 @@ function ExpedienteDigital({ alumnoId }) {
                 <button
                   type="button"
                   onClick={() => setActiveDoc({
-                    url: `http://localhost:3000${doc.url}`,
+                    url: doc.url,
                     title: doc.nombre
                   })}
                   className="text-pink-400 hover:text-pink-300 transition text-sm font-medium cursor-pointer"

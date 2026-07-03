@@ -49,7 +49,7 @@ function AcceptInvitation() {
 
   const handleLinkGoogle = () => {
     if (!token) return;
-    window.location.href = `http://localhost:3000/auth/google?state=${token}`;
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google?state=${token}`;
   };
 
   const handleCreatePassword = async (e) => {

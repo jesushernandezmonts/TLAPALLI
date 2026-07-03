@@ -117,7 +117,7 @@ function Sidebar({ isOpen, onClose }) {
               <div className="w-full h-full rounded-[10px] bg-neutral-900 flex items-center justify-center overflow-hidden">
                 {user?.fotoUrl && !photoError ? (
                   <img
-                    src={`${api.defaults.baseURL || 'http://localhost:3000'}${user.fotoUrl}`}
+                    src={user.fotoUrl}
                     alt={user?.nombre}
                     className="w-full h-full object-cover"
                     onError={() => setPhotoError(true)}

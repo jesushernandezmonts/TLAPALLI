@@ -1115,7 +1115,7 @@ function PrintActividades({ data: d }) {
 
 /* ── Report Preview Modal ── */
 function ReportPreviewModal({ report, data, onClose, onPrint }) {
-  const pdfUrl = `${api.defaults.baseURL || 'http://localhost:3000'}${report.url}`;
+  const pdfUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${report.url}`;
 
   const reportComponent = {
     general: <PrintGeneral data={data} />,

@@ -273,7 +273,7 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
                     <button
                       type="button"
                       onClick={() => setActiveDoc({
-                        url: `${api.defaults.baseURL || 'http://localhost:3000'}${curriculumUrl}`,
+                        url: curriculumUrl,
                         title: `CV - ${form.nombre}`
                       })}
                       className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5 cursor-pointer text-left"
@@ -340,7 +340,7 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
                     <button
                       type="button"
                       onClick={() => setActiveDoc({
-                        url: `${api.defaults.baseURL || 'http://localhost:3000'}${temarioUrl}`,
+                        url: temarioUrl,
                         title: `Temario - ${form.nombre}`
                       })}
                       className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5 cursor-pointer text-left"

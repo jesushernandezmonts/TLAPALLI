@@ -185,7 +185,7 @@ function MiPerfil() {
     return profile?.usuario?.fotoUrl || null;
   };
 
-  const fotoUrl = previewUrl || (getFotoUrl() ? `${api.defaults.baseURL || 'http://localhost:3000'}${getFotoUrl()}` : null);
+  const fotoUrl = previewUrl || getFotoUrl();
   const baseUrl = api.defaults.baseURL || 'http://localhost:3000';
 
   // Compute initials

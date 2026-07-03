@@ -508,7 +508,7 @@ function Instructores() {
                           <button
                             type="button"
                             onClick={() => setActiveDoc({
-                              url: `${api.defaults.baseURL || 'http://localhost:3000'}${detailInstructor.curriculumUrl}`,
+                              url: curriculumUrl,
                               title: `CV - ${detailInstructor.nombre}`
                             })}
                             className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5 cursor-pointer"
@@ -542,7 +542,7 @@ function Instructores() {
                           <button
                             type="button"
                             onClick={() => setActiveDoc({
-                              url: `${api.defaults.baseURL || 'http://localhost:3000'}${detailInstructor.temarioUrl}`,
+                              url: temarioUrl,
                               title: `Temario - ${detailInstructor.nombre}`
                             })}
                             className="text-[10px] font-semibold text-pink-400 hover:text-pink-300 transition flex items-center gap-1 mt-0.5 cursor-pointer"

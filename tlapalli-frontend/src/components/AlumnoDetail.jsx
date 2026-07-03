@@ -193,7 +193,7 @@ function AlumnoDetail({ alumno, onClose }) {
                       <button 
                         type="button"
                         onClick={() => setActiveDoc({
-                          url: `http://localhost:3000${doc.url}`,
+                          url: doc.url,
                           title: doc.nombre
                         })}
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase bg-pink-600/10 text-pink-400 hover:bg-pink-600/25 border border-pink-500/15 hover:border-pink-500/30 transition cursor-pointer select-none shrink-0"
