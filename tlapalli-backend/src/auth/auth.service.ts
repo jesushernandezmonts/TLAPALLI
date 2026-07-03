@@ -153,7 +153,14 @@ export class AuthService {
 
     // Enviar correo de activación (no bloqueante)
     this.mailerService.sendAlumnoActivationEmail(email, token, alumno.nombre)
-      .catch(err => console.error('❌ Error sending activation email (async):', err.message));
+      .then(() => console.log(`✅ Correo de activación enviado a ${email}`))
+      .catch(err => {
+        console.error(`❌ Error enviando correo de activación a ${email}:`, err.message);
+        // Log del enlace de activación como fallback
+        const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+        const activationUrl = `${frontendUrl}/alumno/activar-cuenta?token=${token}`;
+        console.log(`🔗 Enlace de activación (fallback): ${activationUrl}`);
+      });
 
     return {
       message: 'Correo de activación enviado exitosamente',

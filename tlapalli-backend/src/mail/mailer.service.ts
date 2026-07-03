@@ -7,14 +7,29 @@ export class MailerService {
   private transporter: nodemailer.Transporter;
 
   constructor(private configService: ConfigService) {
+    const smtpUser = this.configService.get('SMTP_USER') || '';
+    const smtpPass = this.configService.get('SMTP_PASS') || '';
+
+    // Si son credenciales placeholder, no creamos transporter real
+    if (!smtpUser || smtpUser.includes('tu-correo') || !smtpPass || smtpPass.includes('tu-password')) {
+      console.log('📧 MODO DESARROLLO: Usando console.log para simular envío de correos');
+      return;
+    }
+
     this.transporter = nodemailer.createTransport({
       host: this.configService.get('SMTP_HOST'),
-      port: this.configService.get('SMTP_PORT'),
-      secure: false, // true for 465, false for other ports
+      port: Number(this.configService.get('SMTP_PORT')) || 587,
+      secure: false,
       auth: {
-        user: this.configService.get('SMTP_USER'),
-        pass: this.configService.get('SMTP_PASS'),
+        user: smtpUser,
+        pass: smtpPass,
       },
+      tls: {
+        rejectUnauthorized: false, // Evita errores de certificado en algunos servidores
+      },
+      connectionTimeout: 10000, // 10 segundos de timeout
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
   }
 
