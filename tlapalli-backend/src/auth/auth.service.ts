@@ -162,8 +162,12 @@ export class AuthService {
         console.log(`🔗 Enlace de activación (fallback): ${activationUrl}`);
       });
 
+    const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+    const activationUrl = `${frontendUrl}/alumno/activar-cuenta?token=${token}`;
+
     return {
       message: 'Correo de activación enviado exitosamente',
+      activationLink: activationUrl, // 🔗 Enlace directo por si no llega el correo
       alumno: {
         id: alumno.id,
         nombre: alumno.nombre,
