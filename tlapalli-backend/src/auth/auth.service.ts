@@ -151,8 +151,9 @@ export class AuthService {
       },
     });
 
-    // Enviar correo de activación
-    await this.mailerService.sendAlumnoActivationEmail(email, token, alumno.nombre);
+    // Enviar correo de activación (no bloqueante)
+    this.mailerService.sendAlumnoActivationEmail(email, token, alumno.nombre)
+      .catch(err => console.error('❌ Error sending activation email (async):', err.message));
 
     return {
       message: 'Correo de activación enviado exitosamente',
