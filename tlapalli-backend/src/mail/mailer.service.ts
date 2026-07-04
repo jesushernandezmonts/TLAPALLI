@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as sgMail from '@sendgrid/mail';
+import { MailService } from '@sendgrid/mail';
 
 @Injectable()
 export class MailerService {
+  private sgMail: MailService;
+
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get('SENDGRID_API_KEY') || '';
 
@@ -12,7 +14,8 @@ export class MailerService {
       return;
     }
 
-    sgMail.setApiKey(apiKey);
+    this.sgMail = new MailService();
+    this.sgMail.setApiKey(apiKey);
   }
 
   async sendMail(to: string, subject: string, html: string) {
@@ -36,7 +39,7 @@ export class MailerService {
         subject,
         html,
       };
-      await sgMail.send(msg);
+      await this.sgMail.send(msg);
       console.log(`✅ Email enviado a ${to} via SendGrid`);
     } catch (error) {
       console.error(`❌ Error enviando email a ${to} via SendGrid:`, error.message);
