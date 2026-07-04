@@ -1,51 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import * as sgMail from '@sendgrid/mail';
 
 @Injectable()
 export class MailerService {
-  private transporter: nodemailer.Transporter;
-
   constructor(private configService: ConfigService) {
-    const smtpUser = this.configService.get('SMTP_USER') || '';
-    const smtpPass = this.configService.get('SMTP_PASS') || '';
+    const apiKey = this.configService.get('SENDGRID_API_KEY') || '';
 
-    // Si son credenciales placeholder, no creamos transporter real
-    if (!smtpUser || smtpUser.includes('tu-correo') || !smtpPass || smtpPass.includes('tu-password')) {
-      console.log('📧 MODO DESARROLLO: Usando console.log para simular envío de correos');
+    if (!apiKey || apiKey.includes('tu-api-key')) {
+      console.log('📧 MODO DESARROLLO: SendGrid no configurado, usando console.log');
       return;
     }
 
-    this.transporter = nodemailer.createTransport({
-      host: this.configService.get('SMTP_HOST'),
-      port: Number(this.configService.get('SMTP_PORT')) || 587,
-      secure: false,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-      tls: {
-        rejectUnauthorized: false,
-        family: 4, // Forzar IPv4 (Render no soporta IPv6 saliente)
-      },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-    });
+    sgMail.setApiKey(apiKey);
   }
 
   async sendMail(to: string, subject: string, html: string) {
-    const from = this.configService.get('SMTP_FROM');
-    const user = this.configService.get('SMTP_USER') || '';
-    const pass = this.configService.get('SMTP_PASS') || '';
+    const from = this.configService.get('SMTP_FROM') || 'jesushernandezmonts@gmail.com';
 
-    // MODO SIMULADO: Solo si aún tiene credenciales de placeholder
-    if (!user || user.includes('tu-correo') || !pass || pass.includes('tu-password')) {
+    if (!this.configService.get('SENDGRID_API_KEY') || this.configService.get('SENDGRID_API_KEY')!.includes('tu-api-key')) {
       console.log('---------------------------------------------------------');
       console.log('📧 MODO DESARROLLO: ENVÍO DE EMAIL SIMULADO');
       console.log(`PARA: ${to}`);
       console.log(`ASUNTO: ${subject}`);
-      // Extraer el link del HTML para mostrarlo fácilmente
       const link = html.match(/href="([^"]*)"/)?.[1];
       if (link) console.log(`🔗 ENLACE: ${link}`);
       console.log('---------------------------------------------------------');
@@ -53,14 +30,23 @@ export class MailerService {
     }
 
     try {
-      const info = await this.transporter.sendMail({ from, to, subject, html });
-      console.log(`✅ Email enviado a ${to} — ID: ${info.messageId}`);
+      const msg = {
+        to,
+        from,
+        subject,
+        html,
+      };
+      await sgMail.send(msg);
+      console.log(`✅ Email enviado a ${to} via SendGrid`);
     } catch (error) {
-      console.error(`❌ Error enviando email a ${to}:`, error.message);
-      // Mostrar el link como fallback para no perder el token
+      console.error(`❌ Error enviando email a ${to} via SendGrid:`, error.message);
+      if (error.response) {
+        console.error('SendGrid error body:', error.response.body);
+      }
+      // Log del link como fallback
       const link = html.match(/href="([^"]*)"/)?.[1];
       if (link) console.log(`🔗 ENLACE (backup): ${link}`);
-      throw error; // Propagar para que el controlador lo maneje
+      throw error;
     }
   }
 
