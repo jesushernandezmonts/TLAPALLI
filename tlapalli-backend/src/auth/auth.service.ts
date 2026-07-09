@@ -13,7 +13,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private mailerService: MailerService,
-  ) {}
+  ) { }
 
   // ========== ALUMNO LOGIN ==========
   async alumnoLogin(email: string, password: string) {
