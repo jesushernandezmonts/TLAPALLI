@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Scan, ChevronDown, X, Check } from 'lucide-react';
+import { Scan, ChevronDown, X, Check, Mail, CheckCircle2 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 
 const emptyForm = {
@@ -10,6 +10,7 @@ const emptyForm = {
   curp: '',
   fechaNacimiento: '',
   telefono: '',
+  email: '',
   padecimientos: '',
   estatusActivo: true,
 };
@@ -145,6 +146,9 @@ function AlumnoForm({ alumno, onClose, onSave }) {
     } else if (!/^\d{10}$/.test(form.telefono.trim())) {
       errors.telefono = 'El teléfono debe tener exactamente 10 dígitos.';
     }
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      errors.email = 'El email no tiene un formato válido.';
+    }
     if (form.curp && form.curp.trim().length !== 18) {
       errors.curp = 'La CURP debe tener exactamente 18 caracteres.';
     }
@@ -212,6 +216,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         curp: form.curp.trim() || null,
         fechaNacimiento: form.fechaNacimiento || null,
         telefono: form.telefono.trim(),
+        email: form.email.trim() || undefined,
         padecimientos: form.padecimientos.trim() || null,
       };
       if (!alumno) {
@@ -344,6 +349,34 @@ function AlumnoForm({ alumno, onClose, onSave }) {
           {fieldErrors.telefono && (
             <p className="text-[10px] text-rose-400 font-semibold px-1 flex items-center gap-1">
               <span>⚠</span> {fieldErrors.telefono}
+            </p>
+          )}
+        </div>
+        <div className="space-y-1 md:col-span-2">
+          <label className="text-[10px] text-white/40 uppercase font-black px-1">
+            Correo Electrónico <span className="text-amber-400 text-[8px]">(opcional — envía activación)</span>
+          </label>
+          <div className="relative">
+            <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+            <input
+              name="email"
+              type="email"
+              placeholder="alumno@ejemplo.com"
+              value={form.email}
+              onChange={handleChange}
+              className={`bg-white/5 border rounded-xl pl-9 pr-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${
+                fieldErrors.email ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+              }`}
+            />
+          </div>
+          {fieldErrors.email && (
+            <p className="text-[10px] text-rose-400 font-semibold px-1 flex items-center gap-1">
+              <span>⚠</span> {fieldErrors.email}
+            </p>
+          )}
+          {form.email && !fieldErrors.email && (
+            <p className="text-[9px] text-emerald-400/60 px-1 flex items-center gap-1">
+              <CheckCircle2 size={10} /> Se enviará correo de activación
             </p>
           )}
         </div>

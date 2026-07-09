@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuthService } from '../auth/auth.service';
 import { CreateAlumnoDto } from './dto/create-alumno.dto';
 import { UpdateAlumnoDto } from './dto/update-alumno.dto';
 import * as fs from 'fs';
@@ -7,7 +8,10 @@ import { join } from 'path';
 
 @Injectable()
 export class AlumnosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private authService: AuthService,
+  ) {}
 
   // ========== MÉTODOS PARA ALUMNO AUTENTICADO ==========
 
@@ -121,21 +125,41 @@ export class AlumnosService {
   // ========== MÉTODOS ADMIN/INSTRUCTOR ==========
 
   async create(dto: CreateAlumnoDto) {
-    const { fechaNacimiento, ...rest } = dto;
+    const { fechaNacimiento, email, ...rest } = dto;
     const fecha = fechaNacimiento ? new Date(fechaNacimiento) : undefined;
+    let savedAlumno;
     try {
-      return await this.prisma.alumno.create({
+      savedAlumno = await this.prisma.alumno.create({
         data: {
           ...rest,
+          email: email || null,
           fechaNacimiento: fecha,
         },
       });
     } catch (error: any) {
-      if (error.code === 'P2002' && error.meta?.target?.includes('curp')) {
-        throw new BadRequestException('Ya existe un alumno registrado con esa CURP.');
+      if (error.code === 'P2002') {
+        const target = error.meta?.target?.join(', ') || '';
+        if (target.includes('curp')) {
+          throw new BadRequestException('Ya existe un alumno registrado con esa CURP.');
+        }
+        if (target.includes('email')) {
+          throw new BadRequestException('Ya existe un alumno registrado con ese email.');
+        }
       }
       throw error;
     }
+
+    // Si se proporcionó email, enviar automáticamente el correo de activación
+    if (email) {
+      try {
+        await this.authService.crearAccesoAlumno(savedAlumno.id, email);
+      } catch (err) {
+        // El alumno se creó, pero si falla el envío del correo, no bloqueamos
+        console.error(`⚠️ Alumno creado pero falló envío de activación a ${email}:`, err.message);
+      }
+    }
+
+    return savedAlumno;
   }
 
   async findAll(skip?: number, take?: number) {

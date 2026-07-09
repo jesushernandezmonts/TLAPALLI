@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsDateString, Length, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsDateString, Length, IsBoolean, IsEmail } from 'class-validator';
 
 export class CreateAlumnoDto {
   @IsString()
@@ -35,4 +35,8 @@ export class CreateAlumnoDto {
   @IsOptional()
   @IsBoolean()
   estatusActivo?: boolean;
+
+  @IsOptional()
+  @IsEmail({}, { message: 'El email no tiene un formato válido' })
+  email?: string;
 }
