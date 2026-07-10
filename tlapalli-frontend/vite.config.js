@@ -10,18 +10,4 @@ export default defineConfig({
       html2canvas: 'html2canvas-pro',
     },
   },
-  optimizeDeps: {
-    exclude: ['socket.io-client'],
-    include: ['socket.io-client > engine.io-client', 'socket.io-client > socket.io-parser'],
-  },
-  build: {
-    commonjsOptions: {
-      include: [/socket.io-client/, /node_modules/],
-    },
-    rollupOptions: {
-      output: {
-        manualChunks: undefined,
-      },
-    },
-  },
 })
