@@ -307,31 +307,31 @@ function Dashboard() {
 
       {/* Calendario y Próximas Clases */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-4 md:p-8 shadow-xl flex flex-col">
-          <div className="flex items-center justify-between mb-4 md:mb-8">
-            <h2 className="text-lg md:text-xl font-bold text-white/90">Calendario de Actividades</h2>
-            <div className="flex items-center gap-2">
+        <div className="lg:col-span-2 bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-2xl border border-white/15 rounded-3xl p-4 md:p-8 shadow-2xl shadow-black/30 flex flex-col">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">📅 Calendario</h2>
+            <div className="flex items-center gap-2.5">
               <button
                 onClick={prevMonth}
-                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/60 hover:text-white transition-all"
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-emerald-400/40 text-white/50 hover:text-emerald-400 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/10"
                 title="Mes anterior (←)"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={18} />
               </button>
-              <span className="text-[10px] md:text-xs text-white/40 uppercase tracking-[0.2em] font-black min-w-[110px] text-center">
+              <h3 className="text-sm md:text-base font-black text-white/90 uppercase tracking-[0.15em] min-w-[130px] text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                 {new Date(currentYear, currentMonth).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}
-              </span>
+              </h3>
               <button
                 onClick={nextMonth}
-                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/60 hover:text-white transition-all"
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-emerald-400/40 text-white/50 hover:text-emerald-400 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/10"
                 title="Mes siguiente (→)"
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={18} />
               </button>
               {(currentMonth !== today.getMonth() || currentYear !== today.getFullYear()) && (
                 <button
                   onClick={goToToday}
-                  className="ml-1 px-2.5 py-1 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/20 text-pink-400 text-[10px] font-black uppercase transition-all"
+                  className="ml-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 border border-pink-400/30 text-white text-[10px] font-black uppercase tracking-wider transition-all duration-200 shadow-lg shadow-pink-600/20"
                   title="Ir al mes actual"
                 >
                   Hoy
@@ -341,27 +341,27 @@ function Dashboard() {
           </div>
 
           {/* Legend */}
-          <div className="mb-4 bg-black/30 border border-white/10 rounded-2xl p-3">
+          <div className="mb-5 bg-black/40 border border-white/10 rounded-2xl p-3">
             <div className="grid grid-cols-3 gap-2">
-              <div className="flex items-center justify-center gap-2 bg-white/5 rounded-xl px-2 py-2 border border-rose-500/20">
-                <span className="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]" />
-                <span className="text-xs font-bold text-white/80">Galería</span>
+              <div className="flex items-center justify-center gap-2 bg-rose-500/10 rounded-xl px-2 py-2 border border-rose-500/20 shadow-inner shadow-rose-500/5">
+                <span className="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
+                <span className="text-xs font-bold text-rose-300">Galería</span>
               </div>
-              <div className="flex items-center justify-center gap-2 bg-white/5 rounded-xl px-2 py-2 border border-sky-400/20">
-                <span className="w-3 h-3 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.5)]" />
-                <span className="text-xs font-bold text-white/80">Audioteca</span>
+              <div className="flex items-center justify-center gap-2 bg-sky-500/10 rounded-xl px-2 py-2 border border-sky-400/20 shadow-inner shadow-sky-400/5">
+                <span className="w-3 h-3 rounded-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.6)]" />
+                <span className="text-xs font-bold text-sky-300">Audioteca</span>
               </div>
-              <div className="flex items-center justify-center gap-2 bg-white/5 rounded-xl px-2 py-2 border border-amber-400/20">
-                <span className="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
-                <span className="text-xs font-bold text-white/80">Auditorio</span>
+              <div className="flex items-center justify-center gap-2 bg-amber-500/10 rounded-xl px-2 py-2 border border-amber-400/20 shadow-inner shadow-amber-400/5">
+                <span className="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.6)]" />
+                <span className="text-xs font-bold text-amber-300">Auditorio</span>
               </div>
             </div>
           </div>
           
           {/* Visual Calendar Grid */}
-          <div className="grid grid-cols-7 gap-1 md:gap-2">
+          <div className="grid grid-cols-7 gap-1.5 md:gap-2.5">
             {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => (
-              <div key={d} className="text-center text-[8px] md:text-[10px] font-black text-white/20 uppercase py-1 md:py-2">{d}</div>
+              <div key={d} className="text-center text-[9px] md:text-[11px] font-black text-white/30 uppercase py-1.5 md:py-2 tracking-wider">{d}</div>
             ))}
             
             {padding.map((_, i) => (
@@ -380,45 +380,54 @@ function Dashboard() {
               });
 
               return (
-                <div 
+                <motion.div 
                   key={day} 
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleDayClick(day)}
                   title={dayActividades.length > 0 ? dayActividades.map(a => `${a.titulo} — ${a.ubicacion}`).join('\n') : undefined}
-                  className={`aspect-square rounded-lg md:rounded-xl border flex flex-col items-center justify-center relative transition-all duration-300 group cursor-pointer pb-1 md:pb-2
+                  className={`aspect-square rounded-xl md:rounded-2xl border-2 flex flex-col items-center justify-center relative transition-all duration-200 cursor-pointer pb-1 md:pb-2 select-none
                     ${isToday 
-                      ? 'bg-pink-600 border-pink-500 shadow-lg shadow-pink-600/20 scale-105 z-10' 
+                      ? 'bg-gradient-to-br from-pink-600 to-rose-700 border-pink-400 shadow-xl shadow-pink-600/30 scale-105 z-10' 
                       : isSelected
-                      ? 'bg-white/15 border-white/40 shadow-lg shadow-white/10 scale-105 z-10'
-                      : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'}`}
+                      ? 'bg-gradient-to-br from-white/20 to-white/10 border-white/40 shadow-lg shadow-white/10 scale-105 z-10'
+                      : 'bg-white/[0.04] border-white/[0.08] hover:bg-white/10 hover:border-white/25 hover:shadow-lg hover:shadow-black/20'}`}
                 >
-                  {/* Selected indicator ring */}
-                  {isSelected && (
-                    <span className="absolute top-0.5 md:top-1 w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.6)]" />
+                  {/* Glow effect for today */}
+                  {isToday && (
+                    <>
+                      <div className="absolute inset-0 rounded-xl md:rounded-2xl bg-gradient-to-br from-pink-400/20 to-rose-600/20 animate-pulse" />
+                      <span className="absolute -top-0.5 md:-top-1 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+                    </>
                   )}
-                  <span className={`text-[10px] md:text-sm font-bold ${isToday || isSelected ? 'text-white' : 'text-white/60'}`}>{day}</span>
+                  {/* Selected indicator */}
+                  {isSelected && !isToday && (
+                    <span className="absolute -top-0.5 md:-top-1 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]" />
+                  )}
+                  <span className={`text-[11px] md:text-sm font-black leading-none ${isToday || isSelected ? 'text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.4)]' : 'text-white/70 group-hover:text-white/90'}`}>{day}</span>
                   
                   {/* Indicators for scheduled activities */}
                   {dayActividades.length > 0 && (
-                    <div className="absolute bottom-0.5 md:bottom-1.5 flex gap-0.5 md:gap-1 justify-center w-full items-center">
+                    <div className="absolute bottom-1 md:bottom-2 flex gap-1 justify-center w-full items-center">
                       {dayActividades.length === 1 ? (
                         <span 
-                          className={`w-1.5 h-1.5 md:w-2.5 md:h-2.5 rounded-full ${locationColors[dayActividades[0].ubicacion] || 'bg-white/40'}`}
+                          className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full ring-1 ring-white/20 ${locationColors[dayActividades[0].ubicacion] || 'bg-white/40'}`}
                         />
                       ) : dayActividades.length <= 3 ? (
                         dayActividades.map((act, idx) => (
                           <span 
                             key={act.id || idx} 
-                            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${locationColors[act.ubicacion] || 'bg-white/40'}`}
+                            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ring-1 ring-white/10 ${locationColors[act.ubicacion] || 'bg-white/40'}`}
                           />
                         ))
                       ) : (
-                        <span className={`text-[7px] md:text-[9px] font-black px-1 rounded-full ${locationColors[dayActividades[0].ubicacion] || 'bg-white/40'} text-black/80 leading-none`}>
-                          {dayActividades.length}
+                        <span className={`text-[7px] md:text-[10px] font-black px-1.5 py-0.5 rounded-full ring-1 ring-white/20 ${locationColors[dayActividades[0].ubicacion] || 'bg-white/40'} text-black/90 leading-none`}>
+                          +{dayActividades.length}
                         </span>
                       )}
                     </div>
                   )}
-                </div>
+                </motion.div>
               );
             })}
           </div>
