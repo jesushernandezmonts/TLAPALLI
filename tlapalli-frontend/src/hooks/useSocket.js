@@ -1,7 +1,25 @@
 import { useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+let socketInstance = null;
+let socketInitPromise = null;
+
+async function getSocket() {
+  if (socketInstance) return socketInstance;
+  if (socketInitPromise) return socketInitPromise;
+  
+  socketInitPromise = (async () => {
+    const { io } = await import('socket.io-client');
+    socketInstance = io(SOCKET_URL, {
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
+    });
+    return socketInstance;
+  })();
+  
+  return socketInitPromise;
+}
 
 export default function useSocket(event, callback) {
   const callbackRef = useRef(callback);
@@ -11,27 +29,26 @@ export default function useSocket(event, callback) {
   }, [callback]);
 
   useEffect(() => {
-    const socket = io(SOCKET_URL, {
-      withCredentials: true,
-      transports: ['websocket', 'polling'],
-    });
+    let mounted = true;
 
-    socket.on('connect', () => {
-      console.log('🔌 WebSocket conectado');
-    });
+    getSocket().then((socket) => {
+      if (!mounted) return;
 
-    socket.on(event, (...args) => {
-      if (callbackRef.current) {
-        callbackRef.current(...args);
-      }
-    });
+      const handler = (...args) => {
+        if (callbackRef.current) {
+          callbackRef.current(...args);
+        }
+      };
 
-    socket.on('disconnect', () => {
-      console.log('🔌 WebSocket desconectado');
+      socket.on(event, handler);
+
+      return () => {
+        socket.off(event, handler);
+      };
     });
 
     return () => {
-      socket.disconnect();
+      mounted = false;
     };
   }, [event]);
 }
