@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import api, { setAccessToken, clearAccessToken, setOnRefreshed } from '../../services/api';
+import api, { setAccessToken, clearAccessToken, setOnRefreshed, setRefreshUrl, setLoginRedirectUrl } from '../../services/api';
 import { jwtDecode } from 'jwt-decode';
 import { Loader2 } from 'lucide-react';
 
@@ -9,6 +9,10 @@ function AlumnoPrivateRoute() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Configurar el interceptor para usar las rutas de alumno
+    setRefreshUrl('/auth/alumno/refresh');
+    setLoginRedirectUrl('/alumno/login');
+
     const checkSession = async () => {
       try {
         const { data } = await api.post('/auth/alumno/refresh');

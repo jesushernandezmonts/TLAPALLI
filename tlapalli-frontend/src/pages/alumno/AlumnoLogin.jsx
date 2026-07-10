@@ -19,7 +19,7 @@ function AlumnoLogin() {
     setError('');
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/alumno/login', { email, password });
+      const { data } = await api.post('/auth/alumno/login', { email, password }, { withCredentials: true });
       setAccessToken(data.accessToken);
       navigate('/alumno/dashboard');
     } catch (err) {

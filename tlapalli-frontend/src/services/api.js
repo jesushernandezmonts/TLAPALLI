@@ -9,6 +9,8 @@ const api = axios.create({
 
 // Variables en memoria (no localStorage)
 let accessToken = null;
+let refreshUrl = '/auth/refresh';
+let loginRedirectUrl = '/login';
 let onRefreshed = null;
 let isRefreshing = false;
 let failedQueue = [];
@@ -57,7 +59,7 @@ api.interceptors.response.use(
 
       try {
         // Intentar refrescar el token
-        const { data } = await axios.post(`${API_URL}/auth/refresh`, {}, {
+        const { data } = await axios.post(`${API_URL}${refreshUrl}`, {}, {
           withCredentials: true,
         });
 
@@ -76,7 +78,7 @@ api.interceptors.response.use(
         // Limpiar y redirigir al login
         accessToken = null;
         if (onRefreshed) onRefreshed(null);
-        window.location.href = '/login';
+        window.location.href = loginRedirectUrl;
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -100,6 +102,14 @@ export const clearAccessToken = () => {
 
 export const setOnRefreshed = (callback) => {
   onRefreshed = callback;
+};
+
+export const setRefreshUrl = (url) => {
+  refreshUrl = url;
+};
+
+export const setLoginRedirectUrl = (url) => {
+  loginRedirectUrl = url;
 };
 
 export default api;
