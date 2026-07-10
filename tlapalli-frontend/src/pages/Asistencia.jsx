@@ -8,21 +8,6 @@ import {
 import api from '../services/api';
 import Toast from '../components/Toast';
 import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDatePicker from '../components/CustomDatePicker';
 
 const GRUPO_COLORS = [
   { from: 'from-pink-600', to: 'to-rose-600', bg: 'bg-pink-500/10', border: 'border-pink-500/30', text: 'text-pink-300', avatar: 'from-pink-500 to-rose-500' },
