@@ -23,7 +23,7 @@ export class ServicioSocialService {
       throw new BadRequestException('El alumno ya tiene un servicio social activo');
     }
 
-    return this.prisma.servicioSocial.create({
+    const result = await this.prisma.servicioSocial.create({
       data: {
         alumnoId: dto.alumnoId,
         horasRequeridas: dto.horasRequeridas || 480,
@@ -35,6 +35,8 @@ export class ServicioSocialService {
       },
       include: { alumno: { select: { nombre: true, apellidoPaterno: true } } },
     });
+    this.gateway.emitServicioSocialUpdated();
+    return result;
   }
 
   async findAll() {
@@ -90,16 +92,20 @@ export class ServicioSocialService {
 
   async update(id: number, dto: UpdateServicioSocialDto) {
     await this.findOne(id);
-    return this.prisma.servicioSocial.update({
+    const result = await this.prisma.servicioSocial.update({
       where: { id },
       data: dto,
       include: { alumno: { select: { nombre: true, apellidoPaterno: true } } },
     });
+    this.gateway.emitServicioSocialUpdated();
+    return result;
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.servicioSocial.delete({ where: { id } });
+    const result = await this.prisma.servicioSocial.delete({ where: { id } });
+    this.gateway.emitServicioSocialUpdated();
+    return result;
   }
 
   // ========== ACTIVIDADES ==========
@@ -136,6 +142,7 @@ export class ServicioSocialService {
       await this._recalcularHoras(dto.servicioSocialId);
     }
 
+    this.gateway.emitServicioSocialUpdated();
     return actividad;
   }
 
@@ -164,7 +171,9 @@ export class ServicioSocialService {
       await this._recalcularHoras(actividad.servicioSocialId);
     }
 
-    return this.prisma.actividadServicioSocial.findUnique({ where: { id } });
+    const result = await this.prisma.actividadServicioSocial.findUnique({ where: { id } });
+    this.gateway.emitServicioSocialUpdated();
+    return result;
   }
 
   /** Obtener actividades pendientes (para admin) */
@@ -205,6 +214,7 @@ export class ServicioSocialService {
       await this._recalcularHoras(actividad.servicioSocialId);
     }
 
+    this.gateway.emitServicioSocialUpdated();
     return { message: 'Actividad eliminada' };
   }
 

@@ -84,4 +84,3 @@ export class InscripcionesService {
     return result;
   }
 }
-```

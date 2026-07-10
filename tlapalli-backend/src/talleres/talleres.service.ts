@@ -52,6 +52,8 @@ export class TalleresService {
     return taller;
   }
 
+  async update(id: number, dto: UpdateTallerDto) {
+    await this.findOne(id);
     const result = await this.prisma.taller.update({
       where: { id },
       data: dto,
