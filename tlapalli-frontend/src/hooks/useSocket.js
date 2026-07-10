@@ -8,16 +8,19 @@ let socketInitPromise = null;
 async function getSocket() {
   if (socketInstance) return socketInstance;
   if (socketInitPromise) return socketInitPromise;
-  
+
   socketInitPromise = (async () => {
-    const { io } = await import('socket.io-client');
-    socketInstance = io(SOCKET_URL, {
+    // Esperar a que el CDN cargue socket.io
+    while (typeof window.io === 'undefined') {
+      await new Promise(r => setTimeout(r, 50));
+    }
+    socketInstance = window.io(SOCKET_URL, {
       withCredentials: true,
       transports: ['websocket', 'polling'],
     });
     return socketInstance;
   })();
-  
+
   return socketInitPromise;
 }
 
