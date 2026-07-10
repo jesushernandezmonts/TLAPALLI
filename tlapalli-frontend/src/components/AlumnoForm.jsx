@@ -52,6 +52,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         curp: alumno.curp || '',
         fechaNacimiento: alumno.fechaNacimiento ? alumno.fechaNacimiento.slice(0, 10) : '',
         telefono: alumno.telefono || '',
+        email: alumno.email || '',
         padecimientos: alumno.padecimientos || '',
         estatusActivo: alumno.estatusActivo ?? true,
       });
@@ -216,7 +217,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         curp: form.curp.trim() || null,
         fechaNacimiento: form.fechaNacimiento || null,
         telefono: form.telefono.trim(),
-        email: form.email.trim() || undefined,
+        email: (form.email || '').trim() || undefined,
         padecimientos: form.padecimientos.trim() || null,
       };
       if (!alumno) {
