@@ -11,6 +11,7 @@ import SearchBar from '../components/SearchBar';
 import Pagination from '../components/Pagination';
 import StatusBadge from '../components/StatusBadge';
 import FilterDropdown from '../components/FilterDropdown';
+import useSocket from '../hooks/useSocket';
 
 function Alumnos() {
   const [alumnos, setAlumnos] = useState([]);
@@ -54,6 +55,13 @@ function Alumnos() {
     fetchTalleres();
     fetchInscripciones();
   }, []);
+
+  // Refrescar datos cuando lleguen cambios en tiempo real
+  useSocket('alumnos:updated', fetchAlumnos);
+  useSocket('inscripciones:updated', () => {
+    fetchAlumnos();
+    fetchInscripciones();
+  });
 
   useEffect(() => {
     const fetchDocumentosTodosAlumnos = async () => {

@@ -5,12 +5,14 @@ import { CreateAlumnoDto } from './dto/create-alumno.dto';
 import { UpdateAlumnoDto } from './dto/update-alumno.dto';
 import * as fs from 'fs';
 import { join } from 'path';
+import { AppGateway } from '../gateway/app.gateway';
 
 @Injectable()
 export class AlumnosService {
   constructor(
     private prisma: PrismaService,
     private authService: AuthService,
+    private gateway: AppGateway,
   ) {}
 
   // ========== MÉTODOS PARA ALUMNO AUTENTICADO ==========
@@ -159,6 +161,7 @@ export class AlumnosService {
       }
     }
 
+    this.gateway.emitAlumnosUpdated();
     return savedAlumno;
   }
 
@@ -195,10 +198,13 @@ export class AlumnosService {
       data.fechaNacimiento = fechaNacimiento ? new Date(fechaNacimiento) : null;
     }
     
-    return this.prisma.alumno.update({
+    const updated = await this.prisma.alumno.update({
       where: { id },
       data,
     });
+
+    this.gateway.emitAlumnosUpdated();
+    return updated;
   }
 
   async remove(id: number) {
@@ -217,6 +223,8 @@ export class AlumnosService {
 
     // Gracias a onDelete: Cascade en el schema, Prisma borra
     // inscripciones, asistencias, documentos y pagos automáticamente
-    return this.prisma.alumno.delete({ where: { id } });
+    const result = await this.prisma.alumno.delete({ where: { id } });
+    this.gateway.emitAlumnosUpdated();
+    return result;
   }
 }

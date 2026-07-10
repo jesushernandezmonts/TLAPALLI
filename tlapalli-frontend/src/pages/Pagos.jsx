@@ -4,6 +4,7 @@ import api from '../services/api';
 import Modal from '../components/Modal';
 import { CreditCard, Plus, Trash2, Search, Calendar, User, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import useSocket from '../hooks/useSocket';
 
 function Pagos() {
   const { user } = useAuth();
@@ -24,6 +25,12 @@ function Pagos() {
     fetchPagos();
     fetchAlumnos();
   }, []);
+
+  // Refrescar en tiempo real
+  useSocket('pagos:updated', () => {
+    fetchPagos();
+    fetchAlumnos();
+  });
 
   const fetchPagos = async () => {
     try {

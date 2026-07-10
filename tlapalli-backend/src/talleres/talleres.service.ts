@@ -2,15 +2,21 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTallerDto } from './dto/create-taller.dto';
 import { UpdateTallerDto } from './dto/update-taller.dto';
+import { AppGateway } from '../gateway/app.gateway';
 
 @Injectable()
 export class TalleresService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private gateway: AppGateway,
+  ) {}
 
   async create(dto: CreateTallerDto) {
-    return this.prisma.taller.create({
+    const result = await this.prisma.taller.create({
       data: dto,
     });
+    this.gateway.emitTalleresUpdated();
+    return result;
   }
 
   async findAll() {
@@ -46,19 +52,21 @@ export class TalleresService {
     return taller;
   }
 
-  async update(id: number, dto: UpdateTallerDto) {
-    await this.findOne(id);
-    return this.prisma.taller.update({
+    const result = await this.prisma.taller.update({
       where: { id },
       data: dto,
     });
+    this.gateway.emitTalleresUpdated();
+    return result;
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.taller.update({
+    const result = await this.prisma.taller.update({
       where: { id },
       data: { activo: false },
     });
+    this.gateway.emitTalleresUpdated();
+    return result;
   }
 }

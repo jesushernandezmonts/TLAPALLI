@@ -3,10 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateServicioSocialDto } from './dto/create-servicio-social.dto';
 import { UpdateServicioSocialDto } from './dto/update-servicio-social.dto';
 import { CreateActividadDto } from './dto/create-actividad.dto';
+import { AppGateway } from '../gateway/app.gateway';
 
 @Injectable()
 export class ServicioSocialService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private gateway: AppGateway,
+  ) {}
 
   async create(dto: CreateServicioSocialDto) {
     const alumno = await this.prisma.alumno.findUnique({ where: { id: dto.alumnoId } });

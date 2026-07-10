@@ -5,17 +5,23 @@ import { promisify } from 'util';
 import { join } from 'path';
 import * as fs from 'fs';
 import { PDFDocument } from 'pdf-lib';
+import { AppGateway } from '../gateway/app.gateway';
 
 const execFileAsync = promisify(execFile);
 
 @Injectable()
 export class DocumentosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private gateway: AppGateway,
+  ) {}
 
   async upload(alumnoId: number, nombre: string, tipo: string, url: string) {
-    return this.prisma.documento.create({
+    const result = await this.prisma.documento.create({
       data: { nombre, tipo, url, alumnoId },
     });
+    this.gateway.emitDocumentosUpdated();
+    return result;
   }
 
   async findAllGrouped() {
@@ -58,7 +64,9 @@ export class DocumentosService {
       console.error('No se pudo borrar el archivo de Cloudinary:', e);
     }
 
-    return this.prisma.documento.delete({ where: { id } });
+    const result = await this.prisma.documento.delete({ where: { id } });
+    this.gateway.emitDocumentosUpdated();
+    return result;
   }
 
   async scanDocument(useDialog: boolean): Promise<Buffer> {

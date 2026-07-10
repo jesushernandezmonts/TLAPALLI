@@ -1,16 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePagoDto } from './dto/create-pago.dto';
+import { AppGateway } from '../gateway/app.gateway';
 
 @Injectable()
 export class PagosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private gateway: AppGateway,
+  ) {}
 
   async create(dto: CreatePagoDto, usuarioId: number) {
     const alumno = await this.prisma.alumno.findUnique({ where: { id: dto.alumnoId } });
     if (!alumno) throw new NotFoundException('Alumno no encontrado');
 
-    return this.prisma.pago.create({
+    const result = await this.prisma.pago.create({
       data: {
         alumnoId: dto.alumnoId,
         monto: dto.monto,
@@ -25,6 +29,8 @@ export class PagosService {
         },
       },
     });
+    this.gateway.emitPagosUpdated();
+    return result;
   }
 
   findAll(skip?: number, take?: number) {
@@ -57,6 +63,8 @@ export class PagosService {
   }
 
   async remove(id: number) {
-    return this.prisma.pago.delete({ where: { id } });
+    const result = await this.prisma.pago.delete({ where: { id } });
+    this.gateway.emitPagosUpdated();
+    return result;
   }
 }

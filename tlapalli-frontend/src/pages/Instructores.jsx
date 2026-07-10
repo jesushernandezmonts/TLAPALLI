@@ -8,8 +8,9 @@ import DocumentViewerModal from '../components/DocumentViewerModal';
 import Toast from '../components/Toast';
 import StatCard from '../components/StatCard';
 import SearchBar from '../components/SearchBar';
-import Pagination from '../components/Pagination';
 import StatusBadge from '../components/StatusBadge';
+import Pagination from '../components/Pagination';
+import useSocket from '../hooks/useSocket';
 import FilterDropdown from '../components/FilterDropdown';
 
 function Instructores() {
@@ -37,6 +38,10 @@ function Instructores() {
     fetchInstructores();
     fetchTalleres();
   }, []);
+
+  // Refrescar en tiempo real
+  useSocket('instructores:updated', fetchInstructores);
+  useSocket('talleres:updated', fetchTalleres);
 
   useEffect(() => {
     function handleClickOutside(event) {

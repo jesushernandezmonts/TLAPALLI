@@ -2,10 +2,14 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInscripcionDto } from './dto/create-inscripcion.dto';
 import { UpdateInscripcionDto } from './dto/update-inscripcion.dto';
+import { AppGateway } from '../gateway/app.gateway';
 
 @Injectable()
 export class InscripcionesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private gateway: AppGateway,
+  ) {}
 
   async create(dto: CreateInscripcionDto) {
     // Verificar que el alumno existe
@@ -24,7 +28,7 @@ export class InscripcionesService {
       throw new BadRequestException('El taller ha alcanzado su cupo máximo');
     }
 
-    return this.prisma.inscripcion.create({
+    const result = await this.prisma.inscripcion.create({
       data: {
         alumnoId: dto.alumnoId,
         tallerId: dto.tallerId,
@@ -32,6 +36,8 @@ export class InscripcionesService {
       },
       include: { alumno: true, taller: true },
     });
+    this.gateway.emitInscripcionesUpdated();
+    return result;
   }
 
   async findAll() {
@@ -59,18 +65,23 @@ export class InscripcionesService {
 
   async update(id: number, dto: UpdateInscripcionDto) {
     await this.findOne(id);
-    return this.prisma.inscripcion.update({
+    const result = await this.prisma.inscripcion.update({
       where: { id },
       data: dto,
       include: { alumno: true, taller: true },
     });
+    this.gateway.emitInscripcionesUpdated();
+    return result;
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.inscripcion.update({
+    const result = await this.prisma.inscripcion.update({
       where: { id },
-      data: { estatusPago: 'baja' }, // baja lógica, no borramos el historial
+      data: { estatusPago: 'baja' },
     });
+    this.gateway.emitInscripcionesUpdated();
+    return result;
   }
 }
+```

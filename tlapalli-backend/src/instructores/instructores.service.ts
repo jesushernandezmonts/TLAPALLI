@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { MailerService } from '../mail/mailer.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { AppGateway } from '../gateway/app.gateway';
 
 
 @Injectable()
@@ -15,6 +16,7 @@ export class InstructoresService {
     private prisma: PrismaService,
     private mailerService: MailerService,
     private cloudinaryService: CloudinaryService,
+    private gateway: AppGateway,
   ) {}
 
   async create(dto: CreateInstructorDto) {
@@ -70,10 +72,13 @@ export class InstructoresService {
       await this.mailerService.sendActivationEmail(dto.email, token, dto.nombre, tallerNombre);
     }
 
-    return this.prisma.instructor.findUnique({
+    const result = await this.prisma.instructor.findUnique({
       where: { id: instructor.id },
       include: { taller: true, usuario: true },
     });
+
+    this.gateway.emitInstructoresUpdated();
+    return result;
   }
 
   findAll() {
@@ -131,6 +136,8 @@ export class InstructoresService {
       include: { taller: true },
     });
 
+    this.gateway.emitInstructoresUpdated();
+
     // 3. Sincronizar con el Usuario vinculado si existe
     const usuario = await this.prisma.usuario.findUnique({
       where: { instructorId: id },
@@ -170,6 +177,7 @@ export class InstructoresService {
       }
     }
 
+    this.gateway.emitInstructoresUpdated();
     return updatedInstructor;
   }
 
@@ -202,7 +210,9 @@ export class InstructoresService {
       if (publicId) await this.cloudinaryService.deleteFile(publicId);
     }
 
-    return this.prisma.instructor.delete({ where: { id } });
+    const result = await this.prisma.instructor.delete({ where: { id } });
+    this.gateway.emitInstructoresUpdated();
+    return result;
   }
 
   // Activar/Inactivar en lugar de eliminar
@@ -224,11 +234,14 @@ export class InstructoresService {
       }
     }
 
-    return this.prisma.instructor.update({
+    const updated = await this.prisma.instructor.update({
       where: { id },
       data: { activo: newActivo, estado: newEstado },
       include: { taller: true },
     });
+
+    this.gateway.emitInstructoresUpdated();
+    return updated;
   }
 
   async reenviarActivacion(id: number) {

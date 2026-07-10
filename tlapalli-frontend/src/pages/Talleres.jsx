@@ -47,6 +47,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import Toast from '../components/Toast';
 import StatCard from '../components/StatCard';
 import SearchBar from '../components/SearchBar';
+import useSocket from '../hooks/useSocket';
 import Pagination from '../components/Pagination';
 
 function Talleres() {
@@ -67,6 +68,11 @@ function Talleres() {
   useEffect(() => {
     fetchTalleres();
   }, []);
+
+  // Refrescar en tiempo real
+  useSocket('talleres:updated', () => fetchTalleres(true));
+  useSocket('inscripciones:updated', () => fetchTalleres(true));
+  useSocket('pagos:updated', () => fetchTalleres(true));
 
   const fetchTalleres = async (silent = false) => {
     if (!silent) setLoading(true);

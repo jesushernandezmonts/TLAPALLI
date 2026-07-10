@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs/cli": "^11.0.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
@@ -27,7 +28,10 @@
     "@nestjs/mapped-types": "^2.1.1",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.19",
+    "@nestjs/platform-socket.io": "^11.1.28",
+    "@nestjs/schematics": "^11.0.0",
     "@nestjs/swagger": "^11.4.2",
+    "@nestjs/websockets": "^11.1.28",
     "@prisma/client": "^6.19.3",
     "@sendgrid/mail": "^8.1.6",
     "@types/nodemailer": "^8.0.0",
@@ -47,9 +51,8 @@
     "pdf-lib": "^1.17.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "swagger-ui-express": "^5.0.1",
-    "@nestjs/cli": "^11.0.0",
-    "@nestjs/schematics": "^11.0.0"
+    "socket.io": "^4.8.3",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

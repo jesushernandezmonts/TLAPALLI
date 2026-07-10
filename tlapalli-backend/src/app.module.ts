@@ -16,6 +16,7 @@ import { GruposModule } from './grupos/grupos.module';
 import { AsistenciasModule } from './asistencias/asistencias.module';
 import { ServicioSocialModule } from './servicio-social/servicio-social.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { GatewayModule } from './gateway/gateway.module';
 import { HealthController } from './health/health.controller';
 
 
@@ -38,6 +39,7 @@ import { HealthController } from './health/health.controller';
     AsistenciasModule,
     ServicioSocialModule,
     CloudinaryModule,
+    GatewayModule,
   ],
   controllers: [HealthController],
 })

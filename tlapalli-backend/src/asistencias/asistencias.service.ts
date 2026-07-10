@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAsistenciasDto, AsistenciaQueryDto } from './dto/create-asistencia.dto';
+import { AppGateway } from '../gateway/app.gateway';
 
 @Injectable()
 export class AsistenciasService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private gateway: AppGateway,
+  ) {}
 
   // Obtener alumnos de un grupo con su grupoAlumnoId para pasar lista
   async getAlumnosByGrupo(grupoId: number, instructorId: number) {
@@ -103,7 +107,9 @@ export class AsistenciasService {
         });
       }
 
-      return { message: 'Asistencias guardadas correctamente', fecha, total: asistencias.length };
+      const result = { message: 'Asistencias guardadas correctamente', fecha, total: asistencias.length };
+      this.gateway.emitAsistenciasUpdated();
+      return result;
     });
   }
 
