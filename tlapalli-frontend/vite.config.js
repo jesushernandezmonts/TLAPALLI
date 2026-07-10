@@ -10,4 +10,12 @@ export default defineConfig({
       html2canvas: 'html2canvas-pro',
     },
   },
+  optimizeDeps: {
+    include: ['socket.io-client'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/socket.io-client/, /node_modules/],
+    },
+  },
 })
