@@ -112,10 +112,10 @@ function Pagos() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400 w-5 h-5" />
         <input
-          className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
-          placeholder="Buscar por alumno o mes..."
+          className="w-full bg-white/15 border-2 border-emerald-500/40 rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:bg-white/20 focus:shadow-lg focus:shadow-emerald-500/20 transition-all text-base font-medium backdrop-blur-sm"
+          placeholder="🔍 Buscar por alumno o mes..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
