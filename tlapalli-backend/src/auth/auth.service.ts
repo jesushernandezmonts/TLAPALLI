@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { MailerService } from '../mail/mailer.service';
+import { AppLogger } from '../common/logger/logger.service';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private mailerService: MailerService,
+    private logger: AppLogger,
   ) { }
 
   // ========== ALUMNO LOGIN ==========
@@ -153,13 +155,13 @@ export class AuthService {
 
     // Enviar correo de activación (no bloqueante)
     this.mailerService.sendAlumnoActivationEmail(email, token, alumno.nombre)
-      .then(() => console.log(`✅ Correo de activación enviado a ${email}`))
+      .then(() => this.logger.success(`Correo de activación enviado a ${email}`))
       .catch(err => {
-        console.error(`❌ Error enviando correo de activación a ${email}:`, err.message);
+        this.logger.error(`Error enviando correo de activación a ${email}: ${err.message}`, err.stack, 'AuthService');
         // Log del enlace de activación como fallback
         const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
         const activationUrl = `${frontendUrl}/alumno/activar-cuenta?token=${token}`;
-        console.log(`🔗 Enlace de activación (fallback): ${activationUrl}`);
+        this.logger.info(`🔗 Enlace de activación (fallback): ${activationUrl}`);
       });
 
     const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
@@ -281,6 +283,7 @@ export class AuthService {
 
     const isMatch = await bcrypt.compare(password, usuario.passwordHash);
     if (!isMatch) {
+      this.logger.security(`Intento fallido de login para: ${email} (intento #${usuario.intentosFallidos + 1})`, 'AuthService');
       await this.registrarIntentoFallido(usuario.id, usuario.intentosFallidos);
       throw new UnauthorizedException('Credenciales inválidas');
     }

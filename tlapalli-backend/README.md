@@ -1,98 +1,154 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🌮 TLAPALLI - Centro Cultural Huamantla
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Sistema de gestión integral para el centro cultural **Tlapalli** en Huamantla, Tlaxcala.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📋 Descripción
 
-## Description
+Plataforma web para la administración de:
+- **Alumnos**: Registro, expediente digital, documentos
+- **Talleres**: Catálogo, cupos, horarios, costos
+- **Instructores**: Perfiles, asignación a talleres, estados
+- **Inscripciones**: Registro de alumnos a talleres, control de pagos
+- **Asistencias**: Pase de lista por grupo
+- **Pagos**: Control de mensualidades, métodos de pago
+- **Reportes**: Estadísticas generales, financieras, alumnos
+- **Servicio Social**: Control de horas y actividades
+- **Portal del Alumno**: Acceso a información personal, pagos y servicio social
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🏗️ Stack Tecnológico
 
-## Project setup
+| Capa | Tecnología |
+|------|-----------|
+| **Backend** | NestJS 11 + TypeScript |
+| **Frontend** | React 19 + Vite 8 + Tailwind CSS 4 |
+| **Base de datos** | PostgreSQL (Neon) |
+| **Autenticación** | JWT + Passport + Google OAuth 2.0 |
+| **Email** | SendGrid / Nodemailer |
+| **Archivos** | Cloudinary |
+| **Tiempo real** | Socket.IO |
+| **Documentación API** | Swagger UI |
 
-```bash
-$ npm install
-```
+## 🚀 Requisitos
 
-## Compile and run the project
+- Node.js 20+
+- npm 9+
+- PostgreSQL (recomendado: Neon)
 
-```bash
-# development
-$ npm run start
+## 🔧 Instalación
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+### 1. Clonar el repositorio
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone <repo-url>
+cd proyecto_estadias
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 2. Configurar Backend
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+cd tlapalli-backend
+npm install
+
+# Copiar variables de entorno y configurar
+cp .env.example .env
+# Editar .env con tus credenciales
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 3. Configurar Frontend
 
-## Resources
+```bash
+cd tlapalli-frontend
+npm install
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### 4. Base de datos
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+cd tlapalli-backend
+npx prisma generate
+npx prisma migrate dev
+npm run seed
+```
 
-## Support
+### 5. Iniciar desarrollo
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# Terminal 1: Backend
+cd tlapalli-backend
+npm run start:dev
 
-## Stay in touch
+# Terminal 2: Frontend
+cd tlapalli-frontend
+npm run dev
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 🌐 URLs de desarrollo
 
-## License
+- **Frontend**: http://localhost:5173
+- **Backend**: http://localhost:3000
+- **Swagger Docs**: http://localhost:3000/api/docs
+- **Health Check**: http://localhost:3000/api/health
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 📦 Producción
+
+### Backend (Koyeb)
+
+```bash
+cd tlapalli-backend
+npm run build
+# Desplegar en Koyeb usando koyeb.yaml
+```
+
+**Variables de entorno requeridas en producción:**
+
+```
+DATABASE_URL, DIRECT_URL, JWT_SECRET, REFRESH_TOKEN_SECRET,
+FRONTEND_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+GOOGLE_CALLBACK_URL, CLOUDINARY_CLOUD_NAME,
+CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+```
+
+### Frontend (Vercel)
+
+```bash
+cd tlapalli-frontend
+npm run build
+# Desplegar en Vercel conectando el repositorio
+```
+
+**Variables de entorno requeridas:**
+```
+VITE_API_URL=https://tlapalli-backend.koyeb.app
+```
+
+## 🧪 Tests
+
+```bash
+cd tlapalli-backend
+npm run test        # Unit tests
+npm run test:e2e    # E2E tests
+npm run test:cov    # Coverage
+```
+
+## 📖 Documentación API
+
+La documentación interactiva de la API está disponible en `/api/docs` cuando el servidor está corriendo.
+
+## 🔐 Roles de Usuario
+
+- **admin**: Acceso completo al sistema
+- **profesor**: Gestión de grupos, asistencias y pagos
+- **alumno**: Portal personal con información propia
+
+## 🛡️ Seguridad
+
+- Autenticación JWT con refresh tokens (httpOnly cookies)
+- Rate limiting global y específico por endpoint
+- Bloqueo por intentos fallidos de login
+- Helmet para cabeceras HTTP seguras
+- Validación de entrada con whitelist
+- Filtro global de excepciones
+
+## 📄 Licencia
+
+UNLICENSED - Proyecto privado

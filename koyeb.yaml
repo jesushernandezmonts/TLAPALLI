@@ -9,11 +9,42 @@ service:
   build:
     builder: buildpacks
   run:
-    command: node dist/main
+    command: node --no-deprecation dist/main
     health:
       path: /api/health
+      initial_delay_seconds: 10
+      period_seconds: 15
+      timeout_seconds: 5
+      success_threshold: 2
+      failure_threshold: 5
     env:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: "3000"
+      # === IMPORTANTE: Configurar estos secrets en el panel de Koyeb ===
+      # Las siguientes variables deben configurarse como environment variables
+      # o secrets en Koyeb Dashboard > Settings > Environment variables
+      #
+      # REQUIRED:
+      # - DATABASE_URL
+      # - DIRECT_URL
+      # - JWT_SECRET
+      # - REFRESH_TOKEN_SECRET
+      # - FRONTEND_URL
+      # - GOOGLE_CLIENT_ID
+      # - GOOGLE_CLIENT_SECRET
+      # - GOOGLE_CALLBACK_URL
+      # - CLOUDINARY_CLOUD_NAME
+      # - CLOUDINARY_API_KEY
+      # - CLOUDINARY_API_SECRET
+      #
+      # OPCIONAL (si usas SendGrid):
+      # - SENDGRID_API_KEY
+      #
+      # OPCIONAL (si usas SMTP):
+      # - SMTP_HOST
+      # - SMTP_PORT
+      # - SMTP_USER
+      # - SMTP_PASS
+      # - SMTP_FROM

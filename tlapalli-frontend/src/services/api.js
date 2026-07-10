@@ -41,9 +41,24 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Si no hay respuesta del servidor (error de red)
+    if (!error.response) {
+      console.warn('[API] Error de red:', error.message);
+      return Promise.reject(error);
+    }
+
+    const { status, data } = error.response;
+
+    // Logging en desarrollo
+    if (import.meta.env.DEV) {
+      console.log(`[API] ${originalRequest.method?.toUpperCase()} ${originalRequest.url} -> ${status}`, data);
+    }
+
     // Si es 401 y no es la ruta de refresh ni de login
-    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh') && !originalRequest.url.includes('/auth/login')) {
-      
+    if (status === 401 && !originalRequest._retry &&
+        !originalRequest.url.includes('/auth/refresh') &&
+        !originalRequest.url.includes('/auth/login')) {
+
       // Si ya está refrescando, poner en cola
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -59,12 +74,12 @@ api.interceptors.response.use(
 
       try {
         // Intentar refrescar el token
-        const { data } = await axios.post(`${API_URL}${refreshUrl}`, {}, {
+        const { data: refreshData } = await axios.post(`${API_URL}${refreshUrl}`, {}, {
           withCredentials: true,
         });
 
-        accessToken = data.accessToken;
-        
+        accessToken = refreshData.accessToken;
+
         // Notificar a los listeners
         if (onRefreshed) onRefreshed(accessToken);
         processQueue(null, accessToken);
@@ -83,6 +98,11 @@ api.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
+    }
+
+    // Si es 429 (rate limit), log advertencia
+    if (status === 429) {
+      console.warn('[API] Rate limit alcanzado:', data?.message);
     }
 
     return Promise.reject(error);

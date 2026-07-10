@@ -17,6 +17,7 @@ import { AsistenciasModule } from './asistencias/asistencias.module';
 import { ServicioSocialModule } from './servicio-social/servicio-social.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { GatewayModule } from './gateway/gateway.module';
+import { CommonModule } from './common/common.module';
 import { HealthController } from './health/health.controller';
 
 
@@ -40,6 +41,7 @@ import { HealthController } from './health/health.controller';
     ServicioSocialModule,
     CloudinaryModule,
     GatewayModule,
+    CommonModule,
   ],
   controllers: [HealthController],
 })

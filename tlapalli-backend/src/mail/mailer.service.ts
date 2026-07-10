@@ -1,16 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '@sendgrid/mail';
+import { AppLogger } from '../common/logger/logger.service';
 
 @Injectable()
 export class MailerService {
   private sgMail: MailService;
 
+  private logger: AppLogger;
+
   constructor(private configService: ConfigService) {
+    this.logger = new AppLogger('MailerService');
     const apiKey = this.configService.get('SENDGRID_API_KEY') || '';
 
     if (!apiKey || apiKey.includes('tu-api-key')) {
-      console.log('📧 MODO DESARROLLO: SendGrid no configurado, usando console.log');
+      this.logger.email('MODO DESARROLLO: SendGrid no configurado, usando logger');
       return;
     }
 
@@ -22,13 +26,11 @@ export class MailerService {
     const from = this.configService.get('SMTP_FROM') || 'jesushernandezmonts@gmail.com';
 
     if (!this.configService.get('SENDGRID_API_KEY') || this.configService.get('SENDGRID_API_KEY')!.includes('tu-api-key')) {
-      console.log('---------------------------------------------------------');
-      console.log('📧 MODO DESARROLLO: ENVÍO DE EMAIL SIMULADO');
-      console.log(`PARA: ${to}`);
-      console.log(`ASUNTO: ${subject}`);
+      this.logger.email('MODO DESARROLLO: ENVÍO DE EMAIL SIMULADO');
+      this.logger.email(`PARA: ${to}`);
+      this.logger.email(`ASUNTO: ${subject}`);
       const link = html.match(/href="([^"]*)"/)?.[1];
-      if (link) console.log(`🔗 ENLACE: ${link}`);
-      console.log('---------------------------------------------------------');
+      if (link) this.logger.info(`🔗 ENLACE: ${link}`);
       return;
     }
 
@@ -40,15 +42,15 @@ export class MailerService {
         html,
       };
       await this.sgMail.send(msg);
-      console.log(`✅ Email enviado a ${to} via SendGrid`);
+      this.logger.success(`Email enviado a ${to} via SendGrid`);
     } catch (error) {
-      console.error(`❌ Error enviando email a ${to} via SendGrid:`, error.message);
+      this.logger.error(`Error enviando email a ${to} via SendGrid: ${error.message}`, error.stack, 'MailerService');
       if (error.response) {
-        console.error('SendGrid error body:', error.response.body);
+        this.logger.error(`SendGrid error body: ${JSON.stringify(error.response.body)}`, '', 'MailerService');
       }
       // Log del link como fallback
       const link = html.match(/href="([^"]*)"/)?.[1];
-      if (link) console.log(`🔗 ENLACE (backup): ${link}`);
+      if (link) this.logger.info(`🔗 ENLACE (backup): ${link}`);
       throw error;
     }
   }
