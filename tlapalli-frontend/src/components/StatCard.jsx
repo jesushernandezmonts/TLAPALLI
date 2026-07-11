@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 
 const colorMap = {
-  white: 'bg-slate-800/95 border-white/25 text-white hover:shadow-white/20',
-  emerald: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300 hover:shadow-emerald-500/20',
-  amber: 'bg-amber-500/20 border-amber-500/30 text-amber-300 hover:shadow-amber-500/20',
-  rose: 'bg-rose-500/20 border-rose-500/30 text-rose-300 hover:shadow-rose-500/20',
-  purple: 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:shadow-purple-500/20',
-  cyan: 'bg-cyan-500/20 border-cyan-500/30 text-cyan-300 hover:shadow-cyan-500/20',
+  white: 'bg-slate-800 border-white/25 text-white hover:shadow-white/20',
+  emerald: 'bg-emerald-500/90 border-emerald-400/40 text-white hover:shadow-emerald-500/20',
+  amber: 'bg-amber-500/90 border-amber-400/40 text-white hover:shadow-amber-500/20',
+  rose: 'bg-rose-500/90 border-rose-400/40 text-white hover:shadow-rose-500/20',
+  purple: 'bg-purple-500/90 border-purple-400/40 text-white hover:shadow-purple-500/20',
+  cyan: 'bg-cyan-500/90 border-cyan-400/40 text-white hover:shadow-cyan-500/20',
 };
 
 function StatCard({ icon: Icon, label, value, color = 'white' }) {

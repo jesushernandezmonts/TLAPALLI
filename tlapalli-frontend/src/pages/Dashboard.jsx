@@ -390,7 +390,7 @@ function Dashboard() {
                     ${isToday 
                       ? 'bg-gradient-to-br from-pink-600 to-rose-700 border-pink-400 shadow-xl shadow-pink-600/30 scale-105 z-10' 
                       : isSelected
-                      ? 'bg-gradient-to-br from-white/20 to-white/10 border-white/40 shadow-lg shadow-white/10 scale-105 z-10'
+                      ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-white/40 shadow-lg shadow-white/10 scale-105 z-10'
                       : 'bg-slate-800/80 border-slate-800/80 hover:bg-slate-800/90 hover:border-white/25 hover:shadow-lg hover:shadow-black/20'}`}
                 >
                   {/* Glow effect for today */}
@@ -831,9 +831,10 @@ function Dashboard() {
 
 function KpiCard({ title, value, color, trend, trendLabel, isCurrency }) {
   const colorClasses = {
-    pink: 'bg-pink-500/20 border-pink-500/30 text-pink-100 hover:shadow-pink-500/20',
-    emerald: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-100 hover:shadow-emerald-500/20',
-    cyan: 'bg-cyan-500/20 border-cyan-500/30 text-cyan-100 hover:shadow-cyan-500/20'
+    pink: 'bg-pink-500/90 border-pink-400/40 text-white hover:shadow-pink-500/20',
+    emerald: 'bg-emerald-500/90 border-emerald-400/40 text-white hover:shadow-emerald-500/20',
+    amber: 'bg-amber-500/90 border-amber-400/40 text-white hover:shadow-amber-500/20',
+    sky: 'bg-sky-500/90 border-sky-400/40 text-white hover:shadow-sky-500/20',
   };
 
   const trendValue = trend ? trend.actual - trend.anterior : 0;
