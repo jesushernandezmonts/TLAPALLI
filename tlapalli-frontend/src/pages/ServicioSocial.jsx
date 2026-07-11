@@ -260,7 +260,7 @@ function ServicioSocial() {
       )}
 
       {/* Barra de Controles Unificada en Glassmorphic — buscador + tabs */}
-      <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5 mt-2">
+      <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 ring-1 ring-white/5 mt-2">
         <SearchBar
           value={search}
           onChange={setSearch}
@@ -275,7 +275,7 @@ function ServicioSocial() {
             className={`w-full sm:w-auto px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'lista'
                 ? 'bg-gradient-to-r from-amber-600/30 to-orange-600/20 text-amber-300 border border-amber-500/40 shadow-lg shadow-amber-600/10 ring-1 ring-amber-500/20'
-                : 'bg-white/5 text-white/50 hover:text-white/80 hover:bg-white/10 border border-white/10 hover:border-white/20'
+                : 'bg-slate-800/80 text-white/50 hover:text-white/80 hover:bg-slate-800/90 border border-white/15 hover:border-white/20'
             }`}
           >
             <BarChart3 size={16} />
@@ -288,7 +288,7 @@ function ServicioSocial() {
             className={`w-full sm:w-auto px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'pendientes'
                 ? 'bg-gradient-to-r from-amber-600/30 to-orange-600/20 text-amber-300 border border-amber-500/40 shadow-lg shadow-amber-600/10 ring-1 ring-amber-500/20'
-                : 'bg-white/5 text-white/50 hover:text-white/80 hover:bg-white/10 border border-white/10 hover:border-white/20'
+                : 'bg-slate-800/80 text-white/50 hover:text-white/80 hover:bg-slate-800/90 border border-white/15 hover:border-white/20'
             }`}
           >
             <Clock size={16} />
@@ -329,7 +329,7 @@ function ServicioSocial() {
                   filteredRecords.map(r => {
                     const progreso = Math.min(100, Math.round((r.horasCompletadas / r.horasRequeridas) * 100));
                     return (
-                      <tr key={r.id} className="hover:bg-white/5 transition group">
+                      <tr key={r.id} className="hover:bg-slate-800/80 transition group">
                         <td data-label="Alumno">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
@@ -343,7 +343,7 @@ function ServicioSocial() {
                         </td>
                         <td data-label="Progreso" className="hidden sm:table-cell">
                           <div className="flex items-center gap-3 min-w-[140px]">
-                            <div className="flex-1 bg-white/10 rounded-full h-2.5 max-w-[120px] overflow-hidden">
+                            <div className="flex-1 bg-slate-800/90 rounded-full h-2.5 max-w-[120px] overflow-hidden">
                               <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${progreso}%` }}
@@ -367,12 +367,12 @@ function ServicioSocial() {
                         <td data-label="Acciones" className="text-right">
                           <div className="flex justify-end gap-1 sm:gap-2">
                             <button onClick={() => openDetail(r.id)}
-                              className="p-2.5 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-cyan-500/30 text-white/60"
+                              className="p-2.5 bg-slate-800/80 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-cyan-500/30 text-white/60"
                               title="Ver detalle">
                               <Eye size={16} />
                             </button>
                             <button onClick={() => openAddHoras(r.id)}
-                              className="p-2.5 bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-emerald-500/30 text-white/60"
+                              className="p-2.5 bg-slate-800/80 hover:bg-emerald-500/20 hover:text-emerald-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-emerald-500/30 text-white/60"
                               title="Agregar horas">
                               <Plus size={16} />
                             </button>
@@ -394,7 +394,7 @@ function ServicioSocial() {
           {loadingPendientes ? (
             <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 animate-spin text-amber-500" /></div>
           ) : pendientes.length === 0 ? (
-            <div className="rounded-3xl border border-white/20 bg-slate-950/45 p-16 text-center backdrop-blur-xl shadow-2xl shadow-black/25 ring-1 ring-white/5">
+            <div className="rounded-3xl border border-white/20 bg-slate-950/45 p-16 text-center shadow-2xl shadow-black/25 ring-1 ring-white/5">
               <CheckCircle2 size={64} className="mx-auto text-emerald-400/30 mb-4" />
               <p className="text-white/50 font-bold text-lg">No hay actividades pendientes de aprobación.</p>
               <p className="text-white/30 text-sm mt-2">Los alumnos pueden registrar horas y tú las apruebas desde aquí.</p>
@@ -408,7 +408,7 @@ function ServicioSocial() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   layout
-                  className="group rounded-3xl border border-amber-500/15 bg-slate-950/60 p-6 backdrop-blur-xl shadow-2xl shadow-black/25 ring-1 ring-white/5 hover:border-amber-500/30 hover:bg-slate-950/70 transition-all duration-500"
+                  className="group rounded-3xl border border-amber-500/15 bg-slate-950/60 p-6 shadow-2xl shadow-black/25 ring-1 ring-white/5 hover:border-amber-500/30 hover:bg-slate-950/70 transition-all duration-500"
                 >
                   <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
                     <div className="flex-1 w-full">
@@ -426,13 +426,13 @@ function ServicioSocial() {
                       </div>
 
                       {/* Descripción */}
-                      <div className="bg-white/5 rounded-2xl p-4 border border-white/10 mb-3">
+                      <div className="bg-slate-800/80 rounded-2xl p-4 border border-white/15 mb-3">
                         <h4 className="font-bold text-white/90 text-sm flex items-center gap-2">
                           <BookOpen size={14} className="text-amber-400/60 shrink-0" />
                           {act.descripcion}
                         </h4>
                         {act.comentarios && (
-                          <p className="text-xs text-white/50 mt-2 italic leading-relaxed border-t border-white/5 pt-2">"{act.comentarios}"</p>
+                          <p className="text-xs text-white/50 mt-2 italic leading-relaxed border-t border-white/15 pt-2">"{act.comentarios}"</p>
                         )}
                       </div>
 
@@ -478,7 +478,7 @@ function ServicioSocial() {
           <div className="space-y-1">
             <label className="text-sm text-white/60 ml-1">Alumno</label>
             <select value={newSS.alumnoId} onChange={(e) => setNewSS({...newSS, alumnoId: e.target.value})}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" required>
+              className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" required>
               <option value="" className="text-black">Seleccionar alumno</option>
               {alumnos.map(a => (
                 <option key={a.id} value={a.id} className="text-black">{a.nombre} {a.apellidoPaterno} {a.apellidoMaterno || ''}</option>
@@ -489,13 +489,13 @@ function ServicioSocial() {
             <div className="space-y-1">
               <label className="text-sm text-white/60 ml-1">Horas Requeridas</label>
               <input type="number" value={newSS.horasRequeridas} onChange={(e) => setNewSS({...newSS, horasRequeridas: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" required />
+                className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" required />
             </div>
             <div className="space-y-1">
               <label className="text-sm text-white/60 ml-1">Institución</label>
               <input type="text" value={newSS.institucion} onChange={(e) => setNewSS({...newSS, institucion: e.target.value})}
                 placeholder="Opcional"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" />
+                className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -503,23 +503,23 @@ function ServicioSocial() {
               <label className="text-sm text-white/60 ml-1">Programa</label>
               <input type="text" value={newSS.programa} onChange={(e) => setNewSS({...newSS, programa: e.target.value})}
                 placeholder="Opcional"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" />
+                className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" />
             </div>
             <div className="space-y-1">
               <label className="text-sm text-white/60 ml-1">Supervisor</label>
               <input type="text" value={newSS.supervisor} onChange={(e) => setNewSS({...newSS, supervisor: e.target.value})}
                 placeholder="Opcional"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" />
+                className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" />
             </div>
           </div>
           <div className="space-y-1">
             <label className="text-sm text-white/60 ml-1">Observaciones</label>
             <textarea value={newSS.observaciones} onChange={(e) => setNewSS({...newSS, observaciones: e.target.value})} rows={2}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 resize-none"
+              className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 resize-none"
               placeholder="Opcional" />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={() => setCreateOpen(false)} className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl transition">Cancelar</button>
+            <button type="button" onClick={() => setCreateOpen(false)} className="px-6 py-3 bg-slate-800/80 hover:bg-slate-800/90 text-white rounded-2xl transition">Cancelar</button>
             <button type="submit" className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-lg shadow-amber-600/20 transition-all flex items-center gap-2">
               <HeartHandshake size={18} /> Registrar
             </button>
@@ -533,21 +533,21 @@ function ServicioSocial() {
           <div className="space-y-1">
             <label className="text-sm text-white/60 ml-1">Horas *</label>
             <input type="number" min="1" value={newActividad.horas} onChange={(e) => setNewActividad({...newActividad, horas: e.target.value})}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" required />
+              className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" required />
           </div>
           <div className="space-y-1">
             <label className="text-sm text-white/60 ml-1">Descripción *</label>
             <input type="text" value={newActividad.descripcion} onChange={(e) => setNewActividad({...newActividad, descripcion: e.target.value})}
               placeholder="Ej. Apoyo en biblioteca, mantenimiento..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" required />
+              className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50" required />
           </div>
           <div className="space-y-1">
             <label className="text-sm text-white/60 ml-1">Comentarios</label>
             <textarea value={newActividad.comentarios} onChange={(e) => setNewActividad({...newActividad, comentarios: e.target.value})} rows={2}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 resize-none" />
+              className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 resize-none" />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={() => setAddHorasOpen(false)} className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl transition">Cancelar</button>
+            <button type="button" onClick={() => setAddHorasOpen(false)} className="px-6 py-3 bg-slate-800/80 hover:bg-slate-800/90 text-white rounded-2xl transition">Cancelar</button>
             <button type="submit" className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2">
               <Plus size={18} /> Registrar Horas
             </button>
@@ -560,7 +560,7 @@ function ServicioSocial() {
         {selectedRecord && (
           <div className="space-y-6">
             {/* Info del alumno */}
-            <div className="rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-orange-600/5 p-6 backdrop-blur-xl shadow-2xl shadow-black/25 ring-1 ring-amber-500/10">
+            <div className="rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-orange-600/5 p-6 shadow-2xl shadow-black/25 ring-1 ring-amber-500/10">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-600/20 flex items-center justify-center ring-1 ring-amber-500/20 shrink-0">
@@ -581,13 +581,13 @@ function ServicioSocial() {
                   <span className="text-white/80 font-bold">{selectedRecord.horasCompletadas} hrs completadas</span>
                   <span className="text-white/40">{selectedRecord.horasRequeridas} hrs requeridas</span>
                 </div>
-                <div className="w-full bg-white/10 rounded-full h-4 overflow-hidden shadow-inner shadow-black/20">
+                <div className="w-full bg-slate-800/90 rounded-full h-4 overflow-hidden shadow-inner shadow-black/20">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(100, Math.round((selectedRecord.horasCompletadas / selectedRecord.horasRequeridas) * 100))}%` }}
                     className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-400 relative"
                   >
-                    <div className="absolute inset-0 bg-white/15 rounded-full" />
+                    <div className="absolute inset-0 bg-slate-800/95 rounded-full" />
                   </motion.div>
                 </div>
                 <p className="text-right text-xs font-bold text-white/40 mt-1">{Math.round((selectedRecord.horasCompletadas / selectedRecord.horasRequeridas) * 100)}% completado</p>
@@ -599,7 +599,7 @@ function ServicioSocial() {
                   {selectedRecord.supervisor && <span className="flex items-center gap-1.5">👤 Supervisor: {selectedRecord.supervisor}</span>}
                 </div>
               )}
-              {selectedRecord.observaciones && <p className="text-sm text-white/50 mt-2 italic bg-white/5 rounded-xl p-3 border border-white/5">"{selectedRecord.observaciones}"</p>}
+              {selectedRecord.observaciones && <p className="text-sm text-white/50 mt-2 italic bg-slate-800/80 rounded-xl p-3 border border-white/15">"{selectedRecord.observaciones}"</p>}
 
               {/* Acciones de estatus */}
               <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-amber-500/10">
@@ -616,7 +616,7 @@ function ServicioSocial() {
             </div>
 
             {/* Actividades */}
-            <div className="rounded-3xl border border-white/20 bg-slate-950/45 p-6 backdrop-blur-xl shadow-2xl shadow-black/25 ring-1 ring-white/5">
+            <div className="rounded-3xl border border-white/20 bg-slate-950/45 p-6 shadow-2xl shadow-black/25 ring-1 ring-white/5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-white flex items-center gap-2 text-sm">
                   <BookOpen size={16} className="text-amber-400/60" /> Actividades ({selectedRecord.actividades?.length || 0})
@@ -627,7 +627,7 @@ function ServicioSocial() {
                 </button>
               </div>
               {selectedRecord.actividades?.length === 0 ? (
-                <p className="text-white/40 italic text-sm bg-white/5 rounded-xl p-4 text-center">No hay actividades registradas.</p>
+                <p className="text-white/40 italic text-sm bg-slate-800/80 rounded-xl p-4 text-center">No hay actividades registradas.</p>
               ) : (
                 <div className="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
                   {selectedRecord.actividades.map(act => (
@@ -635,7 +635,7 @@ function ServicioSocial() {
                       key={act.id}
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex items-start justify-between bg-white/5 rounded-2xl p-4 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+                      className="flex items-start justify-between bg-slate-800/80 rounded-2xl p-4 border border-white/15 hover:bg-slate-800/90 hover:border-white/20 transition-all duration-300"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">

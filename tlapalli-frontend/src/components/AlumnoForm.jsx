@@ -285,7 +285,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
               placeholder="Ej. Juan Carlos"
               value={form.nombre}
               onChange={handleChange}
-              className={`bg-white/5 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${fieldErrors.nombre ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+              className={`bg-slate-800/80 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${fieldErrors.nombre ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/15 focus:border-pink-500/50'
                 }`}
             />
             {fieldErrors.nombre && (
@@ -303,7 +303,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
               placeholder="Ej. Pérez"
               value={form.apellidoPaterno}
               onChange={handleChange}
-              className={`bg-white/5 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${fieldErrors.apellidoPaterno ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+              className={`bg-slate-800/80 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${fieldErrors.apellidoPaterno ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/15 focus:border-pink-500/50'
                 }`}
             />
             {fieldErrors.apellidoPaterno && (
@@ -321,7 +321,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
               placeholder="Ej. García"
               value={form.apellidoMaterno}
               onChange={handleChange}
-              className={`bg-white/5 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${fieldErrors.apellidoMaterno ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+              className={`bg-slate-800/80 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${fieldErrors.apellidoMaterno ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/15 focus:border-pink-500/50'
                 }`}
             />
             {fieldErrors.apellidoMaterno && (
@@ -340,7 +340,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
               value={form.telefono}
               onChange={handleChange}
               maxLength={10}
-              className={`bg-white/5 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${fieldErrors.telefono ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+              className={`bg-slate-800/80 border rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${fieldErrors.telefono ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/15 focus:border-pink-500/50'
                 }`}
             />
             {fieldErrors.telefono && (
@@ -361,7 +361,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
                 placeholder="alumno@ejemplo.com"
                 value={form.email}
                 onChange={handleChange}
-                className={`bg-white/5 border rounded-xl pl-9 pr-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${fieldErrors.email ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/10 focus:border-pink-500/50'
+                className={`bg-slate-800/80 border rounded-xl pl-9 pr-3 py-2 text-sm text-white placeholder-white/20 w-full outline-none transition ${fieldErrors.email ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/15 focus:border-pink-500/50'
                   }`}
               />
             </div>
@@ -383,7 +383,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
               placeholder="Ej. Alergias, asma, diabetes, etc."
               value={form.padecimientos}
               onChange={handleChange}
-              className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full focus:border-pink-500/50 outline-none transition"
+              className="bg-slate-800/80 border border-white/15 rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full focus:border-pink-500/50 outline-none transition"
             />
           </div>
           <div className="space-y-1 md:col-span-4 relative">
@@ -392,7 +392,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
               <button
                 type="button"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-full flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white hover:border-white/20 transition"
+                className="w-full flex items-center justify-between gap-2 bg-slate-800/80 border border-white/15 rounded-xl px-3 py-2 text-sm text-white hover:border-white/20 transition"
               >
                 <span className="truncate">
                   {selectedTallerIds.length === 0
@@ -402,7 +402,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
                 <ChevronDown size={16} className={`shrink-0 text-white/50 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {dropdownOpen && (
-                <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-white/10 bg-slate-950/95 shadow-2xl backdrop-blur-md">
+                <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-white/15 bg-slate-950/95 shadow-2xl ">
                   <div className="max-h-36 overflow-y-auto p-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
                     {talleres.filter(taller => taller.activo !== false || selectedTallerIds.includes(taller.id)).map((taller) => {
                       const isSelected = selectedTallerIds.includes(taller.id);
@@ -410,7 +410,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
                         <div
                           key={taller.id}
                           onClick={() => toggleTaller(taller.id)}
-                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition ${isSelected ? 'bg-pink-500/20 text-pink-300' : 'text-white/70 hover:bg-white/5'
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition ${isSelected ? 'bg-pink-500/20 text-pink-300' : 'text-white/70 hover:bg-slate-800/80'
                             }`}
                         >
                           <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition ${isSelected ? 'bg-pink-500 border-pink-500' : 'border-white/30'
@@ -422,7 +422,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
                       );
                     })}
                   </div>
-                  <div className="flex justify-end border-t border-white/10 bg-slate-950/95 px-2 py-1.5">
+                  <div className="flex justify-end border-t border-white/15 bg-slate-950/95 px-2 py-1.5">
                     <button
                       type="button"
                       onClick={() => setDropdownOpen(false)}
@@ -453,7 +453,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         </div>
 
         {/* Expediente Digital Inicial */}
-        <div className="bg-white/5 rounded-2xl p-4 border border-white/10 space-y-3">
+        <div className="bg-slate-800/80 rounded-2xl p-4 border border-white/15 space-y-3">
           <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-pink-500">Expediente Digital Inicial</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <FileInput
@@ -522,11 +522,11 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         )}
 
         {/* Footer unificado */}
-        <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
+        <div className="flex justify-end gap-2 pt-3 border-t border-white/15">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white/70 rounded-xl font-bold transition text-xs cursor-pointer"
+            className="px-5 py-2.5 bg-slate-800/80 hover:bg-slate-800/90 text-white/70 rounded-xl font-bold transition text-xs cursor-pointer"
           >
             Cancelar
           </button>
@@ -565,7 +565,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
 
 function FileInput({ label, onChange, onScan, fileName, isScanning, existingDoc, onRemoveExisting }) {
   return (
-    <div className="flex items-center justify-between gap-3 bg-white/5 border border-white/10 rounded-xl p-2.5 hover:border-white/20 transition-all">
+    <div className="flex items-center justify-between gap-3 bg-slate-800/80 border border-white/15 rounded-xl p-2.5 hover:border-white/20 transition-all">
       <div className="min-w-0 flex-1">
         <label className="text-[10px] text-white/50 uppercase font-black tracking-wider px-0.5 block truncate">{label}</label>
         {fileName ? (
@@ -606,7 +606,7 @@ function FileInput({ label, onChange, onScan, fileName, isScanning, existingDoc,
             />
             <label
               htmlFor={`file-input-${label.replace(/\s+/g, '-')}`}
-              className="flex items-center justify-center py-1.5 px-2.5 rounded-lg text-[9px] font-bold uppercase bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 transition cursor-pointer border border-white/5 select-none"
+              className="flex items-center justify-center py-1.5 px-2.5 rounded-lg text-[9px] font-bold uppercase bg-slate-800/80 text-white/60 hover:bg-slate-800/90 hover:text-white/80 transition cursor-pointer border border-white/15 select-none"
             >
               Buscar
             </label>

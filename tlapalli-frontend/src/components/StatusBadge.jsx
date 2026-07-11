@@ -40,7 +40,7 @@ function StatusBadge({ status, label, classes, dotColor, size = 'sm' }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full font-black uppercase tracking-tighter border ${sizeClasses} ${
-        classes || config?.classes || 'bg-white/5 text-white/40 border-white/10'
+        classes || config?.classes || 'bg-slate-800/80 text-white/40 border-white/15'
       }`}
     >
       <span

@@ -195,7 +195,7 @@ export default function Asistencia() {
 
       {/* Selector de Grupo y Fecha */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-5">
+        <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-white/15 rounded-2xl p-5">
           <label className="block text-xs font-bold text-white/70 uppercase tracking-wider mb-3">
             <Users size={14} className="inline mr-1.5 -mt-0.5" />
             Seleccionar Grupo
@@ -209,7 +209,7 @@ export default function Asistencia() {
                 setAsistenciasPrevias({});
                 setHistorial([]);
               }}
-              className="w-full appearance-none px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 text-sm font-medium transition cursor-pointer pr-10"
+              className="w-full appearance-none px-4 py-3 bg-slate-800/80 border border-white/15 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 text-sm font-medium transition cursor-pointer pr-10"
             >
               <option value="" className="bg-slate-900 text-white/50">-- Selecciona un grupo --</option>
               {grupos.map((g) => (
@@ -221,7 +221,7 @@ export default function Asistencia() {
           {grupos.length === 0 && <p className="mt-2 text-xs text-white/30">No tienes grupos registrados</p>}
         </div>
 
-        <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-5">
+        <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-white/15 rounded-2xl p-5">
           <label className="block text-xs font-bold text-white/70 uppercase tracking-wider mb-3">
             <CalendarDays size={14} className="inline mr-1.5 -mt-0.5" />
             Seleccionar Fecha
@@ -230,7 +230,7 @@ export default function Asistencia() {
             type="date"
             value={fecha}
             onChange={(e) => handleFechaChange(e.target.value)}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-pink-500/50 text-sm font-medium transition"
+            className="w-full px-4 py-3 bg-slate-800/80 border border-white/15 rounded-xl text-white focus:outline-none focus:border-pink-500/50 text-sm font-medium transition"
           />
         </div>
       </div>
@@ -247,19 +247,19 @@ export default function Asistencia() {
               {/* Stats */}
               {alumnos.length > 0 && (
                 <div className="grid grid-cols-4 gap-3">
-                  <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border border-white/10 rounded-xl p-4 text-center">
+                  <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-white/15 rounded-xl p-4 text-center">
                     <p className="text-2xl font-black text-white">{totalAlumnos}</p>
                     <p className="text-xs text-white/50 mt-1">Total</p>
                   </div>
-                  <div className="bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 backdrop-blur-xl border border-emerald-500/20 rounded-xl p-4 text-center">
+                  <div className="bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 border border-emerald-500/20 rounded-xl p-4 text-center">
                     <p className="text-2xl font-black text-emerald-400">{asistenciasCount}</p>
                     <p className="text-xs text-emerald-400/60 mt-1">Asistencias</p>
                   </div>
-                  <div className="bg-gradient-to-br from-red-900/30 to-red-800/20 backdrop-blur-xl border border-red-500/20 rounded-xl p-4 text-center">
+                  <div className="bg-gradient-to-br from-red-900/30 to-red-800/20 border border-red-500/20 rounded-xl p-4 text-center">
                     <p className="text-2xl font-black text-red-400">{faltasCount}</p>
                     <p className="text-xs text-red-400/60 mt-1">Faltas</p>
                   </div>
-                  <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border border-white/10 rounded-xl p-4 text-center">
+                  <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-white/15 rounded-xl p-4 text-center">
                     <p className="text-2xl font-black text-white/50">{sinRegistro}</p>
                     <p className="text-xs text-white/30 mt-1">Sin registro</p>
                   </div>
@@ -267,7 +267,7 @@ export default function Asistencia() {
               )}
 
               {selectedGrupo && (
-                <div className={`bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border ${colors.border} rounded-2xl overflow-hidden`}>
+                <div className={`bg-gradient-to-br from-slate-900/60 to-slate-800/40 border ${colors.border} rounded-2xl overflow-hidden`}>
                   <div className={`h-1 bg-gradient-to-r ${colors.from} ${colors.to}`} />
                   <div className="p-5">
                     {/* Cabecera con acciones */}
@@ -285,7 +285,7 @@ export default function Asistencia() {
                         <button
                           onClick={() => setShowHistorial(!showHistorial)}
                           className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition ${
-                            showHistorial ? 'bg-white/10 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                            showHistorial ? 'bg-slate-800/90 text-white' : 'bg-slate-800/80 text-white/60 hover:bg-slate-800/90 hover:text-white'
                           }`}
                         >
                           <History size={14} />
@@ -306,7 +306,7 @@ export default function Asistencia() {
                             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white font-bold text-sm transition ${
                               hasChanges()
                                 ? `bg-gradient-to-r ${colors.from} ${colors.to} hover:brightness-110 shadow-lg`
-                                : 'bg-white/5 text-white/30 cursor-not-allowed'
+                                : 'bg-slate-800/80 text-white/30 cursor-not-allowed'
                             }`}
                           >
                             {saving ? (
@@ -331,11 +331,11 @@ export default function Asistencia() {
                           {historial.length === 0 ? (
                             <p className="text-white/30 text-sm py-4 text-center italic">No hay historial de asistencias aún</p>
                           ) : (
-                            <div className="bg-white/5 rounded-xl p-3 max-h-48 overflow-y-auto space-y-1">
+                            <div className="bg-slate-800/80 rounded-xl p-3 max-h-48 overflow-y-auto space-y-1">
                               {historial.map((entry) => (
                                 <div
                                   key={entry.fecha}
-                                  className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/5 transition cursor-pointer"
+                                  className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-800/80 transition cursor-pointer"
                                   onClick={() => { handleFechaChange(entry.fecha); setShowHistorial(false); }}
                                 >
                                   <span className="text-white text-sm font-medium capitalize">
@@ -363,11 +363,11 @@ export default function Asistencia() {
                         <p className="text-white/40 text-sm">Este grupo no tiene alumnos registrados</p>
                       </div>
                     ) : (
-                      <div className="overflow-x-auto rounded-xl border border-white/5">
+                      <div className="overflow-x-auto rounded-xl border border-white/15">
                         <table className="w-full text-sm">
                           {/* Cabecera de la tabla */}
                           <thead>
-                            <tr className="border-b border-white/5 bg-white/[0.03]">
+                            <tr className="border-b border-white/15 bg-white/[0.03]">
                               <th className="text-left px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-12">#</th>
                               <th className="text-left px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider">Alumno</th>
                               <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-28">✅ Asistencia</th>
@@ -429,7 +429,7 @@ export default function Asistencia() {
                                       } ${
                                         estado === 'asistencia'
                                           ? 'bg-emerald-500 border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.35)]'
-                                          : 'border-white/20 hover:border-emerald-400/50 bg-white/5'
+                                          : 'border-white/20 hover:border-emerald-400/50 bg-slate-800/80'
                                       }`}>
                                         {estado === 'asistencia' && (
                                           <CheckCircle2 size={16} className="text-white" />
@@ -453,7 +453,7 @@ export default function Asistencia() {
                                       } ${
                                         estado === 'falta'
                                           ? 'bg-red-500 border-red-400 shadow-[0_0_12px_rgba(248,113,113,0.35)]'
-                                          : 'border-white/20 hover:border-red-400/50 bg-white/5'
+                                          : 'border-white/20 hover:border-red-400/50 bg-slate-800/80'
                                       }`}>
                                         {estado === 'falta' && (
                                           <XCircle size={16} className="text-white" />
@@ -475,7 +475,7 @@ export default function Asistencia() {
           )}
         </>
       ) : (
-        <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl py-16 text-center">
+        <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-white/15 rounded-2xl py-16 text-center">
           <ClipboardList size={48} className="mx-auto text-white/20 mb-4" />
           <p className="text-white/50 text-lg font-medium">Selecciona un grupo para empezar</p>
           <p className="text-white/30 text-sm mt-1">Elige un grupo arriba y podrás registrar la asistencia del día</p>

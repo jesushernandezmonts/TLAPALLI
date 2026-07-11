@@ -67,9 +67,9 @@ export default function CustomDatePicker({ value, onChange, disabled = false }) 
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen(!open)}
-        className={`w-full flex items-center justify-between gap-3 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-left text-sm font-medium transition-all duration-200
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-white/10 hover:border-pink-500/30'}
-          ${open ? 'border-pink-500/50 bg-white/10 shadow-lg shadow-pink-500/5' : ''}
+        className={`w-full flex items-center justify-between gap-3 px-4 py-3 bg-slate-800/80 border border-white/15 rounded-xl text-left text-sm font-medium transition-all duration-200
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/90 hover:border-pink-500/30'}
+          ${open ? 'border-pink-500/50 bg-slate-800/90 shadow-lg shadow-pink-500/5' : ''}
         `}
       >
         <div className="flex items-center gap-2.5">
@@ -88,16 +88,16 @@ export default function CustomDatePicker({ value, onChange, disabled = false }) 
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 right-0 mt-2 z-50 bg-slate-900/95 backdrop-blur-xl border border-white/15 rounded-2xl p-4 shadow-2xl shadow-black/50"
+            className="absolute top-full left-0 right-0 mt-2 z-50 bg-slate-900/95  border border-white/15 rounded-2xl p-4 shadow-2xl shadow-black/50"
           >
             <div className="flex items-center justify-between mb-3">
-              <button type="button" onClick={prevMonth} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-white/50 hover:text-white transition-all">
+              <button type="button" onClick={prevMonth} className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-800/95 border border-white/15 text-white/50 hover:text-white transition-all">
                 <ChevronLeft size={14} />
               </button>
               <span className="text-xs font-black text-white/90 uppercase tracking-wider">
                 {MONTH_NAMES[viewMonth]} {viewYear}
               </span>
-              <button type="button" onClick={nextMonth} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-white/50 hover:text-white transition-all">
+              <button type="button" onClick={nextMonth} className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-800/95 border border-white/15 text-white/50 hover:text-white transition-all">
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -125,8 +125,8 @@ export default function CustomDatePicker({ value, onChange, disabled = false }) 
                       ${isSelected
                         ? 'bg-gradient-to-br from-pink-600 to-rose-600 text-white shadow-lg shadow-pink-600/30'
                         : isToday
-                        ? 'bg-white/10 text-white border border-pink-500/40'
-                        : 'text-white/60 hover:bg-white/10 hover:text-white'}
+                        ? 'bg-slate-800/90 text-white border border-pink-500/40'
+                        : 'text-white/60 hover:bg-slate-800/90 hover:text-white'}
                     `}
                   >
                     {isToday && !isSelected && (
@@ -138,7 +138,7 @@ export default function CustomDatePicker({ value, onChange, disabled = false }) 
               })}
             </div>
 
-            <div className="mt-3 pt-2 border-t border-white/10 flex justify-center">
+            <div className="mt-3 pt-2 border-t border-white/15 flex justify-center">
               <button
                 type="button"
                 onClick={() => { setViewYear(today.getFullYear()); setViewMonth(today.getMonth()); selectDate(today.getDate()); }}

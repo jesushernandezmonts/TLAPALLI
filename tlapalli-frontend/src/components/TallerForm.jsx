@@ -84,7 +84,7 @@ function TallerForm({ taller, onClose, onSave }) {
   };
 
   const getInputClass = (fieldName) => {
-    const base = "bg-white/5 border rounded-xl pl-11 pr-4 w-full text-white placeholder-white/25 focus:outline-none focus:ring-2 text-sm h-12 transition-all duration-200";
+    const base = "bg-slate-800/80 border rounded-xl pl-11 pr-4 w-full text-white placeholder-white/25 focus:outline-none focus:ring-2 text-sm h-12 transition-all duration-200";
     if (fieldErrors[fieldName]) {
       return `${base} border-rose-500/50 focus:border-rose-500/60 focus:ring-rose-500/20 hover:border-rose-500/60`;
     }
@@ -128,7 +128,7 @@ function TallerForm({ taller, onClose, onSave }) {
             placeholder="Breve descripción de los temas o el taller..."
             value={form.descripcion}
             onChange={handleChange}
-            className="bg-white/5 border border-white/15 rounded-xl pl-11 pr-4 py-3 w-full text-white placeholder-white/25 focus:outline-none focus:border-pink-500/60 focus:ring-2 focus:ring-pink-500/15 text-sm transition-all duration-200 hover:border-white/30 resize-none"
+            className="bg-slate-800/80 border border-white/15 rounded-xl pl-11 pr-4 py-3 w-full text-white placeholder-white/25 focus:outline-none focus:border-pink-500/60 focus:ring-2 focus:ring-pink-500/15 text-sm transition-all duration-200 hover:border-white/30 resize-none"
             rows="3"
           />
         </div>
@@ -202,14 +202,14 @@ function TallerForm({ taller, onClose, onSave }) {
 
       {/* Activo (solo al editar) */}
       {taller && (
-        <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3.5">
+        <div className="flex items-center gap-3 bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3.5">
           <input
             type="checkbox"
             name="activo"
             id="activo"
             checked={form.activo}
             onChange={(e) => setForm({ ...form, activo: e.target.checked })}
-            className="w-4 h-4 rounded text-pink-600 bg-black/20 border-white/15 focus:ring-pink-500 cursor-pointer"
+            className="w-4 h-4 rounded text-pink-600 bg-slate-900/80 border-white/15 focus:ring-pink-500 cursor-pointer"
           />
           <label htmlFor="activo" className="text-sm font-semibold text-white/90 cursor-pointer select-none">
             Taller Activo (Disponible para inscripciones)
@@ -226,12 +226,12 @@ function TallerForm({ taller, onClose, onSave }) {
       )}
 
       {/* Separador */}
-      <div className="border-t border-white/10 pt-4">
+      <div className="border-t border-white/15 pt-4">
         <div className="flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 bg-white/8 hover:bg-white/15 rounded-xl text-white/80 hover:text-white text-sm font-bold transition-all duration-200 border border-white/10 hover:border-white/20"
+            className="px-5 py-2.5 bg-white/8 hover:bg-slate-800/95 rounded-xl text-white/80 hover:text-white text-sm font-bold transition-all duration-200 border border-white/15 hover:border-white/20"
           >
             Cancelar
           </button>

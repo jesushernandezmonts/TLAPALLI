@@ -46,16 +46,16 @@ function AlumnoPagos() {
       </div>
 
       {pagos.length === 0 ? (
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-12 text-center">
+        <div className="bg-slate-900/95 border border-white/20 rounded-2xl p-12 text-center">
           <CreditCard size={48} className="mx-auto text-white/20 mb-4" />
           <p className="text-white/40 font-medium">No hay pagos registrados aún.</p>
         </div>
       ) : (
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-slate-900/95 border border-white/20 rounded-2xl overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-white/5 border-b border-white/10">
+                <tr className="bg-slate-800/80 border-b border-white/15">
                   <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Mes</th>
                   <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Monto</th>
                   <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Método</th>
@@ -65,7 +65,7 @@ function AlumnoPagos() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {pagos.map((p) => (
-                  <tr key={p.id} className="hover:bg-white/5 transition-colors">
+                  <tr key={p.id} className="hover:bg-slate-800/80 transition-colors">
                     <td className="py-4 px-6">
                       <span className="text-white/90 font-medium capitalize">{p.mesCorrespondiente}</span>
                     </td>
@@ -73,7 +73,7 @@ function AlumnoPagos() {
                       <span className="text-emerald-400 font-black text-lg">${Number(p.monto).toFixed(2)}</span>
                     </td>
                     <td className="py-4 px-6">
-                      <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/60 text-[10px] font-bold uppercase tracking-widest">
+                      <span className="px-3 py-1 rounded-full bg-slate-800/80 border border-white/15 text-white/60 text-[10px] font-bold uppercase tracking-widest">
                         {p.metodoPago}
                       </span>
                     </td>

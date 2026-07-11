@@ -145,7 +145,7 @@ function Inscripciones() {
               <tr><td colSpan="6" className="p-20 text-center text-white/20 italic font-medium">No hay inscripciones activas.</td></tr>
             ) : (
               paginatedInscripciones.map(i => (
-                <tr key={i.id} className="hover:bg-white/5 transition group">
+                <tr key={i.id} className="hover:bg-slate-800/80 transition group">
                   <td data-label="Alumno">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 font-bold">
@@ -190,7 +190,7 @@ function Inscripciones() {
       </div>
 
       {!loading && inscripciones.length > inscripcionesPerPage && (
-        <div className="mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-slate-950/80 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-md">
+        <div className="mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/15 bg-slate-950/80 px-5 py-4 shadow-lg shadow-black/20">
           <p className="text-xs font-bold uppercase tracking-wider text-white/80">
             Mostrando {startIndex + 1}-{Math.min(startIndex + inscripcionesPerPage, inscripciones.length)} de {inscripciones.length} inscripciones
           </p>
@@ -198,7 +198,7 @@ function Inscripciones() {
             <button
               onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
               disabled={currentPage === 1}
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
+              className="rounded-full border border-white/15 bg-slate-800/90 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/15 disabled:hover:bg-slate-800/90 disabled:hover:shadow-none"
             >
               Anterior
             </button>
@@ -208,7 +208,7 @@ function Inscripciones() {
             <button
               onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
               disabled={currentPage === totalPages}
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
+              className="rounded-full border border-white/15 bg-slate-800/90 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/15 disabled:hover:bg-slate-800/90 disabled:hover:shadow-none"
             >
               Siguiente
             </button>
@@ -223,7 +223,7 @@ function Inscripciones() {
             <select 
               value={form.alumnoId} 
               onChange={(e) => setForm({...form, alumnoId: e.target.value})}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500/50 transition-all" 
+              className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500/50 transition-all" 
               required
             >
               <option value="" className="text-black">Seleccionar alumno</option>
@@ -238,7 +238,7 @@ function Inscripciones() {
             <select 
               value={form.tallerId} 
               onChange={(e) => setForm({...form, tallerId: e.target.value})}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500/50 transition-all" 
+              className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500/50 transition-all" 
               required
             >
               <option value="" className="text-black">Seleccionar taller</option>
@@ -266,7 +266,7 @@ function Inscripciones() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 80 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
-            className={`fixed right-6 top-6 z-200 flex items-center gap-3 rounded-2xl bg-slate-950/90 px-5 py-4 text-white shadow-2xl backdrop-blur-xl ${toast.type === 'error' ? 'border border-rose-500/25 shadow-rose-500/10' : 'border border-emerald-500/20 shadow-emerald-500/10'}`}
+            className={`fixed right-6 top-6 z-200 flex items-center gap-3 rounded-2xl bg-slate-950/90 px-5 py-4 text-white shadow-2xl ${toast.type === 'error' ? 'border border-rose-500/25 shadow-rose-500/10' : 'border border-emerald-500/20 shadow-emerald-500/10'}`}
           >
             <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${toast.type === 'error' ? 'border-rose-500/25 bg-rose-500/10 text-rose-400' : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'}`}
             >

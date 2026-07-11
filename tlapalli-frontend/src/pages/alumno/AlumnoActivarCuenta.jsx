@@ -79,7 +79,7 @@ function AlumnoActivarCuenta() {
           transition={{ duration: 0.6 }}
           className="relative z-20 w-full max-w-md px-4"
         >
-          <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.35)] text-center">
+          <div className="bg-slate-800/90 border border-white/20 rounded-[2rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.35)] text-center">
             <div className="w-16 h-16 rounded-2xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center mx-auto mb-4">
               <AlertCircle size={28} className="text-rose-400" />
             </div>
@@ -119,7 +119,7 @@ function AlumnoActivarCuenta() {
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="relative z-20 w-full max-w-lg px-4"
       >
-        <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2rem] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
+        <div className="bg-slate-800/90 border border-white/20 rounded-[2rem] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
 
           {/* Header */}
           <div className="flex flex-col items-center mb-7">
@@ -185,7 +185,7 @@ function AlumnoActivarCuenta() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-white/10 border border-white/20 rounded-2xl pl-12 pr-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-violet-500/50 focus:bg-white/15 transition-all"
+                  className="w-full bg-slate-800/90 border border-white/20 rounded-2xl pl-12 pr-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-violet-500/50 focus:bg-slate-800/95 transition-all"
                   required
                 />
                 <button
@@ -211,7 +211,7 @@ function AlumnoActivarCuenta() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-white/10 border border-white/20 rounded-2xl pl-12 pr-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-violet-500/50 focus:bg-white/15 transition-all"
+                  className="w-full bg-slate-800/90 border border-white/20 rounded-2xl pl-12 pr-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-violet-500/50 focus:bg-slate-800/95 transition-all"
                   required
                 />
                 <button

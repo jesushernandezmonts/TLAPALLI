@@ -10,7 +10,7 @@ function Toast({ toast, onClose }) {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 80 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          className={`fixed right-6 top-6 z-200 flex items-center gap-3 rounded-2xl bg-slate-950/90 px-5 py-4 text-white shadow-2xl backdrop-blur-xl ${
+          className={`fixed right-6 top-6 z-200 flex items-center gap-3 rounded-2xl bg-slate-950/90 px-5 py-4 text-white shadow-2xl  ${
             toast.type === 'delete' || toast.type === 'error'
               ? 'border border-rose-500/25 shadow-rose-500/10'
               : 'border border-emerald-500/20 shadow-emerald-500/10'

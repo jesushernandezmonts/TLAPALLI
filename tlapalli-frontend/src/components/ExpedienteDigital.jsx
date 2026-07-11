@@ -92,7 +92,7 @@ function ExpedienteDigital({ alumnoId }) {
 
   return (
     <>
-      <div className="bg-white/5 backdrop-blur-md border border-white/20 rounded-2xl p-6">
+      <div className="bg-slate-800/80  border border-white/20 rounded-2xl p-6">
       <h3 className="text-lg font-semibold mb-4 text-white/90">Expediente Digital</h3>
       
       {/* Subir o Escanear documento */}
@@ -101,7 +101,7 @@ function ExpedienteDigital({ alumnoId }) {
           value={tipo} 
           onChange={(e) => setTipo(e.target.value)}
           disabled={loading || isScanning}
-          className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-pink-500/50 transition w-full md:w-auto"
+          className="bg-slate-800/90 border border-white/20 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-pink-500/50 transition w-full md:w-auto"
         >
           <option value="acta_nacimiento" className="text-black">Acta de Nacimiento</option>
           <option value="curp" className="text-black">CURP</option>
@@ -159,7 +159,7 @@ function ExpedienteDigital({ alumnoId }) {
           <p className="text-white/40 text-sm italic py-4">No hay documentos registrados para este alumno.</p>
         ) : (
           documentos.map(doc => (
-            <div key={doc.id} className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition group">
+            <div key={doc.id} className="flex justify-between items-center bg-slate-800/80 p-4 rounded-2xl border border-white/15 hover:border-white/15 transition group">
               <div>
                 <p className="text-sm font-medium text-white/90">{doc.nombre}</p>
                 <p className="text-[10px] text-white/40 uppercase tracking-wider">{doc.tipo.replace('_', ' ')} • {new Date(doc.subidoEn).toLocaleDateString()}</p>

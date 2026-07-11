@@ -38,7 +38,7 @@ function AlumnoTalleres() {
       </div>
 
       {talleres.length === 0 ? (
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-12 text-center">
+        <div className="bg-slate-900/95 border border-white/20 rounded-2xl p-12 text-center">
           <Palette size={48} className="mx-auto text-white/20 mb-4" />
           <p className="text-white/40 font-medium">No estás inscrito en ningún taller actualmente.</p>
         </div>
@@ -67,7 +67,7 @@ function AlumnoTalleres() {
                   <span className="text-emerald-400 font-bold">${Number(insc.taller?.costoMensual).toFixed(2)} / mes</span>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-white/10">
+              <div className="mt-4 pt-4 border-t border-white/15">
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                   insc.estatusPago === 'al_corriente'
                     ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'

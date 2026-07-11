@@ -55,7 +55,7 @@ function AlumnoPerfil() {
         </div>
 
         {/* Detalles */}
-        <div className="lg:col-span-2 bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-8 shadow-xl">
+        <div className="lg:col-span-2 bg-slate-900/95 border border-white/20 rounded-2xl p-8 shadow-xl">
           <h3 className="text-lg font-bold text-white/90 mb-6">Información Personal</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">

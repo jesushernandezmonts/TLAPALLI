@@ -256,7 +256,7 @@ function Instructores() {
       default:
         return {
           icon: null,
-          classes: 'bg-white/5 text-white/40 border-white/10',
+          classes: 'bg-slate-800/80 text-white/40 border-white/15',
           label: estado,
         };
     }
@@ -284,7 +284,7 @@ function Instructores() {
       </div>
 
       {/* Barra de Controles Unificada en Glassmorphic */}
-      <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5 mt-2">
+      <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 ring-1 ring-white/5 mt-2">
         <SearchBar
           value={search}
           onChange={setSearch}
@@ -343,7 +343,7 @@ function Instructores() {
               paginatedInstructores.map((i, index) => {
                 const badge = getEstadoBadge(i.estado);
                 return (
-                  <tr key={i.id} className="hover:bg-white/5 transition group">
+                  <tr key={i.id} className="hover:bg-slate-800/80 transition group">
                     <td data-label="Instructor">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 shrink-0 font-bold">
@@ -384,7 +384,7 @@ function Instructores() {
                       <div className="flex justify-end gap-1 sm:gap-2">
                         <button 
                           onClick={() => handleViewDetail(i)} 
-                          className="p-2.5 bg-white/5 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-purple-500/30 text-white/60" 
+                          className="p-2.5 bg-slate-800/80 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-purple-500/30 text-white/60" 
                           title="Ver detalle"
                         >
                           <Eye size={16} />
@@ -393,7 +393,7 @@ function Instructores() {
                           <button 
                             onClick={() => handleReenviarActivacion(i.id)} 
                             disabled={sendingEmail === i.id}
-                            className="p-2.5 bg-white/5 hover:bg-blue-500/20 hover:text-blue-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-blue-500/30 text-white/60 disabled:opacity-30" 
+                            className="p-2.5 bg-slate-800/80 hover:bg-blue-500/20 hover:text-blue-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-blue-500/30 text-white/60 disabled:opacity-30" 
                             title={i.estado === 'Activo' ? 'Reenviar enlace de restablecimiento' : 'Reenviar activación'}
                           >
                             {sendingEmail === i.id ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
@@ -401,14 +401,14 @@ function Instructores() {
                         )}
                         <button 
                           onClick={() => handleEdit(i)} 
-                          className="p-2.5 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-cyan-500/30 text-white/60" 
+                          className="p-2.5 bg-slate-800/80 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-cyan-500/30 text-white/60" 
                           title="Editar"
                         >
                           <Edit3 size={16} />
                         </button>
                         <button 
                           onClick={() => handleToggleActivo(i.id, i.estado)} 
-                          className={`p-2.5 bg-white/5 rounded-xl transition-all duration-300 border border-white/5 text-white/60 ${
+                          className={`p-2.5 bg-slate-800/80 rounded-xl transition-all duration-300 border border-white/15 text-white/60 ${
                             i.estado === 'Inactivo' 
                               ? 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30' 
                               : 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30'
@@ -419,7 +419,7 @@ function Instructores() {
                         </button>
                         <button 
                           onClick={() => handleDelete(i.id)} 
-                          className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30 text-white/60" 
+                          className="p-2.5 bg-slate-800/80 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-rose-500/30 text-white/60" 
                           title="Eliminar"
                         >
                           <Trash2 size={16} />
@@ -475,36 +475,36 @@ function Instructores() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2 overflow-hidden">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4 md:col-span-2 overflow-hidden">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Correo Electrónico</p>
                 <div className="flex items-center gap-2 text-sm text-white/80 truncate">
                   <Mail size={14} className="text-pink-400/60 shrink-0" />
                   <span className="truncate select-all">{detailInstructor.email || <span className="opacity-30 italic">Sin correo</span>}</span>
                 </div>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Teléfono</p>
                 <p className="text-sm text-white/80 truncate">{detailInstructor.telefono || <span className="opacity-30 italic">No registrado</span>}</p>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Taller Asignado</p>
                 <div className="flex items-center gap-2 text-sm text-white/80 truncate">
                   <Palette size={14} className="text-pink-400/60 shrink-0" />
                   <span className="truncate">{detailInstructor.taller?.nombreTaller || <span className="opacity-30 italic">Sin taller asignado</span>}</span>
                 </div>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4 md:col-span-2">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Estado de Cuenta</p>
                 <p className="text-sm text-white/80">{detailInstructor.estado === 'Activo' ? 'Cuenta activada y operativa' : detailInstructor.estado === 'Pendiente' ? 'Esperando activación por correo' : 'Cuenta desactivada por administrador'}</p>
               </div>
               
               {/* Documentos Adjuntos */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2 space-y-3">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4 md:col-span-2 space-y-3">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Documentos Adjuntos</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   
                   {/* Tarjeta CV */}
-                  <div className="bg-black/20 border border-white/10 rounded-xl p-3 flex items-center justify-between gap-3 overflow-hidden">
+                  <div className="bg-slate-900/80 border border-white/15 rounded-xl p-3 flex items-center justify-between gap-3 overflow-hidden">
                     <div className="flex items-center gap-2.5 overflow-hidden">
                       <FileText size={18} className="text-pink-400 shrink-0" />
                       <div className="overflow-hidden">
@@ -538,7 +538,7 @@ function Instructores() {
                   </div>
 
                   {/* Tarjeta Temario */}
-                  <div className="bg-black/20 border border-white/10 rounded-xl p-3 flex items-center justify-between gap-3 overflow-hidden">
+                  <div className="bg-slate-900/80 border border-white/15 rounded-xl p-3 flex items-center justify-between gap-3 overflow-hidden">
                     <div className="flex items-center gap-2.5 overflow-hidden">
                       <FileText size={18} className="text-pink-400 shrink-0" />
                       <div className="overflow-hidden">
@@ -579,7 +579,7 @@ function Instructores() {
               <button
                 type="button"
                 onClick={() => setDetailInstructor(null)}
-                className="px-5 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-bold transition"
+                className="px-5 py-2.5 bg-slate-800/90 hover:bg-slate-800 rounded-xl text-white text-sm font-bold transition"
               >
                 Cerrar
               </button>

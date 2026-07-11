@@ -128,7 +128,7 @@ function AlumnoServicioSocial() {
       </AnimatePresence>
 
       {!ss ? (
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-12 text-center">
+        <div className="bg-slate-900/95 border border-white/20 rounded-2xl p-12 text-center">
           <HeartHandshake size={48} className="mx-auto text-white/20 mb-4" />
           <p className="text-white/40 font-medium">No tienes un registro de servicio social activo.</p>
           <p className="text-white/30 text-sm mt-2">Contacta al administrador para iniciar tu servicio social.</p>
@@ -166,7 +166,7 @@ function AlumnoServicioSocial() {
                 <span className="text-white/70 font-medium">{ss.horasCompletadas} hrs completadas</span>
                 <span className="text-white/50">{ss.horasRequeridas} hrs requeridas</span>
               </div>
-              <div className="w-full bg-white/10 rounded-full h-4 overflow-hidden">
+              <div className="w-full bg-slate-800/90 rounded-full h-4 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-1000 ${
                     ss.estatus === 'completado'
@@ -193,7 +193,7 @@ function AlumnoServicioSocial() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="bg-black/40 backdrop-blur-2xl border border-amber-500/20 rounded-2xl p-6 md:p-8 shadow-xl overflow-hidden"
+                className="bg-slate-900/95 border border-amber-500/20 rounded-2xl p-6 md:p-8 shadow-xl overflow-hidden"
               >
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <h3 className="text-lg font-bold text-white/90 flex items-center gap-2">
@@ -212,7 +212,7 @@ function AlumnoServicioSocial() {
                         value={formData.horas}
                         onChange={(e) => setFormData({ ...formData, horas: e.target.value })}
                         placeholder="Ej. 4"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-all"
+                        className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-slate-800/90 transition-all"
                         required
                       />
                     </div>
@@ -224,7 +224,7 @@ function AlumnoServicioSocial() {
                         type="date"
                         value={new Date().toISOString().split('T')[0]}
                         disabled
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white/50 focus:outline-none transition-all cursor-not-allowed"
+                        className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white/50 focus:outline-none transition-all cursor-not-allowed"
                       />
                       <p className="text-[10px] text-white/30 mt-1 ml-1">Se usa la fecha actual</p>
                     </div>
@@ -239,7 +239,7 @@ function AlumnoServicioSocial() {
                       value={formData.descripcion}
                       onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                       placeholder="Ej. Apoyo en la biblioteca, organización de archivos..."
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-all"
+                      className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-slate-800/90 transition-all"
                       required
                     />
                   </div>
@@ -253,7 +253,7 @@ function AlumnoServicioSocial() {
                       onChange={(e) => setFormData({ ...formData, comentarios: e.target.value })}
                       placeholder="Detalles sobre las actividades realizadas..."
                       rows={2}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-all resize-none"
+                      className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-slate-800/90 transition-all resize-none"
                     />
                   </div>
 
@@ -261,7 +261,7 @@ function AlumnoServicioSocial() {
                     <button
                       type="button"
                       onClick={() => setShowForm(false)}
-                      className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl transition border border-white/10"
+                      className="px-5 py-2.5 bg-slate-800/80 hover:bg-slate-800/90 text-white font-bold rounded-2xl transition border border-white/15"
                     >
                       Cancelar
                     </button>
@@ -283,7 +283,7 @@ function AlumnoServicioSocial() {
           </AnimatePresence>
 
           {/* Historial de actividades */}
-          <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-6 md:p-8 shadow-xl">
+          <div className="bg-slate-900/95 border border-white/20 rounded-2xl p-6 md:p-8 shadow-xl">
             <h2 className="text-lg md:text-xl font-bold text-white/90 flex items-center gap-2 mb-6">
               <BookOpen size={20} className="text-amber-400" />
               Actividades Registradas
@@ -297,7 +297,7 @@ function AlumnoServicioSocial() {
                     key={act.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/5 rounded-2xl p-5 border border-white/10 hover:bg-white/10 transition-all"
+                    className="bg-slate-800/80 rounded-2xl p-5 border border-white/15 hover:bg-slate-800/90 transition-all"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -338,7 +338,7 @@ function AlumnoServicioSocial() {
                     </div>
                   </motion.div>
                 ))}
-                <div className="border-t border-white/10 pt-4 mt-4">
+                <div className="border-t border-white/15 pt-4 mt-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-white/60">Total horas aprobadas</span>
                     <span className="text-emerald-400 font-bold">{ss.horasCompletadas} hrs</span>

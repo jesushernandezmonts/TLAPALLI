@@ -266,7 +266,7 @@ function MiniCalendar({ value, onChange, onClear }) {
         className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200 ${
           value
             ? 'bg-pink-500/15 border-pink-500/40 text-pink-300 hover:bg-pink-500/25'
-            : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80'
+            : 'bg-slate-800/80 border-white/15 text-white/50 hover:bg-slate-800/90 hover:text-white/80'
         }`}
       >
         <CalendarDays size={15} className={value ? 'text-pink-400' : 'text-white/30'} />
@@ -299,13 +299,13 @@ function MiniCalendar({ value, onChange, onClear }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.96 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="absolute left-0 top-[calc(100%+8px)] z-50 w-72 rounded-2xl border border-white/15 bg-slate-900/95 backdrop-blur-2xl shadow-2xl shadow-black/50 overflow-hidden"
+              className="absolute left-0 top-[calc(100%+8px)] z-50 w-72 rounded-2xl border border-white/15 bg-slate-900/95 shadow-2xl shadow-black/50 overflow-hidden"
             >
               {/* Cabecera del mes */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
                 <button
                   onClick={prevMes}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-slate-800/90 transition"
                 >
                   <ChevronLeft size={15} />
                 </button>
@@ -314,7 +314,7 @@ function MiniCalendar({ value, onChange, onClear }) {
                 </span>
                 <button
                   onClick={nextMes}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-slate-800/90 transition"
                 >
                   <ChevronRight size={15} />
                 </button>
@@ -341,8 +341,8 @@ function MiniCalendar({ value, onChange, onClear }) {
                           esMismoDia(d)
                             ? 'bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/30 scale-105'
                             : esHoy(d)
-                            ? 'bg-white/10 text-white ring-1 ring-pink-500/40'
-                            : 'text-white/60 hover:bg-white/10 hover:text-white'
+                            ? 'bg-slate-800/90 text-white ring-1 ring-pink-500/40'
+                            : 'text-white/60 hover:bg-slate-800/90 hover:text-white'
                         }`}
                       >
                         {d}
@@ -361,7 +361,7 @@ function MiniCalendar({ value, onChange, onClear }) {
                     onChange(`${hoyDate.getFullYear()}-${hh}-${dd}`);
                     setOpen(false);
                   }}
-                  className="w-full py-2 rounded-xl text-xs font-bold text-white/40 hover:text-pink-300 hover:bg-pink-500/10 border border-white/5 hover:border-pink-500/20 transition-all duration-200"
+                  className="w-full py-2 rounded-xl text-xs font-bold text-white/40 hover:text-pink-300 hover:bg-pink-500/10 border border-white/15 hover:border-pink-500/20 transition-all duration-200"
                 >
                   Ir a hoy
                 </button>
@@ -591,7 +591,7 @@ export default function Reportes() {
         </div>
         <button
           onClick={fetchData}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/50 hover:text-white text-xs font-bold transition"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800/90 border border-white/15 text-white/50 hover:text-white text-xs font-bold transition"
         >
           <RefreshCw size={14} /> Actualizar datos
         </button>
@@ -601,7 +601,7 @@ export default function Reportes() {
       {data && (
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {kpis.map(k => (
-            <div key={k.label} className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-3 text-center">
+            <div key={k.label} className="bg-slate-900/95 border border-white/15 rounded-2xl px-4 py-3 text-center">
               <p className="text-xl font-black text-white">{k.val}</p>
               <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold mt-0.5">{k.label}</p>
             </div>
@@ -622,7 +622,7 @@ export default function Reportes() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.07 }}
               whileHover={{ scale: 1.02, boxShadow: r.glow }}
-              className={`relative bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 flex flex-col gap-4 overflow-hidden ring-1 ${r.ring} transition-all duration-300`}
+              className={`relative bg-slate-900/95 border border-white/15 rounded-3xl p-6 flex flex-col gap-4 overflow-hidden ring-1 ${r.ring} transition-all duration-300`}
             >
               {/* fondo decorativo */}
               <div className={`absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl opacity-20 bg-gradient-to-br ${r.gradient}`} />
@@ -670,7 +670,7 @@ export default function Reportes() {
       </div>
 
       {/* ── Historial de Reportes Guardados ── */}
-      <div className="rounded-[2rem] border border-white/20 bg-slate-950/45 p-6 shadow-2xl backdrop-blur-xl mt-8">
+      <div className="rounded-[2rem] border border-white/20 bg-slate-950/45 p-6 shadow-2xl mt-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-pink-600/10 flex items-center justify-center text-pink-400">
@@ -697,7 +697,7 @@ export default function Reportes() {
                 placeholder="Buscar por nombre o tipo..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                className="w-full pl-9 pr-9 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all duration-200"
+                className="w-full pl-9 pr-9 py-2.5 bg-slate-800/80 border border-white/15 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all duration-200"
               />
               {busqueda && (
                 <button
@@ -715,7 +715,7 @@ export default function Reportes() {
               <select
                 value={filtroTipo}
                 onChange={(e) => setFiltroTipo(e.target.value)}
-                className="pl-9 pr-8 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white/80 focus:outline-none focus:border-pink-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[180px]"
+                className="pl-9 pr-8 py-2.5 bg-slate-800/80 border border-white/15 rounded-xl text-sm text-white/80 focus:outline-none focus:border-pink-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[180px]"
                 style={{ backgroundImage: 'none' }}
               >
                 <option value="todos" className="bg-slate-900">Todos los tipos</option>
@@ -787,7 +787,7 @@ export default function Reportes() {
                   };
                   const ReportIcon = category.icon;
                   return (
-                    <tr key={report.id} className="hover:bg-white/5 transition group">
+                    <tr key={report.id} className="hover:bg-slate-800/80 transition group">
                       <td data-label="Reporte">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${category.gradient} flex items-center justify-center text-white shrink-0 shadow-sm`}>
@@ -813,14 +813,14 @@ export default function Reportes() {
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => setPreviewReport(report)}
-                            className="p-2.5 bg-white/5 hover:bg-pink-500/20 hover:text-pink-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-pink-500/30 text-white/60"
+                            className="p-2.5 bg-slate-800/80 hover:bg-pink-500/20 hover:text-pink-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-pink-500/30 text-white/60"
                             title="Vista previa del reporte"
                           >
                             <FileText size={16} />
                           </button>
                           <button
                             onClick={() => handleDeleteReport(report.id)}
-                            className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30 text-white/60"
+                            className="p-2.5 bg-slate-800/80 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-rose-500/30 text-white/60"
                             title="Eliminar Reporte"
                           >
                             <Trash2 size={16} />
@@ -837,7 +837,7 @@ export default function Reportes() {
 
         {/* Paginador */}
         {reportesFiltrados.length > itemsPerPage && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-white/5">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-white/15">
             <p className="text-xs text-white/50">
               Mostrando <span className="font-bold text-white">{((currentPage - 1) * itemsPerPage) + 1}</span> a{' '}
               <span className="font-bold text-white">
@@ -849,7 +849,7 @@ export default function Reportes() {
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-white rounded-xl border border-white/5 transition duration-200 cursor-pointer disabled:cursor-not-allowed"
+                className="p-2 bg-slate-800/80 hover:bg-slate-800/90 disabled:opacity-30 disabled:hover:bg-slate-800/80 text-white rounded-xl border border-white/15 transition duration-200 cursor-pointer disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -861,7 +861,7 @@ export default function Reportes() {
                   className={`w-9 h-9 text-xs font-bold rounded-xl transition duration-200 border cursor-pointer ${
                     currentPage === page
                       ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white border-none shadow-md shadow-pink-500/20'
-                      : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border-white/5'
+                      : 'bg-slate-800/80 hover:bg-slate-800/90 text-white/70 hover:text-white border-white/15'
                   }`}
                 >
                   {page}
@@ -871,7 +871,7 @@ export default function Reportes() {
               <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(reportesFiltrados.length / itemsPerPage)))}
                 disabled={currentPage === Math.ceil(reportesFiltrados.length / itemsPerPage)}
-                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-white rounded-xl border border-white/5 transition duration-200 cursor-pointer disabled:cursor-not-allowed"
+                className="p-2 bg-slate-800/80 hover:bg-slate-800/90 disabled:opacity-30 disabled:hover:bg-slate-800/80 text-white rounded-xl border border-white/15 transition duration-200 cursor-pointer disabled:cursor-not-allowed"
               >
                 <ChevronRight size={16} />
               </button>
@@ -1135,7 +1135,7 @@ function ReportPreviewModal({ report, data, onClose, onPrint }) {
     <>
       {/* Overlay */}
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8">
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+        <div className="absolute inset-0 bg-slate-900" onClick={onClose} />
         
         {/* Modal */}
         <motion.div
@@ -1146,7 +1146,7 @@ function ReportPreviewModal({ report, data, onClose, onPrint }) {
           className="relative w-full max-w-[900px] max-h-[90vh] bg-gradient-to-b from-slate-900 to-slate-950 rounded-3xl border border-white/15 shadow-2xl shadow-black/60 overflow-hidden flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 bg-black/30">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-white/15 bg-slate-900/90">
             <div className="flex items-center gap-3">
               <FileText size={20} className="text-pink-400" />
               <div>
@@ -1177,7 +1177,7 @@ function ReportPreviewModal({ report, data, onClose, onPrint }) {
               </a>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-xl hover:bg-white/10 text-white/50 hover:text-white transition-all duration-200"
+                className="p-1.5 rounded-xl hover:bg-slate-800/90 text-white/50 hover:text-white transition-all duration-200"
               >
                 <X size={15} />
               </button>
@@ -1194,7 +1194,7 @@ function ReportPreviewModal({ report, data, onClose, onPrint }) {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-1.5 border-t border-white/10 bg-black/30 flex items-center justify-between">
+          <div className="px-4 py-1.5 border-t border-white/15 bg-slate-900/90 flex items-center justify-between">
             <p className="text-xs text-white/40">Vista previa del reporte · Puede diferir del PDF final</p>
             <button
               onClick={onClose}

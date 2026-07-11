@@ -114,7 +114,7 @@ function Pagos() {
       <div className="relative w-full max-w-md">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400 w-5 h-5" />
         <input
-          className="w-full bg-white/15 border-2 border-emerald-500/40 rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:bg-white/20 focus:shadow-lg focus:shadow-emerald-500/20 transition-all text-base font-medium backdrop-blur-sm"
+          className="w-full bg-slate-800/95 border-2 border-emerald-500/40 rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-white/50 focus:outline-none focus:border-emerald-400 focus:bg-slate-800 focus:shadow-lg focus:shadow-emerald-500/20 transition-all text-base font-medium"
           placeholder="🔍 Buscar por alumno o mes..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -146,7 +146,7 @@ function Pagos() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     key={p.id} 
-                    className="hover:bg-white/5 transition-colors group"
+                    className="hover:bg-slate-800/80 transition-colors group"
                   >
                     <td data-label="Alumno">
                       <div className="flex items-center gap-3">
@@ -166,7 +166,7 @@ function Pagos() {
                       <span className="text-emerald-400 font-black text-lg">${p.monto}</span>
                     </td>
                     <td data-label="Método">
-                      <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/60 text-[10px] font-bold uppercase tracking-widest">
+                      <span className="px-3 py-1 rounded-full bg-slate-800/80 border border-white/15 text-white/60 text-[10px] font-bold uppercase tracking-widest">
                         {p.metodoPago}
                       </span>
                     </td>
@@ -193,7 +193,7 @@ function Pagos() {
       </div>
 
       {!loading && filteredPagos.length > pagosPerPage && (
-        <div className="mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-slate-950/80 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-md">
+        <div className="mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/15 bg-slate-950/80 px-5 py-4 shadow-lg shadow-black/20">
           <p className="text-xs font-bold uppercase tracking-wider text-white/80">
             Mostrando {startIndex + 1}-{Math.min(startIndex + pagosPerPage, filteredPagos.length)} de {filteredPagos.length} pagos
           </p>
@@ -201,7 +201,7 @@ function Pagos() {
             <button
               onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
               disabled={currentPage === 1}
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
+              className="rounded-full border border-white/15 bg-slate-800/90 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/15 disabled:hover:bg-slate-800/90 disabled:hover:shadow-none"
             >
               Anterior
             </button>
@@ -211,7 +211,7 @@ function Pagos() {
             <button
               onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
               disabled={currentPage === totalPages}
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/10 disabled:hover:shadow-none"
+              className="rounded-full border border-white/15 bg-slate-800/90 px-5 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:border-pink-400/40 hover:bg-pink-500/20 hover:shadow-lg hover:shadow-pink-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/15 disabled:hover:bg-slate-800/90 disabled:hover:shadow-none"
             >
               Siguiente
             </button>
@@ -226,7 +226,7 @@ function Pagos() {
             <select 
               value={form.alumnoId} 
               onChange={(e) => setForm({...form, alumnoId: e.target.value})}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50"
+              className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50"
               required
             >
               <option value="" className="text-black">Seleccionar alumno</option>
@@ -245,7 +245,7 @@ function Pagos() {
                 placeholder="0.00"
                 value={form.monto}
                 onChange={(e) => setForm({...form, monto: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50"
+                className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50"
                 required
               />
             </div>
@@ -254,7 +254,7 @@ function Pagos() {
               <select 
                 value={form.mesCorrespondiente}
                 onChange={(e) => setForm({...form, mesCorrespondiente: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50"
+                className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50"
               >
                 {['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'].map(m => (
                   <option key={m} value={m} className="text-black">{m}</option>
@@ -275,7 +275,7 @@ function Pagos() {
             <button 
               type="button" 
               onClick={() => setModalOpen(false)} 
-              className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl transition"
+              className="px-6 py-3 bg-slate-800/80 hover:bg-slate-800/90 text-white rounded-2xl transition"
             >
               Cancelar
             </button>

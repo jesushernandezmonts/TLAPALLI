@@ -63,16 +63,16 @@ function AlumnoAsistencias() {
       </div>
 
       {asistencias.length === 0 ? (
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-12 text-center">
+        <div className="bg-slate-900/95 border border-white/20 rounded-2xl p-12 text-center">
           <ClipboardList size={48} className="mx-auto text-white/20 mb-4" />
           <p className="text-white/40 font-medium">No hay registros de asistencia aún.</p>
         </div>
       ) : (
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-slate-900/95 border border-white/20 rounded-2xl overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-white/5 border-b border-white/10">
+                <tr className="bg-slate-800/80 border-b border-white/15">
                   <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Fecha</th>
                   <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Taller / Grupo</th>
                   <th className="py-4 px-6 text-xs font-black uppercase tracking-wider text-white/40">Estado</th>
@@ -81,7 +81,7 @@ function AlumnoAsistencias() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {asistencias.map((a) => (
-                  <tr key={a.id} className="hover:bg-white/5 transition-colors">
+                  <tr key={a.id} className="hover:bg-slate-800/80 transition-colors">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2 text-white/80">
                         <Calendar size={14} className="text-white/40" />

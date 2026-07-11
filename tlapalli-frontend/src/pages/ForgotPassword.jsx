@@ -40,7 +40,7 @@ function ForgotPassword() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-20 w-full max-w-lg px-4"
       >
-        <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <div className="bg-slate-800/90 border border-white/20 rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           <div className="mb-8">
             <Link to="/login" className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm font-medium mb-6">
               <ArrowLeft size={16} />
@@ -57,7 +57,7 @@ function ForgotPassword() {
                 <div className="relative group">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
                   <input
-                    className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-4 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
+                    className="w-full bg-slate-800/90 border border-white/20 rounded-2xl px-12 py-4 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
                     type="email"
                     placeholder="tu-correo@ejemplo.com"
                     value={email}
@@ -73,7 +73,7 @@ function ForgotPassword() {
                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl backdrop-blur-xl shadow-lg text-left"
+                    className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl shadow-lg text-left"
                   >
                     <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                     <div className="space-y-1">

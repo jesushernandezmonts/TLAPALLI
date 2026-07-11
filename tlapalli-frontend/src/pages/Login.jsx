@@ -96,7 +96,7 @@ function Login() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative z-20 w-full max-w-lg px-4"
       >
-        <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2rem] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
+        <div className="bg-slate-800/90 border border-white/20 rounded-[2rem] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
           <div className="flex flex-col items-center mb-6">
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -117,7 +117,7 @@ function Login() {
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
                 <input
-                  className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
+                  className="w-full bg-slate-800/90 border border-white/20 rounded-2xl px-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-slate-800/95 transition-all"
                   type="email"
                   placeholder="admin@tlapalli.com"
                   value={email}
@@ -133,7 +133,7 @@ function Login() {
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
                 <input
-                  className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
+                  className="w-full bg-slate-800/90 border border-white/20 rounded-2xl px-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-slate-800/95 transition-all"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
@@ -182,7 +182,7 @@ function Login() {
                   initial={{ opacity: 0, scale: 0.95, y: -10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                  className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl backdrop-blur-xl shadow-lg text-left"
+                  className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl shadow-lg text-left"
                 >
                   <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                   <div className="space-y-1">
@@ -208,7 +208,7 @@ function Login() {
 
             <div className="relative py-2">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/10"></div>
+                <div className="w-full border-t border-white/15"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-transparent px-2 text-white/30 font-medium">O continuar con</span>
@@ -223,7 +223,7 @@ function Login() {
               whileTap={{ scale: 0.98 }}
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 h-12 bg-white/10 hover:bg-white/15 border border-white/20 hover:border-pink-500/50 rounded-2xl font-bold text-white transition-all shadow-lg"
+              className="w-full flex items-center justify-center gap-3 h-12 bg-slate-800/90 hover:bg-slate-800/95 border border-white/20 hover:border-pink-500/50 rounded-2xl font-bold text-white transition-all shadow-lg"
             >
               <GoogleIcon className="w-5 h-5" />
               <span>Iniciar sesión con Google</span>
@@ -232,7 +232,7 @@ function Login() {
             {/* Separador y link al portal del alumno */}
             <div className="relative py-1">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/10" />
+                <div className="w-full border-t border-white/15" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-transparent px-2 text-white/30 font-medium">¿Eres alumno?</span>
@@ -243,7 +243,7 @@ function Login() {
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full flex items-center justify-center gap-2 h-12 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-pink-500/40 rounded-2xl font-bold text-white/70 hover:text-white transition-all text-sm"
+                className="w-full flex items-center justify-center gap-2 h-12 bg-slate-800/80 hover:bg-slate-800/90 border border-white/15 hover:border-pink-500/40 rounded-2xl font-bold text-white/70 hover:text-white transition-all text-sm"
               >
                 <GraduationCap className="w-5 h-5 text-pink-400" />
                 <span>Acceder al Portal del Alumno</span>

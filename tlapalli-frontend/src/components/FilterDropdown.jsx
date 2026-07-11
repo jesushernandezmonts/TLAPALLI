@@ -8,7 +8,7 @@ function FilterDropdown({ options, value, onChange, icon, label, isOpen, onToggl
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/15 bg-black/25 px-4 py-3 text-left text-xs font-black text-white shadow-inner shadow-black/20 outline-none transition hover:border-white/30 hover:bg-black/35 focus:border-pink-500/50"
+        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/15 bg-slate-900/85 px-4 py-3 text-left text-xs font-black text-white shadow-inner shadow-black/20 outline-none transition hover:border-white/30 hover:bg-black/35 focus:border-pink-500/50"
       >
         <span className="flex min-w-0 items-center gap-2">
           {icon && <span className="text-white/40 shrink-0">{icon}</span>}
@@ -26,7 +26,7 @@ function FilterDropdown({ options, value, onChange, icon, label, isOpen, onToggl
               className={`w-full rounded-xl px-3 py-2.5 text-left text-xs font-bold transition ${
                 option.value === value
                   ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/20'
-                  : 'text-white/75 hover:bg-white/10 hover:text-white'
+                  : 'text-white/75 hover:bg-slate-800/90 hover:text-white'
               }`}
             >
               {option.label}

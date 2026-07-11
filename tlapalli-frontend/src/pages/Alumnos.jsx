@@ -281,7 +281,7 @@ function Alumnos() {
       </div>
 
       {/* Barra de Controles Unificada */}
-      <div className="relative z-30 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5">
+      <div className="relative z-30 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 ring-1 ring-white/5">
         <SearchBar
           value={search}
           onChange={setSearch}
@@ -328,12 +328,12 @@ function Alumnos() {
                 setTallerFilter('todos');
                 setOpenFilter(null);
               }}
-              className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-xs font-black uppercase tracking-wider text-white/70 transition hover:border-pink-400/30 hover:bg-pink-500/15 hover:text-white sm:w-auto"
+              className="w-full rounded-2xl border border-white/15 bg-slate-800/90 px-4 py-3 text-xs font-black uppercase tracking-wider text-white/70 transition hover:border-pink-400/30 hover:bg-pink-500/15 hover:text-white sm:w-auto"
             >
               Limpiar
             </button>
           )}
-          <div className="flex items-center justify-center rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs font-black uppercase tracking-wider text-white/70">
+          <div className="flex items-center justify-center rounded-2xl border border-white/15 bg-slate-900/80 px-4 py-3 text-xs font-black uppercase tracking-wider text-white/70">
             {filtered.length} {filtered.length === 1 ? 'alumno' : 'alumnos'}
           </div>
         </div>
@@ -365,7 +365,7 @@ function Alumnos() {
               <tr><td colSpan="6" className="p-20 text-center text-white/20 italic font-medium">No se encontraron registros.</td></tr>
             ) : (
               paginatedAlumnos.map((a, index) => (
-                <tr key={a.id} className="hover:bg-white/5 transition group">
+                <tr key={a.id} className="hover:bg-slate-800/80 transition group">
                   <td data-label="Alumno">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 font-bold">
@@ -442,28 +442,28 @@ function Alumnos() {
                     <div className="flex justify-end gap-1 sm:gap-2">
                       <button
                         onClick={() => handleCrearAcceso(a)}
-                        className="p-2.5 bg-white/5 hover:bg-violet-500/20 hover:text-violet-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-violet-500/30"
+                        className="p-2.5 bg-slate-800/80 hover:bg-violet-500/20 hover:text-violet-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-violet-500/30"
                         title="Crear acceso al portal del alumno"
                       >
                         <KeyRound size={16} />
                       </button>
                       <button
                         onClick={() => setViewAlumno({ ...a, displayId: startIndex + index + 1 })}
-                        className="p-2.5 bg-white/5 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-purple-500/30"
+                        className="p-2.5 bg-slate-800/80 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-purple-500/30"
                         title="Ver Ficha y Expediente"
                       >
                         <Eye size={16} />
                       </button>
                       <button
                         onClick={() => handleEdit(a)}
-                        className="p-2.5 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-cyan-500/30"
+                        className="p-2.5 bg-slate-800/80 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-cyan-500/30"
                         title="Editar Datos y Expediente"
                       >
                         <Edit3 size={16} />
                       </button>
                       <button
                         onClick={() => handleToggleActivo(a)}
-                        className={`p-2.5 bg-white/5 rounded-xl transition-all duration-300 border border-white/5 ${a.estatusActivo
+                        className={`p-2.5 bg-slate-800/80 rounded-xl transition-all duration-300 border border-white/15 ${a.estatusActivo
                             ? 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30'
                             : 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30'
                           }`}
@@ -473,7 +473,7 @@ function Alumnos() {
                       </button>
                       <button
                         onClick={() => handleDelete(a.id)}
-                        className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30"
+                        className="p-2.5 bg-slate-800/80 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-rose-500/30"
                         title="Eliminar Permanente"
                       >
                         <Trash2 size={16} />
@@ -532,7 +532,7 @@ function Alumnos() {
       {/* Modal: Crear Acceso Alumno */}
       {accesoModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setAccesoModalOpen(false)} />
+          <div className="absolute inset-0 bg-slate-900" onClick={() => setAccesoModalOpen(false)} />
           <div className="relative w-full max-w-md bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl p-6 space-y-5">
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
@@ -549,7 +549,7 @@ function Alumnos() {
               </div>
               <button
                 onClick={() => setAccesoModalOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition"
+                className="p-1.5 rounded-lg hover:bg-slate-800/90 text-white/40 hover:text-white transition"
               >
                 <X size={16} />
               </button>
@@ -571,7 +571,7 @@ function Alumnos() {
                 onChange={(e) => setAccesoEmail(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && confirmCrearAcceso()}
                 placeholder="correo@ejemplo.com"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all"
+                className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all"
                 autoFocus
               />
             </div>
@@ -580,7 +580,7 @@ function Alumnos() {
             <div className="flex gap-3 pt-1">
               <button
                 onClick={() => setAccesoModalOpen(false)}
-                className="flex-1 py-3 rounded-xl border border-white/10 bg-white/5 text-white/70 text-sm font-bold hover:bg-white/10 transition"
+                className="flex-1 py-3 rounded-xl border border-white/15 bg-slate-800/80 text-white/70 text-sm font-bold hover:bg-slate-800/90 transition"
               >
                 Cancelar
               </button>

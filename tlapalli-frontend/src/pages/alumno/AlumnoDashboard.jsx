@@ -24,9 +24,9 @@ function KpiCard({ title, value, color, subtitle }) {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className={`rounded-2xl p-6 border backdrop-blur-md ${colorClasses[color] || colorClasses.pink} shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative group`}
+      className={`rounded-2xl p-6 border ${colorClasses[color] || colorClasses.pink} shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative group`}
     >
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all" />
+      <div className="absolute -right-4 -top-4 w-24 h-24 bg-slate-800/80 rounded-full blur-2xl group-hover:bg-slate-800/90 transition-all" />
       <p className="text-sm opacity-60 font-medium uppercase tracking-wider">{title}</p>
       <p className="text-3xl font-black mt-2 tracking-tighter">{value}</p>
       {subtitle && (
@@ -145,7 +145,7 @@ function AlumnoDashboard() {
 
       {/* Mis Talleres — solo si aplica */}
       {tieneTalleres && (
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-6 md:p-8 shadow-xl">
+        <div className="bg-slate-900/95 border border-white/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg md:text-xl font-bold text-white/90">Mis Talleres</h2>
             <Link
@@ -165,7 +165,7 @@ function AlumnoDashboard() {
                   key={insc.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col gap-2 bg-white/5 p-5 rounded-2xl border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group relative overflow-hidden"
+                  className="flex flex-col gap-2 bg-slate-800/80 p-5 rounded-2xl border border-white/15 hover:bg-slate-800/90 hover:border-white/20 transition-all duration-500 group relative overflow-hidden"
                 >
                   <div className="absolute top-0 left-0 w-1 h-full bg-pink-500/40 group-hover:bg-pink-500 transition-all" />
                   <div className="flex items-center gap-2 mb-1">
@@ -189,7 +189,7 @@ function AlumnoDashboard() {
 
       {/* Últimos Pagos — solo si tiene talleres */}
       {tieneTalleres && data.pagos.length > 0 && (
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-6 md:p-8 shadow-xl">
+        <div className="bg-slate-900/95 border border-white/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg md:text-xl font-bold text-white/90">Últimos Pagos</h2>
             <Link
@@ -203,7 +203,7 @@ function AlumnoDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="text-[10px] text-white/40 uppercase tracking-wider border-b border-white/10">
+                <tr className="text-[10px] text-white/40 uppercase tracking-wider border-b border-white/15">
                   <th className="py-3 px-4">Mes</th>
                   <th className="py-3 px-4">Monto</th>
                   <th className="py-3 px-4">Método</th>
@@ -212,7 +212,7 @@ function AlumnoDashboard() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {data.pagos.slice(0, 5).map((p) => (
-                  <tr key={p.id} className="hover:bg-white/5 transition-colors">
+                  <tr key={p.id} className="hover:bg-slate-800/80 transition-colors">
                     <td className="py-3 px-4 text-white/80 font-medium capitalize">
                       {p.mesCorrespondiente}
                     </td>
@@ -254,7 +254,7 @@ function AlumnoDashboard() {
 
       {/* Mensaje si no tiene nada */}
       {tipo === 'ninguno' && (
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-12 text-center">
+        <div className="bg-slate-900/95 border border-white/20 rounded-2xl p-12 text-center">
           <p className="text-white/40 text-lg font-medium">Aún no tienes actividades asignadas.</p>
           <p className="text-white/30 text-sm mt-2">Contacta al administrador para más información.</p>
         </div>

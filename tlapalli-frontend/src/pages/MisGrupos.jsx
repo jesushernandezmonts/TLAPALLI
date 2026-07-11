@@ -289,7 +289,7 @@ export default function MisGrupos() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   whileHover={{ y: -2 }}
-                  className={`relative bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border ${colors.border} rounded-2xl overflow-hidden transition-all hover:shadow-xl ${colors.glow} group ${isExpanded ? 'ring-1 ring-white/20' : ''}`}
+                  className={`relative bg-gradient-to-br from-slate-900/60 to-slate-800/40 border ${colors.border} rounded-2xl overflow-hidden transition-all hover:shadow-xl ${colors.glow} group ${isExpanded ? 'ring-1 ring-white/20' : ''}`}
                 >
                   {/* Accent bar top */}
                   <div className={`h-1 bg-gradient-to-r ${colors.from} ${colors.to}`} />
@@ -372,7 +372,7 @@ export default function MisGrupos() {
                   initial={{ opacity: 0, y: -10, height: 0 }}
                   animate={{ opacity: 1, y: 0, height: 'auto' }}
                   exit={{ opacity: 0, y: -10, height: 0 }}
-                  className={`bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl border ${colors.border} rounded-2xl overflow-hidden`}
+                  className={`bg-gradient-to-br from-slate-900/60 to-slate-800/40 border ${colors.border} rounded-2xl overflow-hidden`}
                 >
                   <div className={`h-1 bg-gradient-to-r ${colors.from} ${colors.to}`} />
                   <div className="p-5 space-y-4">
@@ -400,7 +400,7 @@ export default function MisGrupos() {
                             key={alumno.id}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center justify-between bg-white/5 hover:bg-white/8 border border-white/5 rounded-xl px-4 py-3 transition"
+                            className="flex items-center justify-between bg-slate-800/80 hover:bg-white/8 border border-white/15 rounded-xl px-4 py-3 transition"
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0`}>
@@ -457,7 +457,7 @@ export default function MisGrupos() {
                 placeholder="Nombre del grupo"
                 value={formData.nombre}
                 onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
+                className="w-full px-3 py-2 bg-slate-800/80 border border-white/15 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
               />
             </div>
             <div>
@@ -467,11 +467,11 @@ export default function MisGrupos() {
                 value={formData.descripcion}
                 onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                 rows="3"
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 resize-none"
+                className="w-full px-3 py-2 bg-slate-800/80 border border-white/15 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 resize-none"
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={handleCloseModal} className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg font-bold text-sm transition">
+              <button onClick={handleCloseModal} className="flex-1 py-2 bg-slate-800/80 hover:bg-slate-800/90 text-white rounded-lg font-bold text-sm transition">
                 Cancelar
               </button>
               <motion.button
@@ -501,7 +501,7 @@ export default function MisGrupos() {
                 placeholder="Escribe para buscar..."
                 value={busquedaAlumnos}
                 onChange={(e) => setBusquedaAlumnos(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
+                className="w-full px-3 py-2 bg-slate-800/80 border border-white/15 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50"
               />
             </div>
 
@@ -510,7 +510,7 @@ export default function MisGrupos() {
               <label className="block text-xs font-bold text-white/70 uppercase mb-2">
                 Seleccionar alumno
               </label>
-              <div className="max-h-60 overflow-y-auto border border-white/10 rounded-lg divide-y divide-white/5 bg-black/20">
+              <div className="max-h-60 overflow-y-auto border border-white/15 rounded-lg divide-y divide-white/5 bg-slate-900/80">
                 {alumnosDisponibles.length === 0 ? (
                   <p className="text-white/30 text-sm italic text-center py-6">
                     No hay alumnos disponibles. El admin debe inscribirlos primero a tu taller.
@@ -533,13 +533,13 @@ export default function MisGrupos() {
                         className={`w-full text-left px-4 py-3 flex items-center gap-3 transition ${
                           selectedAlumnoId === alumno.id
                             ? 'bg-pink-500/20 text-white'
-                            : 'text-white/70 hover:bg-white/5 hover:text-white'
+                            : 'text-white/70 hover:bg-slate-800/80 hover:text-white'
                         }`}
                       >
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
                           selectedAlumnoId === alumno.id
                             ? 'bg-pink-500 text-white'
-                            : 'bg-white/10 text-white/50'
+                            : 'bg-slate-800/90 text-white/50'
                         }`}>
                           {alumno.nombre?.[0]}{alumno.apellidoPaterno?.[0]}
                         </div>
@@ -561,7 +561,7 @@ export default function MisGrupos() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button onClick={handleCloseModal} className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg font-bold text-sm transition">
+              <button onClick={handleCloseModal} className="flex-1 py-2 bg-slate-800/80 hover:bg-slate-800/90 text-white rounded-lg font-bold text-sm transition">
                 Cancelar
               </button>
               <motion.button

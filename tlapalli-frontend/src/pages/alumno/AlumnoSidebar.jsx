@@ -15,7 +15,7 @@ function AlumnoSidebar({ isOpen, onClose, alumno, onLogout, tipo }) {
     `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
       isActive
         ? 'bg-gradient-to-r from-pink-600/30 to-orange-600/20 text-pink-400 border border-pink-500/30 shadow-[0_0_20px_rgba(219,39,119,0.2)]'
-        : 'text-white/60 hover:bg-white/5 hover:text-white'
+        : 'text-white/60 hover:bg-slate-800/80 hover:text-white'
     }`;
 
   const tieneTalleres = tipo === 'talleres' || tipo === 'ambos';
@@ -25,12 +25,12 @@ function AlumnoSidebar({ isOpen, onClose, alumno, onLogout, tipo }) {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-900 z-40 lg:hidden"
           onClick={onClose}
         />
       )}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-black/80 lg:bg-black/40 backdrop-blur-2xl border-r border-white/10 flex flex-col p-6 transition-transform duration-300 transform
+        fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 lg:bg-slate-900/95 border-r border-white/15 flex flex-col p-6 transition-transform duration-300 transform
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:static lg:flex
       `}>
@@ -45,7 +45,7 @@ function AlumnoSidebar({ isOpen, onClose, alumno, onLogout, tipo }) {
               <span className="text-[10px] text-pink-500 font-bold tracking-[0.2em] uppercase leading-none">Alumno</span>
             </div>
           </div>
-          <button onClick={onClose} className="lg:hidden p-2 text-white/40 hover:text-white rounded-xl hover:bg-white/10 transition">
+          <button onClick={onClose} className="lg:hidden p-2 text-white/40 hover:text-white rounded-xl hover:bg-slate-800/90 transition">
             <X size={20} />
           </button>
         </div>
@@ -92,9 +92,9 @@ function AlumnoSidebar({ isOpen, onClose, alumno, onLogout, tipo }) {
         </nav>
 
         {/* Perfil y logout */}
-        <div className="border-t border-white/10 pt-4 mt-4">
+        <div className="border-t border-white/15 pt-4 mt-4">
           <NavLink to="/alumno/perfil" onClick={onClose}
-            className="w-full flex items-center gap-3 mb-3 px-1 hover:bg-white/5 rounded-2xl py-2 transition-all group text-left"
+            className="w-full flex items-center gap-3 mb-3 px-1 hover:bg-slate-800/80 rounded-2xl py-2 transition-all group text-left"
           >
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-orange-500 p-[2px] flex-shrink-0">
               <div className="w-full h-full rounded-[10px] bg-neutral-900 flex items-center justify-center">
@@ -108,7 +108,7 @@ function AlumnoSidebar({ isOpen, onClose, alumno, onLogout, tipo }) {
           </NavLink>
           <button
             onClick={onLogout}
-            className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-red-600/20 hover:text-red-400 text-white/50 py-3 rounded-2xl border border-white/5 transition-all duration-300 font-semibold"
+            className="w-full flex items-center justify-center gap-2 bg-slate-800/80 hover:bg-red-600/20 hover:text-red-400 text-white/50 py-3 rounded-2xl border border-white/15 transition-all duration-300 font-semibold"
           >
             <LogOut size={18} />
             Cerrar sesión

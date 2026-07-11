@@ -307,13 +307,13 @@ function Dashboard() {
 
       {/* Calendario y Próximas Clases */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-2xl border border-white/15 rounded-3xl p-4 md:p-8 shadow-2xl shadow-black/30 flex flex-col">
+        <div className="lg:col-span-2 bg-gradient-to-br from-white/[0.07] to-white/[0.02] border border-white/15 rounded-3xl p-4 md:p-8 shadow-2xl shadow-black/30 flex flex-col">
           <div className="flex items-center justify-between mb-4 md:mb-6">
             <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">📅 Calendario</h2>
             <div className="flex items-center gap-2.5">
               <button
                 onClick={prevMonth}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-emerald-400/40 text-white/50 hover:text-emerald-400 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/10"
+                className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800/95 border border-white/15 hover:border-emerald-400/40 text-white/50 hover:text-emerald-400 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/10"
                 title="Mes anterior (←)"
               >
                 <ChevronLeft size={18} />
@@ -323,7 +323,7 @@ function Dashboard() {
               </h3>
               <button
                 onClick={nextMonth}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-emerald-400/40 text-white/50 hover:text-emerald-400 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/10"
+                className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800/95 border border-white/15 hover:border-emerald-400/40 text-white/50 hover:text-emerald-400 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/10"
                 title="Mes siguiente (→)"
               >
                 <ChevronRight size={18} />
@@ -341,7 +341,7 @@ function Dashboard() {
           </div>
 
           {/* Legend */}
-          <div className="mb-5 bg-black/40 border border-white/10 rounded-2xl p-3">
+          <div className="mb-5 bg-slate-900/95 border border-white/15 rounded-2xl p-3">
             <div className="grid grid-cols-3 gap-2">
               <div className="flex items-center justify-center gap-2 bg-rose-500/10 rounded-xl px-2 py-2 border border-rose-500/20 shadow-inner shadow-rose-500/5">
                 <span className="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
@@ -391,7 +391,7 @@ function Dashboard() {
                       ? 'bg-gradient-to-br from-pink-600 to-rose-700 border-pink-400 shadow-xl shadow-pink-600/30 scale-105 z-10' 
                       : isSelected
                       ? 'bg-gradient-to-br from-white/20 to-white/10 border-white/40 shadow-lg shadow-white/10 scale-105 z-10'
-                      : 'bg-white/[0.04] border-white/[0.08] hover:bg-white/10 hover:border-white/25 hover:shadow-lg hover:shadow-black/20'}`}
+                      : 'bg-white/[0.04] border-white/[0.08] hover:bg-slate-800/90 hover:border-white/25 hover:shadow-lg hover:shadow-black/20'}`}
                 >
                   {/* Glow effect for today */}
                   {isToday && (
@@ -434,7 +434,7 @@ function Dashboard() {
         </div>
         
         {/* Panel de Actividades del Día Seleccionado */}
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-2xl p-4 md:p-8 shadow-xl flex flex-col">
+        <div className="bg-slate-900/95 border border-white/20 rounded-2xl p-4 md:p-8 shadow-xl flex flex-col">
           <div className="flex justify-between items-center mb-4 md:mb-6">
             <h2 className="text-lg md:text-xl font-bold text-white/90">
               {selectedDay ? `Actividades del ${selectedDay.day}` : 'Actividades de Hoy'}
@@ -471,7 +471,7 @@ function Dashboard() {
                     : 'bg-violet-500/10 text-violet-400 border-violet-500/20';
 
                   return (
-                    <div key={act.id} className={`flex flex-col gap-1 bg-white/5 p-4 rounded-2xl border border-white/5 border-l-4 ${borderCol} hover:bg-white/10 transition-all duration-300`}>
+                    <div key={act.id} className={`flex flex-col gap-1 bg-slate-800/80 p-4 rounded-2xl border border-white/15 border-l-4 ${borderCol} hover:bg-slate-800/90 transition-all duration-300`}>
                       <div className="flex items-center justify-between gap-2">
                         <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border ${typeBadge}`}>
                           {typeLabel}
@@ -547,7 +547,7 @@ function Dashboard() {
                     : 'bg-violet-500/10 text-violet-400 border-violet-500/20';
 
                   return (
-                    <div key={act.id} className={`p-4 bg-white/5 border-l-4 ${borderCol} rounded-xl border border-white/5 flex justify-between items-start gap-4 transition hover:bg-white/10`}>
+                    <div key={act.id} className={`p-4 bg-slate-800/80 border-l-4 ${borderCol} rounded-xl border border-white/15 flex justify-between items-start gap-4 transition hover:bg-slate-800/90`}>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border ${typeCol}`}>
@@ -587,7 +587,7 @@ function Dashboard() {
           </div>
 
           {/* Separator line */}
-          <div className="border-t border-white/10 my-4" />
+          <div className="border-t border-white/15 my-4" />
 
           {/* Form to Create/Edit */}
           <form onSubmit={handleSaveActividad} className="space-y-3">
@@ -614,7 +614,7 @@ function Dashboard() {
                   value={formTitulo} 
                   onChange={(e) => setFormTitulo(e.target.value)} 
                   placeholder="Ej. Exposición Fotográfica"
-                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all placeholder-white/30"
+                  className="w-full bg-slate-900/95 border border-white/15 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all placeholder-white/30"
                 />
               </div>
 
@@ -625,7 +625,7 @@ function Dashboard() {
                   value={formHora} 
                   onChange={(e) => setFormHora(e.target.value)} 
                   required
-                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all"
+                  className="w-full bg-slate-900/95 border border-white/15 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all"
                 />
               </div>
 
@@ -668,7 +668,7 @@ function Dashboard() {
                 onChange={(e) => setFormDescripcion(e.target.value)} 
                 placeholder="Detalles sobre el evento..."
                 rows="2"
-                className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all resize-none placeholder-white/30"
+                className="w-full bg-slate-900/95 border border-white/15 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all resize-none placeholder-white/30"
               />
             </div>
 
@@ -677,7 +677,7 @@ function Dashboard() {
                 <button 
                   type="button" 
                   onClick={resetForm}
-                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition text-xs border border-white/10 hover:border-white/20"
+                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-800/90 text-white font-bold rounded-xl transition text-xs border border-white/15 hover:border-white/20"
                 >
                   Cancelar
                 </button>
@@ -847,9 +847,9 @@ function KpiCard({ title, value, color, trend, trendLabel, isCurrency }) {
   return (
     <motion.div 
       whileHover={{ scale: 1.02 }}
-      className={`rounded-2xl p-6 border backdrop-blur-md ${colorClasses[color]} shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative group`}
+      className={`rounded-2xl p-6 border ${colorClasses[color]} shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative group`}
     >
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all" />
+      <div className="absolute -right-4 -top-4 w-24 h-24 bg-slate-800/80 rounded-full blur-2xl group-hover:bg-slate-800/90 transition-all" />
       <p className="text-sm opacity-60 font-medium uppercase tracking-wider">{title}</p>
       <p className="text-3xl font-black mt-2 tracking-tighter">{value}</p>
       {trend && (
@@ -874,7 +874,7 @@ function ClaseItem({ name, instructor }) {
     <motion.div 
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      className="flex flex-col gap-2 bg-white/5 p-5 rounded-2xl border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group relative overflow-hidden text-left"
+      className="flex flex-col gap-2 bg-slate-800/80 p-5 rounded-2xl border border-white/15 hover:bg-slate-800/90 hover:border-white/20 transition-all duration-500 group relative overflow-hidden text-left"
     >
       <div className="absolute top-0 left-0 w-1 h-full bg-pink-500/40 group-hover:bg-pink-500 transition-all" />
       
@@ -897,7 +897,7 @@ function FormDropdown({ label, value, options, isOpen, onToggle, onChange }) {
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/15 bg-black/25 px-5 py-3 text-left text-sm text-white shadow-inner shadow-black/20 outline-none transition hover:border-white/30 hover:bg-black/35 focus:border-pink-500/50"
+        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/15 bg-slate-900/85 px-5 py-3 text-left text-sm text-white shadow-inner shadow-black/20 outline-none transition hover:border-white/30 hover:bg-black/35 focus:border-pink-500/50"
       >
         <span className="truncate">{selected?.label}</span>
         <ChevronDown size={14} className={`shrink-0 text-white/40 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -912,7 +912,7 @@ function FormDropdown({ label, value, options, isOpen, onToggle, onChange }) {
               className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition ${
                 option.value === value
                   ? 'bg-pink-500/15 text-pink-400'
-                  : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  : 'text-white/70 hover:bg-slate-800/80 hover:text-white'
               }`}
             >
               {option.label}

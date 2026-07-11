@@ -49,7 +49,7 @@ function AlumnoLogin() {
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="relative z-20 w-full max-w-lg px-4"
       >
-        <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2rem] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
+        <div className="bg-slate-800/90 border border-white/20 rounded-[2rem] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
 
           {/* Header */}
           <div className="flex flex-col items-center mb-6">
@@ -98,7 +98,7 @@ function AlumnoLogin() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@correo.com"
-                  className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
+                  className="w-full bg-slate-800/90 border border-white/20 rounded-2xl px-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-slate-800/95 transition-all"
                   required
                   autoComplete="email"
                 />
@@ -115,7 +115,7 @@ function AlumnoLogin() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-white/10 border border-white/20 rounded-2xl pl-12 pr-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
+                  className="w-full bg-slate-800/90 border border-white/20 rounded-2xl pl-12 pr-12 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-slate-800/95 transition-all"
                   required
                   autoComplete="current-password"
                 />

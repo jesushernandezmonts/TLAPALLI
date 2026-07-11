@@ -56,7 +56,7 @@ function AlumnoLayout() {
       <div className="flex-1 flex flex-col min-w-0 relative">
         <button
           onClick={() => setSidebarOpen(true)}
-          className="lg:hidden fixed top-6 left-6 z-30 p-3 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl text-white/60 hover:text-white transition-all shadow-2xl"
+          className="lg:hidden fixed top-6 left-6 z-30 p-3 bg-slate-900 border border-white/15 rounded-2xl text-white/60 hover:text-white transition-all shadow-2xl"
         >
           <Menu size={24} />
         </button>

@@ -55,7 +55,7 @@ function AlumnoDetail({ alumno, onClose }) {
     <>
       <div className="space-y-6 text-left">
         {/* Encabezado del Perfil */}
-        <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-5">
+        <div className="flex items-center gap-4 bg-slate-800/80 border border-white/15 rounded-2xl p-5">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-pink-600/10 shrink-0 select-none">
             {initials}
           </div>
@@ -76,14 +76,14 @@ function AlumnoDetail({ alumno, onClose }) {
         </div>
 
         {/* Pestañas de Navegación */}
-        <div className="flex gap-2 border-b border-white/10 pb-3">
+        <div className="flex gap-2 border-b border-white/15 pb-3">
           <button
             type="button"
             onClick={() => setActiveTab('general')}
             className={`px-5 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-300 ${
               activeTab === 'general'
                 ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/20'
-                : 'text-white/60 hover:text-white hover:bg-white/5'
+                : 'text-white/60 hover:text-white hover:bg-slate-800/80'
             }`}
           >
             Información General
@@ -94,7 +94,7 @@ function AlumnoDetail({ alumno, onClose }) {
             className={`px-5 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-300 flex items-center gap-2 ${
               activeTab === 'documentos'
                 ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/20'
-                : 'text-white/60 hover:text-white hover:bg-white/5'
+                : 'text-white/60 hover:text-white hover:bg-slate-800/80'
             }`}
           >
             Expediente Digital
@@ -105,8 +105,8 @@ function AlumnoDetail({ alumno, onClose }) {
         {activeTab === 'general' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Datos Personales */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
-              <h4 className="text-xs font-black uppercase tracking-widest text-pink-500 border-b border-white/5 pb-2">Información Personal</h4>
+            <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-5 space-y-4">
+              <h4 className="text-xs font-black uppercase tracking-widest text-pink-500 border-b border-white/15 pb-2">Información Personal</h4>
               
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
@@ -146,9 +146,9 @@ function AlumnoDetail({ alumno, onClose }) {
             </div>
 
             {/* Talleres Inscritos */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-between">
+            <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-5 flex flex-col justify-between">
               <div>
-                <h4 className="text-xs font-black uppercase tracking-widest text-pink-500 border-b border-white/5 pb-2 shrink-0">Talleres Inscritos</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-pink-500 border-b border-white/15 pb-2 shrink-0">Talleres Inscritos</h4>
                 <div className="mt-3 space-y-2 max-h-[180px] overflow-y-auto pr-1">
                   {loadingInscripciones ? (
                     <p className="text-xs text-white/30 italic py-4">Cargando talleres...</p>
@@ -173,8 +173,8 @@ function AlumnoDetail({ alumno, onClose }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Expediente Digital - Lista de documentos subidos */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col">
-              <h4 className="text-xs font-black uppercase tracking-widest text-pink-500 border-b border-white/5 pb-2 shrink-0">Expediente Digital</h4>
+            <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-5 flex flex-col">
+              <h4 className="text-xs font-black uppercase tracking-widest text-pink-500 border-b border-white/15 pb-2 shrink-0">Expediente Digital</h4>
               
               <div className="flex-1 overflow-y-auto mt-3 space-y-2.5 max-h-[220px] pr-1">
                 {loading ? (
@@ -185,7 +185,7 @@ function AlumnoDetail({ alumno, onClose }) {
                   </p>
                 ) : (
                   documentos.map(doc => (
-                    <div key={doc.id} className="flex justify-between items-center bg-white/[0.02] hover:bg-white/5 p-3 rounded-xl border border-white/5 transition group">
+                    <div key={doc.id} className="flex justify-between items-center bg-white/[0.02] hover:bg-slate-800/80 p-3 rounded-xl border border-white/15 transition group">
                       <div className="min-w-0 flex-1 pr-2">
                         <p className="text-xs font-bold text-white/90 truncate">{doc.nombre}</p>
                         <p className="text-[8px] text-white/40 uppercase tracking-wider mt-0.5">{doc.tipo.replace('_', ' ')}</p>
@@ -210,7 +210,7 @@ function AlumnoDetail({ alumno, onClose }) {
             {/* Checklist de Documentación Requerida */}
             <div className={`rounded-2xl p-5 border flex flex-col justify-between ${
               loading
-                ? 'bg-white/5 border-white/10'
+                ? 'bg-slate-800/80 border-white/15'
                 : expedienteCompleto
                   ? 'bg-emerald-500/5 border-emerald-500/20'
                   : 'bg-amber-500/5 border-amber-500/20'
@@ -267,7 +267,7 @@ function AlumnoDetail({ alumno, onClose }) {
         <div className="flex justify-end pt-2">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white/70 rounded-xl font-bold transition text-xs cursor-pointer border border-white/5 hover:border-white/10"
+            className="px-6 py-2.5 bg-slate-800/80 hover:bg-slate-800/90 text-white/70 rounded-xl font-bold transition text-xs cursor-pointer border border-white/15 hover:border-white/15"
           >
             Cerrar Vista
           </button>

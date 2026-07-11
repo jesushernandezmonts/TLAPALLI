@@ -252,7 +252,7 @@ function MiPerfil() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-2xl shadow-2xl"
+          className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900/80 to-slate-800/40 shadow-2xl"
         >
           <div className="h-1.5 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-cyan-500" />
           <div className="p-6 md:p-10">
@@ -278,7 +278,7 @@ function MiPerfil() {
                         <span className="text-4xl font-black text-white">{initials}</span>
                       )}
                       {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[calc(1rem-3px)]">
+                      <div className="absolute inset-0 bg-slate-900 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[calc(1rem-3px)]">
                         {uploadingPhoto ? (
                           <Loader2 className="w-7 h-7 animate-spin text-white" />
                         ) : previewUrl ? (
@@ -308,7 +308,7 @@ function MiPerfil() {
                         type="text"
                         value={editNombre}
                         onChange={(e) => setEditNombre(e.target.value)}
-                        className="bg-black/40 border border-white/20 rounded-xl px-4 py-2 text-2xl font-black text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 w-full max-w-xs"
+                        className="bg-slate-900/95 border border-white/20 rounded-xl px-4 py-2 text-2xl font-black text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 w-full max-w-xs"
                         placeholder="Tu nombre"
                         autoFocus
                         onKeyDown={(e) => {
@@ -326,7 +326,7 @@ function MiPerfil() {
                       </button>
                       <button
                         onClick={cancelEditName}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 border border-white/10 transition-all"
+                        className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800/90 text-white/60 border border-white/15 transition-all"
                         title="Cancelar"
                       >
                         <X size={16} />
@@ -337,7 +337,7 @@ function MiPerfil() {
                       <h2 className="text-3xl font-black text-white">{u.nombre}</h2>
                       <button
                         onClick={startEditName}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-pink-500/20 text-white/40 hover:text-pink-400 border border-white/10 hover:border-pink-500/30 transition-all"
+                        className="p-2 rounded-xl bg-slate-800/80 hover:bg-pink-500/20 text-white/40 hover:text-pink-400 border border-white/15 hover:border-pink-500/30 transition-all"
                         title="Editar nombre"
                       >
                         <Pencil size={14} />
@@ -365,7 +365,7 @@ function MiPerfil() {
             <div className="mt-6 flex justify-center sm:justify-start">
               <button
                 onClick={openPasswordModal}
-                className="flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-pink-500/20 text-white/70 hover:text-pink-400 rounded-xl border border-white/10 hover:border-pink-500/30 transition-all text-sm font-bold"
+                className="flex items-center gap-2 px-5 py-2.5 bg-slate-800/80 hover:bg-pink-500/20 text-white/70 hover:text-pink-400 rounded-xl border border-white/15 hover:border-pink-500/30 transition-all text-sm font-bold"
               >
                 <Lock size={16} />
                 Cambiar Contraseña
@@ -390,7 +390,7 @@ function MiPerfil() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + idx * 0.1 }}
-              className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl p-6 shadow-lg"
+              className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-slate-900/60 to-slate-800/40 p-6 shadow-lg"
             >
               <div className="flex items-start gap-4">
                 <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.color} shadow-lg`}>
@@ -408,11 +408,11 @@ function MiPerfil() {
         {/* Modal Cambiar Contraseña */}
         {passwordModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => !changingPassword && setPasswordModalOpen(false)} />
+            <div className="absolute inset-0 bg-slate-900" onClick={() => !changingPassword && setPasswordModalOpen(false)} />
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative w-full max-w-md rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-2xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-md rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900 to-slate-800 shadow-2xl overflow-hidden"
             >
               <div className="h-1 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-cyan-500" />
               <div className="p-6 md:p-8">
@@ -443,7 +443,7 @@ function MiPerfil() {
                         type={showCurrent ? 'text' : 'password'}
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all"
+                        className="w-full bg-slate-900/95 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all"
                         placeholder="••••••••"
                       />
                       <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition">
@@ -460,7 +460,7 @@ function MiPerfil() {
                         type={showNew ? 'text' : 'password'}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all"
+                        className="w-full bg-slate-900/95 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all"
                         placeholder="••••••••"
                       />
                       <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition">
@@ -478,7 +478,7 @@ function MiPerfil() {
                         type={showConfirm ? 'text' : 'password'}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all"
+                        className="w-full bg-slate-900/95 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all"
                         placeholder="••••••••"
                       />
                       <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition">
@@ -492,7 +492,7 @@ function MiPerfil() {
                       type="button"
                       onClick={() => setPasswordModalOpen(false)}
                       disabled={changingPassword}
-                      className="flex-1 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition text-sm border border-white/10"
+                      className="flex-1 px-4 py-2.5 bg-slate-800/80 hover:bg-slate-800/90 text-white font-bold rounded-xl transition text-sm border border-white/15"
                     >
                       Cancelar
                     </button>
@@ -540,7 +540,7 @@ function MiPerfil() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-2xl shadow-2xl"
+        className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900/80 to-slate-800/40 shadow-2xl"
       >
         <div className="h-1.5 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-cyan-500" />
         <div className="p-6 md:p-10">
@@ -566,7 +566,7 @@ function MiPerfil() {
                       <span className="text-4xl font-black text-white">{initialsProf}</span>
                     )}
                     {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[calc(1rem-3px)]">
+                    <div className="absolute inset-0 bg-slate-900 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[calc(1rem-3px)]">
                       {uploadingPhoto ? (
                         <Loader2 className="w-7 h-7 animate-spin text-white" />
                       ) : previewUrl ? (
@@ -600,7 +600,7 @@ function MiPerfil() {
                       type="text"
                       value={editNombre}
                       onChange={(e) => setEditNombre(e.target.value)}
-                      className="bg-black/40 border border-white/20 rounded-xl px-4 py-2 text-2xl font-black text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 w-full max-w-xs"
+                      className="bg-slate-900/95 border border-white/20 rounded-xl px-4 py-2 text-2xl font-black text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 w-full max-w-xs"
                       placeholder="Tu nombre"
                       autoFocus
                       onKeyDown={(e) => {
@@ -618,7 +618,7 @@ function MiPerfil() {
                     </button>
                     <button
                       onClick={cancelEditName}
-                      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 border border-white/10 transition-all"
+                      className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800/90 text-white/60 border border-white/15 transition-all"
                       title="Cancelar"
                     >
                       <X size={16} />
@@ -629,7 +629,7 @@ function MiPerfil() {
                     <h2 className="text-3xl font-black text-white">{instructor.nombre}</h2>
                     <button
                       onClick={startEditName}
-                      className="p-2 rounded-xl bg-white/5 hover:bg-pink-500/20 text-white/40 hover:text-pink-400 border border-white/10 hover:border-pink-500/30 transition-all"
+                      className="p-2 rounded-xl bg-slate-800/80 hover:bg-pink-500/20 text-white/40 hover:text-pink-400 border border-white/15 hover:border-pink-500/30 transition-all"
                       title="Editar nombre"
                     >
                       <Pencil size={14} />
@@ -662,7 +662,7 @@ function MiPerfil() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + idx * 0.1 }}
-              className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-xl p-6 shadow-lg"
+              className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-slate-900/60 to-slate-800/40 p-6 shadow-lg"
             >
               <div className="flex items-start gap-4">
                 <div className={`p-3 rounded-xl bg-gradient-to-br ${colorMap[stat.color]} shadow-lg`}>
@@ -683,7 +683,7 @@ function MiPerfil() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-2xl shadow-2xl overflow-hidden"
+          className="rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900/80 to-slate-800/40 shadow-2xl overflow-hidden"
         >
           <div className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500" />
           <div className="p-6 md:p-8">
@@ -696,7 +696,7 @@ function MiPerfil() {
                 <a
                   href={`${baseUrl}${instructor.curriculumUrl}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-500/30 transition-all group"
+                  className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/80 hover:bg-slate-800/90 border border-white/15 hover:border-cyan-500/30 transition-all group"
                 >
                   <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-600 to-blue-600 shadow-lg">
                     <Download size={18} className="text-white" />
@@ -711,7 +711,7 @@ function MiPerfil() {
                 <a
                   href={`${baseUrl}${instructor.temarioUrl}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/30 transition-all group"
+                  className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/80 hover:bg-slate-800/90 border border-white/15 hover:border-purple-500/30 transition-all group"
                 >
                   <div className="p-3 rounded-xl bg-gradient-to-br from-purple-600 to-violet-600 shadow-lg">
                     <Download size={18} className="text-white" />
@@ -730,11 +730,11 @@ function MiPerfil() {
       {/* Modal Cambiar Contraseña para profesor (same modal) */}
       {passwordModalOpen && !profile.esAdmin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => !changingPassword && setPasswordModalOpen(false)} />
+          <div className="absolute inset-0 bg-slate-900" onClick={() => !changingPassword && setPasswordModalOpen(false)} />
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative w-full max-w-md rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-2xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-md rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900 to-slate-800 shadow-2xl overflow-hidden"
           >
             <div className="h-1 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-cyan-500" />
             <div className="p-6 md:p-8">
@@ -759,7 +759,7 @@ function MiPerfil() {
                   <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-1.5 block">Contraseña Actual</label>
                   <div className="relative">
                     <input type={showCurrent ? 'text' : 'password'} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all" placeholder="••••••••" />
+                      className="w-full bg-slate-900/95 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all" placeholder="••••••••" />
                     <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition">
                       {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -769,7 +769,7 @@ function MiPerfil() {
                   <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-1.5 block">Nueva Contraseña</label>
                   <div className="relative">
                     <input type={showNew ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all" placeholder="••••••••" />
+                      className="w-full bg-slate-900/95 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all" placeholder="••••••••" />
                     <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition">
                       {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -780,7 +780,7 @@ function MiPerfil() {
                   <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-1.5 block">Confirmar Nueva Contraseña</label>
                   <div className="relative">
                     <input type={showConfirm ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all" placeholder="••••••••" />
+                      className="w-full bg-slate-900/95 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all" placeholder="••••••••" />
                     <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition">
                       {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -788,7 +788,7 @@ function MiPerfil() {
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button type="button" onClick={() => setPasswordModalOpen(false)} disabled={changingPassword}
-                    className="flex-1 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition text-sm border border-white/10">
+                    className="flex-1 px-4 py-2.5 bg-slate-800/80 hover:bg-slate-800/90 text-white font-bold rounded-xl transition text-sm border border-white/15">
                     Cancelar
                   </button>
                   <button type="submit" disabled={changingPassword}

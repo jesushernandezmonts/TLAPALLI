@@ -39,15 +39,15 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
     <div className="fixed inset-0 z-200 flex items-center justify-center p-2 sm:p-4">
       {/* Overlay oscuro de fondo */}
       <div 
-        className="absolute inset-0 bg-black/85 backdrop-blur-sm transition-opacity duration-300"
+        className="absolute inset-0 bg-black/85  transition-opacity duration-300"
         onClick={onClose}
       />
       
       {/* Contenedor del Modal - Color oscuro unificado (estilo lector de PDFs) para que sea uniforme */}
-      <div className="relative w-full max-w-4xl h-[82vh] flex flex-col bg-[#202124] border border-white/10 rounded-2xl shadow-2xl text-white overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-4xl h-[82vh] flex flex-col bg-[#202124] border border-white/15 rounded-2xl shadow-2xl text-white overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
         
         {/* Cabecera - Color unificado con el fondo de herramientas de PDF */}
-        <div className="flex justify-between items-center px-6 py-4.5 bg-[#202124] border-b border-white/10 shrink-0">
+        <div className="flex justify-between items-center px-6 py-4.5 bg-[#202124] border-b border-white/15 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <FileText size={20} className="text-pink-400 shrink-0" />
             <h3 className="text-sm sm:text-base md:text-lg font-black text-white/90 truncate pr-4">
@@ -71,7 +71,7 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider bg-white/5 text-white/70 hover:bg-white/10 border border-white/10 hover:border-white/20 transition cursor-pointer select-none"
+              className="flex items-center gap-2 px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider bg-slate-800/80 text-white/70 hover:bg-slate-800/90 border border-white/15 hover:border-white/20 transition cursor-pointer select-none"
               title="Abrir en pestaña nueva"
             >
               <ExternalLink size={16} />
@@ -79,12 +79,12 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
             </a>
 
             {/* Divisor */}
-            <div className="h-6 w-px bg-white/10 mx-1 hidden sm:block" />
+            <div className="h-6 w-px bg-slate-800/90 mx-1 hidden sm:block" />
 
             {/* Botón Cerrar */}
             <button
               onClick={onClose}
-              className="p-2.5 text-white/60 hover:text-white hover:bg-white/5 rounded-xl border border-transparent hover:border-white/10 transition cursor-pointer"
+              className="p-2.5 text-white/60 hover:text-white hover:bg-slate-800/80 rounded-xl border border-transparent hover:border-white/15 transition cursor-pointer"
               title="Cerrar visor"
             >
               <X size={22} />

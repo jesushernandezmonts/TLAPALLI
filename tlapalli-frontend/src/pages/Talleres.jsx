@@ -229,7 +229,7 @@ function Talleres() {
       </div>
 
       {/* Barra de Controles Unificada en Glassmorphic */}
-      <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 backdrop-blur-xl ring-1 ring-white/5 mt-2">
+      <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 ring-1 ring-white/5 mt-2">
         <SearchBar
           value={search}
           onChange={(v) => { setSearch(v); }}
@@ -265,7 +265,7 @@ function Talleres() {
               <tr><td colSpan="6" className="p-20 text-center text-white/20 italic font-medium">No se encontraron talleres.</td></tr>
             ) : (
               paginatedTalleres.map(t => (
-                <tr key={t.id} className="hover:bg-white/5 transition group">
+                <tr key={t.id} className="hover:bg-slate-800/80 transition group">
                   <td data-label="Taller">
                     <div className="flex items-center gap-3">
                       {(() => {
@@ -300,7 +300,7 @@ function Talleres() {
                             : 'Libre'}
                         </span>
                       </div>
-                      <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                      <div className="w-full bg-slate-800/90 h-1.5 rounded-full overflow-hidden">
                         <div 
                           className={`h-full rounded-full transition-all duration-500 ${
                             getActiveCount(t) >= t.cupoMaximo
@@ -328,21 +328,21 @@ function Talleres() {
                     <div className="flex justify-end gap-2">
                       <button 
                         onClick={() => setDetailTaller(t)} 
-                        className="p-2.5 bg-white/5 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-purple-500/30 text-white/60" 
+                        className="p-2.5 bg-slate-800/80 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-purple-500/30 text-white/60" 
                         title="Ver detalle"
                       >
                         <Eye size={16} />
                       </button>
                       <button 
                         onClick={() => handleEdit(t)} 
-                        className="p-2.5 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-cyan-500/30 text-white/60" 
+                        className="p-2.5 bg-slate-800/80 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-cyan-500/30 text-white/60" 
                         title="Editar"
                       >
                         <Edit3 size={16} />
                       </button>
                       <button 
                         onClick={() => handleToggleActivo(t.id, t.activo !== false)} 
-                        className={`p-2.5 bg-white/5 rounded-xl transition-all duration-300 border border-white/5 text-white/60 ${
+                        className={`p-2.5 bg-slate-800/80 rounded-xl transition-all duration-300 border border-white/15 text-white/60 ${
                           t.activo === false 
                             ? 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30' 
                             : 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30'
@@ -353,7 +353,7 @@ function Talleres() {
                       </button>
                       <button 
                         onClick={() => handleDelete(t.id)} 
-                        className="p-2.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/5 hover:border-rose-500/30 text-white/60" 
+                        className="p-2.5 bg-slate-800/80 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-rose-500/30 text-white/60" 
                         title="Eliminar"
                       >
                         <Trash2 size={16} />
@@ -390,7 +390,7 @@ function Talleres() {
               {(() => {
                 const { icon: TallerIcon, color, bg } = getTallerIcon(detailTaller.nombreTaller);
                 return (
-                  <div className={`w-16 h-16 rounded-2xl ${bg} flex items-center justify-center ${color} border border-white/10`}>
+                  <div className={`w-16 h-16 rounded-2xl ${bg} flex items-center justify-center ${color} border border-white/15`}>
                     <TallerIcon size={32} />
                   </div>
                 );
@@ -433,23 +433,23 @@ function Talleres() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2 overflow-hidden">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4 md:col-span-2 overflow-hidden">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Descripción del Taller</p>
                 <p className="text-sm text-white/90 leading-relaxed whitespace-pre-line">{detailTaller.descripcion || 'Sin descripción disponible.'}</p>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Horario Definido</p>
                 <p className="text-sm text-white/90 font-bold">{detailTaller.horarioDescripcion || 'Sin horario definido.'}</p>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Inversión Mensual</p>
                 <p className="text-lg text-emerald-400 font-black">${Number(detailTaller.costoMensual).toFixed(2)} MXN</p>
               </div>
 
               {/* Instructor(es) asignados */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4 md:col-span-2">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1.5">Instructor(es) Asignado(s)</p>
                 {detailTaller.instructores && detailTaller.instructores.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
@@ -465,14 +465,14 @@ function Talleres() {
                 )}
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4 md:col-span-2">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">Ocupación y Cupo</p>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-xs font-black text-white/80">
                     <span>Ocupado: {getActiveCount(detailTaller)} / {detailTaller.cupoMaximo} lugares</span>
                     <span>{Math.round((getActiveCount(detailTaller) / detailTaller.cupoMaximo) * 100)}% de ocupación</span>
                   </div>
-                  <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden border border-white/5">
+                  <div className="w-full bg-slate-800/90 h-3 rounded-full overflow-hidden border border-white/15">
                     <div 
                       className={`h-full rounded-full transition-all duration-500 ${
                         getActiveCount(detailTaller) >= detailTaller.cupoMaximo
@@ -488,7 +488,7 @@ function Talleres() {
               </div>
 
               {/* Alumnos inscritos activos */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:col-span-2 space-y-3">
+              <div className="bg-slate-800/80 border border-white/15 rounded-2xl p-4 md:col-span-2 space-y-3">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Alumnos Inscritos Activos</p>
                 {(() => {
                   const alumnosActivos = detailTaller.inscripciones
@@ -498,9 +498,9 @@ function Talleres() {
                     return <p className="text-xs text-white/40 italic">No hay alumnos inscritos activos.</p>;
                   }
                   return (
-                    <div className="max-h-48 overflow-y-auto border border-white/5 rounded-xl divide-y divide-white/5 bg-black/20">
+                    <div className="max-h-48 overflow-y-auto border border-white/15 rounded-xl divide-y divide-white/5 bg-slate-900/80">
                       {alumnosActivos.map((insc, idx) => (
-                        <div key={insc.id} className="px-4 py-2.5 flex items-center justify-between text-xs hover:bg-white/5 transition">
+                        <div key={insc.id} className="px-4 py-2.5 flex items-center justify-between text-xs hover:bg-slate-800/80 transition">
                           <span className="font-semibold text-white/90">
                             {idx + 1}. {insc.alumno?.nombre} {insc.alumno?.apellidoPaterno} {insc.alumno?.apellidoMaterno}
                           </span>
@@ -523,7 +523,7 @@ function Talleres() {
               <button
                 type="button"
                 onClick={() => setDetailTaller(null)}
-                className="px-5 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-bold transition"
+                className="px-5 py-2.5 bg-slate-800/90 hover:bg-slate-800 rounded-xl text-white text-sm font-bold transition"
               >
                 Cerrar
               </button>

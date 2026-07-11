@@ -92,7 +92,7 @@ function AcceptInvitation() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative z-20 w-full max-w-lg px-4"
       >
-        <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <div className="bg-slate-800/90 border border-white/20 rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           {loading ? (
             <div className="flex flex-col items-center py-12">
               <Loader2 className="w-12 h-12 text-pink-400 animate-spin mb-4" />
@@ -157,7 +157,7 @@ function AcceptInvitation() {
               </div>
 
               {/* Email registrado */}
-              <div className="bg-black/20 rounded-xl p-3 border border-white/5 text-center mb-6">
+              <div className="bg-slate-900/80 rounded-xl p-3 border border-white/15 text-center mb-6">
                 <span className="text-xs text-white/40 block mb-1">Correo registrado:</span>
                 <span className="text-sm font-semibold text-pink-300">{profesor?.email}</span>
               </div>
@@ -177,7 +177,7 @@ function AcceptInvitation() {
                       placeholder="Contraseña (mínimo 8 caracteres)"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
+                      className="w-full pl-10 pr-10 py-3 bg-slate-800/80 border border-white/15 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
                     />
                     <button
                       type="button"
@@ -195,7 +195,7 @@ function AcceptInvitation() {
                       placeholder="Confirmar contraseña"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
+                      className="w-full pl-10 pr-4 py-3 bg-slate-800/80 border border-white/15 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
                     />
                   </div>
 
@@ -219,7 +219,7 @@ function AcceptInvitation() {
                 {/* Separador */}
                 <div className="relative flex items-center justify-center">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/10" />
+                    <div className="w-full border-t border-white/15" />
                   </div>
                   <span className="relative bg-transparent px-4 text-xs text-white/30 font-bold">O también</span>
                 </div>

@@ -88,7 +88,7 @@ function ResetPassword() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative z-20 w-full max-w-lg px-4"
       >
-        <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <div className="bg-slate-800/90 border border-white/20 rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           <div className="mb-8 text-left">
             <Link to="/login" className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm font-medium mb-6">
               <ArrowLeft size={16} />
@@ -101,7 +101,7 @@ function ResetPassword() {
           {!success ? (
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Password requirements info */}
-              <div className="bg-white/5 rounded-2xl p-4 border border-white/10 mb-4">
+              <div className="bg-slate-800/80 rounded-2xl p-4 border border-white/15 mb-4">
                 <div className="flex items-start gap-2">
                   <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
                   <div className="text-xs text-white/50 space-y-1 text-left">
@@ -120,7 +120,7 @@ function ResetPassword() {
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
                   <input
-                    className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-4 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
+                    className="w-full bg-slate-800/90 border border-white/20 rounded-2xl px-12 py-4 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-slate-800/95 transition-all"
                     type={showPassword ? "text" : "password"}
                     placeholder="Elige una contraseña segura"
                     value={password}
@@ -148,7 +148,7 @@ function ResetPassword() {
                         <div
                           key={i}
                           className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                            i <= strength.level ? strength.color : 'bg-white/10'
+                            i <= strength.level ? strength.color : 'bg-slate-800/90'
                           }`}
                         />
                       ))}
@@ -169,7 +169,7 @@ function ResetPassword() {
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
                   <input
-                    className="w-full bg-white/10 border border-white/20 rounded-2xl px-12 py-4 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-white/15 transition-all"
+                    className="w-full bg-slate-800/90 border border-white/20 rounded-2xl px-12 py-4 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-slate-800/95 transition-all"
                     type={showPassword ? "text" : "password"}
                     placeholder="Repite tu contraseña"
                     value={confirmPassword}
