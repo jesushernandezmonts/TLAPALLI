@@ -367,7 +367,7 @@ export default function Asistencia() {
                         <table className="w-full text-sm">
                           {/* Cabecera de la tabla */}
                           <thead>
-                            <tr className="border-b border-white/15 bg-white/[0.03]">
+                            <tr className="border-b border-white/15 bg-slate-800/80">
                               <th className="text-left px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-12">#</th>
                               <th className="text-left px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider">Alumno</th>
                               <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-28">✅ Asistencia</th>
@@ -384,12 +384,12 @@ export default function Asistencia() {
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   transition={{ delay: idx * 0.02 }}
-                                  className={`border-b border-white/[0.03] transition-colors ${
+                                  className={`border-b border-slate-800/80 transition-colors ${
                                     estado === 'asistencia'
                                       ? 'bg-emerald-500/5 hover:bg-emerald-500/10'
                                       : estado === 'falta'
                                       ? 'bg-red-500/5 hover:bg-red-500/10'
-                                      : 'hover:bg-white/[0.03]'
+                                      : 'hover:bg-slate-800/80'
                                   }`}
                                 >
                                   {/* # */}

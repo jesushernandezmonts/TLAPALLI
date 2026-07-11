@@ -185,7 +185,7 @@ function AlumnoDetail({ alumno, onClose }) {
                   </p>
                 ) : (
                   documentos.map(doc => (
-                    <div key={doc.id} className="flex justify-between items-center bg-white/[0.02] hover:bg-slate-800/80 p-3 rounded-xl border border-white/15 transition group">
+                    <div key={doc.id} className="flex justify-between items-center bg-slate-800/80 hover:bg-slate-800/80 p-3 rounded-xl border border-white/15 transition group">
                       <div className="min-w-0 flex-1 pr-2">
                         <p className="text-xs font-bold text-white/90 truncate">{doc.nombre}</p>
                         <p className="text-[8px] text-white/40 uppercase tracking-wider mt-0.5">{doc.tipo.replace('_', ' ')}</p>

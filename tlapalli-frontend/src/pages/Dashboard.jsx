@@ -307,7 +307,7 @@ function Dashboard() {
 
       {/* Calendario y Próximas Clases */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-gradient-to-br from-white/[0.07] to-white/[0.02] border border-white/15 rounded-3xl p-4 md:p-8 shadow-2xl shadow-black/30 flex flex-col">
+        <div className="lg:col-span-2 bg-gradient-to-br from-slate-800/80 to-slate-800/80 border border-white/15 rounded-3xl p-4 md:p-8 shadow-2xl shadow-black/30 flex flex-col">
           <div className="flex items-center justify-between mb-4 md:mb-6">
             <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">📅 Calendario</h2>
             <div className="flex items-center gap-2.5">
@@ -391,7 +391,7 @@ function Dashboard() {
                       ? 'bg-gradient-to-br from-pink-600 to-rose-700 border-pink-400 shadow-xl shadow-pink-600/30 scale-105 z-10' 
                       : isSelected
                       ? 'bg-gradient-to-br from-white/20 to-white/10 border-white/40 shadow-lg shadow-white/10 scale-105 z-10'
-                      : 'bg-white/[0.04] border-white/[0.08] hover:bg-slate-800/90 hover:border-white/25 hover:shadow-lg hover:shadow-black/20'}`}
+                      : 'bg-slate-800/80 border-slate-800/80 hover:bg-slate-800/90 hover:border-white/25 hover:shadow-lg hover:shadow-black/20'}`}
                 >
                   {/* Glow effect for today */}
                   {isToday && (
@@ -712,7 +712,7 @@ function Dashboard() {
 
           <div className="p-16 relative bg-white select-text">
             {/* Faded Watermark in background */}
-            <div className="watermark-print opacity-[0.03] pointer-events-none select-none">
+            <div className="watermark-print opacity-30 pointer-events-none select-none">
               <SvgFlowerEmblem className="w-[600px] h-[600px] text-[#801D38]" />
             </div>
 

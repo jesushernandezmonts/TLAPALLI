@@ -151,7 +151,7 @@ const PrintPage = ({ children }) => (
 
     <div className="p-4 md:p-6 relative bg-white select-text overflow-hidden">
       {/* Faded Watermark in background */}
-      <div className="watermark-print absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none z-0">
+      <div className="watermark-print absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30 pointer-events-none select-none z-0">
         <Flower className="w-[300px] h-[300px] text-[#801D38]" />
       </div>
       
