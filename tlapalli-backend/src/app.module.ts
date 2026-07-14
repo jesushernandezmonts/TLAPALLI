@@ -19,6 +19,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { CommonModule } from './common/common.module';
 import { HealthController } from './health/health.controller';
+import { AlumnoDocumentosModule } from './alumno-documentos.module';
 
 
 @Module({
@@ -42,6 +43,7 @@ import { HealthController } from './health/health.controller';
     CloudinaryModule,
     GatewayModule,
     CommonModule,
+    AlumnoDocumentosModule,
   ],
   controllers: [HealthController],
 })
