@@ -539,12 +539,20 @@ export default function Reportes() {
   const generateAndDownloadPdf = async (tipo, nombreArchivo) => {
     // Mostrar la sección de impresión
     setPrinting(tipo);
-    await new Promise(r => setTimeout(r, 500)); // esperar render del DOM
+    await new Promise(r => setTimeout(r, 600)); // esperar render del DOM
 
     const element = document.getElementById('print-section');
     if (!element) return;
-    const prevDisplay = element.style.display;
+
+    // Forzar dimensiones carta correctas para html2canvas
     element.style.display = 'block';
+    element.style.position = 'fixed';
+    element.style.top = '-9999px';
+    element.style.left = '0';
+    element.style.width = '816px';   // ancho carta a 96 DPI
+    element.style.zIndex = '-1';
+
+    await new Promise(r => setTimeout(r, 200)); // esperar repaint
 
     try {
       const canvas = await html2canvas(element, {
@@ -552,8 +560,8 @@ export default function Reportes() {
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
+        width: 816,
+        windowWidth: 816,
       });
       const imgData = canvas.toDataURL('image/jpeg', 0.98);
       const pdf = new jsPDF({ unit: 'mm', format: 'letter', orientation: 'portrait' });
@@ -571,7 +579,13 @@ export default function Reportes() {
     } catch (err) {
       console.error('Error al generar PDF:', err);
     } finally {
-      element.style.display = prevDisplay;
+      // Restaurar estilos del elemento
+      element.style.display = 'none';
+      element.style.position = '';
+      element.style.top = '';
+      element.style.left = '';
+      element.style.width = '';
+      element.style.zIndex = '';
       setPrinting(null);
     }
   };
