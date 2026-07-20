@@ -2,10 +2,10 @@ import { Search, X } from 'lucide-react';
 
 function SearchBar({ value, onChange, placeholder = 'Buscar...', onClear }) {
   return (
-    <div className="relative flex-1 sm:max-w-xl w-full">
-      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-pink-400" />
+    <div className="relative flex-1 w-full">
+      <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-8 h-8 text-pink-400" />
       <input
-        className="w-full rounded-2xl border border-white/15 bg-slate-900/85 pl-12 pr-10 py-3 text-lg font-medium text-white/90 caret-white shadow-inner shadow-black/20 placeholder-white/45 transition-all hover:border-white/30 hover:bg-black/35 focus:border-pink-400/70 focus:bg-slate-900/95 focus:outline-none focus:ring-2 focus:ring-pink-500/25"
+        className="w-full rounded-[2rem] border-2 border-white/20 bg-slate-900/90 pl-16 pr-12 py-5 text-2xl font-bold text-white caret-pink-500 shadow-2xl shadow-black/40 placeholder-white/50 transition-all hover:border-white/40 hover:bg-black/50 focus:border-pink-500 focus:bg-slate-950 focus:outline-none focus:ring-4 focus:ring-pink-500/30"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -15,7 +15,7 @@ function SearchBar({ value, onChange, placeholder = 'Buscar...', onClear }) {
           onClick={() => { onChange(''); onClear?.(); }}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition"
         >
-          <X size={16} />
+          <X size={24} />
         </button>
       )}
     </div>

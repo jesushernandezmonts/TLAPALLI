@@ -289,7 +289,7 @@ function Alumnos() {
       </div>
 
       {/* Barra de Controles Unificada */}
-      <div className="relative z-30 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 ring-1 ring-white/5">
+      <div className="relative z-30 flex flex-col justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 ring-1 ring-white/5">
         <SearchBar
           value={search}
           onChange={setSearch}

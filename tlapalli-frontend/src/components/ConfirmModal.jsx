@@ -11,17 +11,16 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-slate-900 "
+            className="absolute inset-0 bg-slate-950"
           />
 
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="relative bg-zinc-900 border border-white/15 rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl overflow-hidden"
+            className="relative bg-slate-900 border border-slate-700 rounded-[2.5rem] p-8 w-full max-w-md shadow-none overflow-hidden"
           >
-            {/* Decoración de fondo */}
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl" />
+            {/* Eliminada la decoración blur-3xl para mayor compatibilidad con Windows 7 */}
 
             <div className="flex flex-col items-center text-center relative z-10">
               <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center text-rose-500 mb-6 border border-rose-500/20">
@@ -36,7 +35,7 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText 
               <div className="grid grid-cols-2 gap-4 w-full">
                 <button
                   onClick={onClose}
-                  className="px-6 py-4 bg-slate-800/80 hover:bg-slate-800/90 text-white font-bold rounded-2xl transition-all duration-300 border border-white/15"
+                  className="px-6 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl transition-none border border-slate-600"
                 >
                   {cancelText}
                 </button>
@@ -45,7 +44,7 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText 
                     onConfirm();
                     onClose();
                   }}
-                  className="px-6 py-4 bg-rose-600 hover:bg-rose-700 text-white font-black tracking-widest rounded-2xl transition-all duration-300 shadow-lg shadow-rose-600/20"
+                  className="px-6 py-4 bg-rose-600 hover:bg-rose-700 text-white font-black tracking-widest rounded-2xl transition-none"
                 >
                   {confirmText}
                 </button>
