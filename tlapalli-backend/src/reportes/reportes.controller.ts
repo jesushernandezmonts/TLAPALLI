@@ -3,7 +3,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ReportesService } from './reportes.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { memoryStorage } from 'multer';
-import { Response } from 'express';
+import type { Response } from 'express';
 import * as https from 'https';
 import * as http from 'http';
 
