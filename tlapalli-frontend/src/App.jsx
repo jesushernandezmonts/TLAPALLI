@@ -31,6 +31,8 @@ import AlumnoActivarCuenta from './pages/alumno/AlumnoActivarCuenta';
 import AlumnoLayout from './pages/alumno/AlumnoLayout';
 import AlumnoPrivateRoute from './pages/alumno/AlumnoPrivateRoute';
 
+import Mapeo from './pages/Mapeo';
+
 function App() {
   return (
     <Routes>
@@ -51,6 +53,7 @@ function App() {
           <Route path="/talleres" element={<Talleres />} />
           <Route path="/inscripciones" element={<Inscripciones />} />
           <Route path="/reportes" element={<Reportes />} />
+          <Route path="/mapeo" element={<Mapeo />} />
           <Route path="/servicio-social" element={<ServicioSocial />} />
         </Route>
       </Route>
