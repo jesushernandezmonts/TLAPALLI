@@ -602,7 +602,7 @@ function FileInput({ label, onChange, onScan, fileName, isScanning, existingDoc,
               onChange={onChange}
               className="hidden"
               id={`file-input-${label.replace(/\s+/g, '-')}`}
-              accept=".pdf,.jpg,.png"
+              accept=".pdf,image/*"
             />
             <label
               htmlFor={`file-input-${label.replace(/\s+/g, '-')}`}
