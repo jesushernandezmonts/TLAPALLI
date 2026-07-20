@@ -18,15 +18,18 @@
     "vite": "^8.0.10"
   },
   "dependencies": {
+    "@types/leaflet": "^1.9.21",
     "axios": "^1.16.0",
     "framer-motion": "^12.38.0",
     "html2canvas-pro": "^2.0.4",
     "html2pdf.js": "^0.14.0",
     "jspdf": "^4.2.1",
     "jwt-decode": "^4.0.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.14.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.15.0"
   },
   "overrides": {

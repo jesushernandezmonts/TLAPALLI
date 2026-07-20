@@ -29,6 +29,7 @@ export class AlumnosService {
         fechaNacimiento: true,
         telefono: true,
         padecimientos: true,
+        barrioComunidad: true,
         email: true,
         fotoUrl: true,
       },

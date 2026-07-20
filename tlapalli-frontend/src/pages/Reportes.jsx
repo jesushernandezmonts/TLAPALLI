@@ -10,6 +10,7 @@ import {
 import api from '../services/api';
 import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
+import MapaHuamantla from '../components/MapaHuamantla';
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 const fmt  = (n) => `$${Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
@@ -668,6 +669,11 @@ export default function Reportes() {
           );
         })}
       </div>
+
+      {/* ── Mapeo Geográfico de Huamantla ── */}
+      {data && (
+        <MapaHuamantla datosBarrios={data.alumnosPorBarrio || []} />
+      )}
 
       {/* ── Historial de Reportes Guardados ── */}
       <div className="rounded-[2rem] border border-white/20 bg-slate-950/45 p-6 shadow-2xl mt-8">

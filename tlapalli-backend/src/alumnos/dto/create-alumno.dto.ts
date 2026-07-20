@@ -43,6 +43,10 @@ export class CreateAlumnoDto {
 
   @IsOptional()
   @IsString()
+  barrioComunidad?: string;
+
+  @IsOptional()
+  @IsString()
   periodo?: string;
 
   @IsOptional()

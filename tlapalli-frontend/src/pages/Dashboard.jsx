@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Loader2, Plus, Trash2, Edit3, Clock, MapPin, Download, ChevronDown, ChevronLeft, ChevronRight, AlertTriangle, CalendarX, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
+import MapaHuamantla from '../components/MapaHuamantla';
 
 function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -314,6 +315,9 @@ function Dashboard() {
           trendLabel="vs mes pasado"
         />
       </div>
+
+      {/* Mapa de Huamantla y Distribución de Alumnos */}
+      <MapaHuamantla datosBarrios={stats?.alumnosPorBarrio || []} />
 
       {/* Calendario y Próximas Clases */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

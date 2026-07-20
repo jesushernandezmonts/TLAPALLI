@@ -3,6 +3,34 @@ import api from '../services/api';
 import { Scan, ChevronDown, X, Check, Mail, CheckCircle2 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 
+export const ZONAS_HUAMANTLA = [
+  'Barrio de San Miguel',
+  'Barrio de Santa Ana',
+  'Barrio de San José',
+  'Barrio de La Preciosa',
+  'Barrio de San Lucas',
+  'Barrio de la Trinidad',
+  'Barrio de Jesús',
+  'Barrio de San Antonio',
+  'Colonia Cuauhtémoc',
+  'Colonia Benito Juárez',
+  'Colonia San Rafael',
+  'Colonia El Alto',
+  'Colonia Volcanes',
+  'Colonia Nuevos Horizontes',
+  'Ignacio Zaragoza',
+  'Benito Juárez (Comunidad)',
+  'San José Xicohténcatl',
+  'Francisco Villa',
+  'Galeana',
+  'Chapultepec',
+  'Carmen Xalpatlahuaya',
+  'Los Pilares',
+  'El Carmen Aztama',
+  'Concepción Hidalgo',
+  'Fuera de Huamantla / Otro',
+];
+
 const emptyForm = {
   nombre: '',
   apellidoPaterno: '',
@@ -12,6 +40,7 @@ const emptyForm = {
   telefono: '',
   email: '',
   padecimientos: '',
+  barrioComunidad: '',
   estatusActivo: true,
 };
 
@@ -56,6 +85,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         telefono: alumno.telefono || '',
         email: alumno.email || '',
         padecimientos: alumno.padecimientos || '',
+        barrioComunidad: alumno.barrioComunidad || '',
         estatusActivo: alumno.estatusActivo ?? true,
       });
       fetchInscripcionesAlumno(alumno.id);
@@ -225,6 +255,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         telefono: form.telefono.trim(),
         email: (form.email || '').trim() || undefined,
         padecimientos: form.padecimientos.trim() || null,
+        barrioComunidad: form.barrioComunidad || null,
       };
       delete cleanedForm.periodo;
       delete cleanedForm.anio;
@@ -232,6 +263,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         if (!cleanedForm.curp) delete cleanedForm.curp;
         if (!cleanedForm.fechaNacimiento) delete cleanedForm.fechaNacimiento;
         if (!cleanedForm.padecimientos) delete cleanedForm.padecimientos;
+        if (!cleanedForm.barrioComunidad) delete cleanedForm.barrioComunidad;
       }
 
       let savedAlumno;
@@ -385,6 +417,22 @@ function AlumnoForm({ alumno, onClose, onSave }) {
                 <CheckCircle2 size={10} /> Se enviará correo de activación
               </p>
             )}
+          </div>
+          <div className="space-y-1 md:col-span-2">
+            <label className="text-[10px] text-white/40 uppercase font-black px-1">Barrio / Comunidad de Huamantla</label>
+            <select
+              name="barrioComunidad"
+              value={form.barrioComunidad}
+              onChange={handleChange}
+              className="bg-slate-800/80 border border-white/15 rounded-xl px-3 py-2 text-sm text-white w-full outline-none focus:border-pink-500/50 transition cursor-pointer"
+            >
+              <option value="">-- Seleccionar Zona --</option>
+              {ZONAS_HUAMANTLA.map((zona) => (
+                <option key={zona} value={zona} className="bg-slate-900 text-white">
+                  {zona}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-1 md:col-span-2">
             <label className="text-[10px] text-white/40 uppercase font-black px-1">Padecimientos o Notas Médicas (Opcional)</label>

@@ -67,6 +67,17 @@ export class StatsService {
         instructor: t.instructores[0]?.nombre || 'Sin instructor',
       }));
 
+    // Conteo por Barrio/Comunidad de Huamantla
+    const alumnosBarriosRaw = await this.prisma.alumno.groupBy({
+      by: ['barrioComunidad'],
+      _count: { id: true },
+    });
+
+    const alumnosPorBarrio = alumnosBarriosRaw.map(b => ({
+      barrio: b.barrioComunidad || 'Sin especificar',
+      cantidad: b._count.id,
+    })).sort((a, b) => b.cantidad - a.cantidad);
+
     return {
       alumnosInscritos: alumnosCount,
       talleresActivos: talleresCount,
@@ -74,6 +85,7 @@ export class StatsService {
       ingresosTotales: totalPagos._sum.monto || 0,
       diaDetectado: diaActual,
       proximasClases,
+      alumnosPorBarrio,
       comparativas: {
         ingresosMes: {
           actual: Number(pagosMes._sum.monto) || 0,
@@ -149,6 +161,18 @@ export class StatsService {
       return acc;
     }, {} as Record<string, number>);
 
+    // Alumnos por Barrio / Comunidad
+    const alumnosPorBarrioMap = alumnos.reduce((acc, a) => {
+      const barrio = a.barrioComunidad || 'Sin especificar';
+      acc[barrio] = (acc[barrio] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const alumnosPorBarrio = Object.entries(alumnosPorBarrioMap).map(([barrio, cantidad]) => ({
+      barrio,
+      cantidad,
+    })).sort((a, b) => b.cantidad - a.cantidad);
+
     // Alumnos por taller
     const alumnosPorTaller = talleres.map(t => ({
       taller: t.nombreTaller,
@@ -176,6 +200,7 @@ export class StatsService {
         nombre: `${a.nombre} ${a.apellidoPaterno} ${a.apellidoMaterno || ''}`.trim(),
         curp: a.curp || '-',
         telefono: a.telefono || '-',
+        barrioComunidad: a.barrioComunidad || 'Sin especificar',
         activo: a.estatusActivo,
         talleres: a.inscripciones
           .filter(i => i.estatusPago !== 'baja')
@@ -193,6 +218,7 @@ export class StatsService {
       })),
       pagosPorMetodo,
       pagosPorMes,
+      alumnosPorBarrio,
       talleres: alumnosPorTaller,
       instructores: instructores.map(i => ({
         id: i.id,

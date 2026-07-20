@@ -47,6 +47,7 @@ model Alumno {
   fechaNacimiento  DateTime?     @map("fecha_nacimiento")
   telefono         String?
   padecimientos    String?
+  barrioComunidad  String?       @map("barrio_comunidad")
   estatusActivo    Boolean       @default(true) @map("estatus_activo")
   fotoUrl          String?       @map("foto_url")
   // Autenticación para alumnos
