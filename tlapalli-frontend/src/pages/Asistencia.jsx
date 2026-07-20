@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ClipboardList, Loader2, AlertCircle, RefreshCw, Users,
   CheckCircle2, XCircle, CalendarDays, ChevronDown, ChevronUp,
-  History, Save, BookOpenCheck
+  History, Save, BookOpenCheck, FileCheck, Paperclip, Upload, Eye
 } from 'lucide-react';
 import api from '../services/api';
 import Toast from '../components/Toast';
 import CustomDatePicker from '../components/CustomDatePicker';
+import DocumentViewerModal from '../components/DocumentViewerModal';
 
 const GRUPO_COLORS = [
   { from: 'from-pink-600', to: 'to-rose-600', bg: 'bg-pink-500/10', border: 'border-pink-500/30', text: 'text-pink-300', avatar: 'from-pink-500 to-rose-500' },
@@ -28,6 +29,10 @@ export default function Asistencia() {
   const [alumnos, setAlumnos] = useState([]);
   const [asistenciasPrevias, setAsistenciasPrevias] = useState({});
   const [asistencias, setAsistencias] = useState({});
+  const [observaciones, setObservaciones] = useState({});
+  const [comprobantes, setComprobantes] = useState({});
+  const [uploadingMap, setUploadingMap] = useState({});
+  const [activeDoc, setActiveDoc] = useState(null);
   const [historial, setHistorial] = useState([]);
   const [showHistorial, setShowHistorial] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -79,12 +84,22 @@ export default function Asistencia() {
       try {
         const { data: asistenciasData } = await api.get(`/asistencias/grupo/${selectedGrupoId}?fecha=${fecha}`);
         const asistenciasMap = {};
-        asistenciasData.forEach((a) => { asistenciasMap[a.grupoAlumnoId] = a.estado; });
+        const obsMap = {};
+        const compMap = {};
+        asistenciasData.forEach((a) => {
+          asistenciasMap[a.grupoAlumnoId] = a.estado;
+          if (a.observaciones) obsMap[a.grupoAlumnoId] = a.observaciones;
+          if (a.comprobanteUrl) compMap[a.grupoAlumnoId] = a.comprobanteUrl;
+        });
         setAsistenciasPrevias(asistenciasMap);
         setAsistencias(asistenciasMap);
+        setObservaciones(obsMap);
+        setComprobantes(compMap);
       } catch {
         setAsistenciasPrevias({});
         setAsistencias({});
+        setObservaciones({});
+        setComprobantes({});
       }
 
       try {
@@ -107,12 +122,22 @@ export default function Asistencia() {
       setLoadingAlumnos(true);
       const { data: asistenciasData } = await api.get(`/asistencias/grupo/${selectedGrupoId}?fecha=${newFecha}`);
       const asistenciasMap = {};
-      asistenciasData.forEach((a) => { asistenciasMap[a.grupoAlumnoId] = a.estado; });
+      const obsMap = {};
+      const compMap = {};
+      asistenciasData.forEach((a) => {
+        asistenciasMap[a.grupoAlumnoId] = a.estado;
+        if (a.observaciones) obsMap[a.grupoAlumnoId] = a.observaciones;
+        if (a.comprobanteUrl) compMap[a.grupoAlumnoId] = a.comprobanteUrl;
+      });
       setAsistenciasPrevias(asistenciasMap);
       setAsistencias(asistenciasMap);
+      setObservaciones(obsMap);
+      setComprobantes(compMap);
     } catch {
       setAsistenciasPrevias({});
       setAsistencias({});
+      setObservaciones({});
+      setComprobantes({});
     } finally {
       setLoadingAlumnos(false);
     }
@@ -122,11 +147,36 @@ export default function Asistencia() {
     setAsistencias((prev) => ({ ...prev, [grupoAlumnoId]: estado }));
   };
 
+  const handleFileUpload = async (grupoAlumnoId, file) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('Archivo demasiado grande', 'El límite es de 10MB', 'error');
+      return;
+    }
+    setUploadingMap((prev) => ({ ...prev, [grupoAlumnoId]: true }));
+    try {
+      const formData = new FormData();
+      formData.append('comprobante', file);
+      const { data } = await api.post('/asistencias/upload-comprobante', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setComprobantes((prev) => ({ ...prev, [grupoAlumnoId]: data.comprobanteUrl }));
+      showToast('Comprobante subido', 'Evidencia adjuntada correctamente', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Error al subir', err.response?.data?.message || 'No se pudo subir la foto', 'error');
+    } finally {
+      setUploadingMap((prev) => ({ ...prev, [grupoAlumnoId]: false }));
+    }
+  };
+
   const handleSave = async () => {
     if (!selectedGrupoId) return;
     const asistenciasArray = Object.entries(asistencias).map(([id, estado]) => ({
       grupoAlumnoId: Number(id),
       estado,
+      observaciones: observaciones[id] || undefined,
+      comprobanteUrl: comprobantes[id] || undefined,
     }));
     try {
       setSaving(true);
@@ -151,7 +201,8 @@ export default function Asistencia() {
   const totalAlumnos = alumnos.length;
   const asistenciasCount = Object.values(asistencias).filter((v) => v === 'asistencia').length;
   const faltasCount = Object.values(asistencias).filter((v) => v === 'falta').length;
-  const sinRegistro = totalAlumnos - asistenciasCount - faltasCount;
+  const justificadasCount = Object.values(asistencias).filter((v) => v === 'justificada').length;
+  const sinRegistro = totalAlumnos - asistenciasCount - faltasCount - justificadasCount;
 
   if (loading) return (
     <div className="flex items-center justify-center h-[60vh]">
@@ -246,7 +297,7 @@ export default function Asistencia() {
             <>
               {/* Stats */}
               {alumnos.length > 0 && (
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-white/15 rounded-xl p-4 text-center">
                     <p className="text-2xl font-black text-white">{totalAlumnos}</p>
                     <p className="text-xs text-white/50 mt-1">Total</p>
@@ -258,6 +309,10 @@ export default function Asistencia() {
                   <div className="bg-gradient-to-br from-red-900/30 to-red-800/20 border border-red-500/20 rounded-xl p-4 text-center">
                     <p className="text-2xl font-black text-red-400">{faltasCount}</p>
                     <p className="text-xs text-red-400/60 mt-1">Faltas</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-amber-900/30 to-amber-800/20 border border-amber-500/20 rounded-xl p-4 text-center">
+                    <p className="text-2xl font-black text-amber-400">{justificadasCount}</p>
+                    <p className="text-xs text-amber-400/60 mt-1">Justificadas</p>
                   </div>
                   <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/40 border border-white/15 rounded-xl p-4 text-center">
                     <p className="text-2xl font-black text-white/50">{sinRegistro}</p>
@@ -346,6 +401,9 @@ export default function Asistencia() {
                                   <div className="flex items-center gap-3 text-xs">
                                     <span className="text-emerald-400 font-bold">{entry.asistencias} ✓</span>
                                     <span className="text-red-400 font-bold">{entry.faltas} ✗</span>
+                                    {entry.justificadas > 0 && (
+                                      <span className="text-amber-400 font-bold">{entry.justificadas} 📄</span>
+                                    )}
                                     <span className="text-white/40">{entry.total} total</span>
                                   </div>
                                 </div>
@@ -370,98 +428,186 @@ export default function Asistencia() {
                             <tr className="border-b border-white/15 bg-slate-800/80">
                               <th className="text-left px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-12">#</th>
                               <th className="text-left px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider">Alumno</th>
-                              <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-28">✅ Asistencia</th>
-                              <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-28">❌ Falta</th>
+                              <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-24">✅ Presente</th>
+                              <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-24">❌ Falta</th>
+                              <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-28">📄 Justificada</th>
                             </tr>
                           </thead>
                           {/* Cuerpo de la tabla */}
-                          <tbody>
+                          <tbody className="divide-y divide-slate-800/80">
                             {alumnos.map((ga, idx) => {
                               const estado = asistencias[ga.id] || null;
+                              const obs = observaciones[ga.id] || '';
+                              const compUrl = comprobantes[ga.id] || null;
+                              const isUploading = uploadingMap[ga.id] || false;
+
                               return (
-                                <motion.tr
-                                  key={ga.id}
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ delay: idx * 0.02 }}
-                                  className={`border-b border-slate-800/80 transition-colors ${
+                                <React.Fragment key={ga.id}>
+                                  <tr className={`transition-colors ${
                                     estado === 'asistencia'
                                       ? 'bg-emerald-500/5 hover:bg-emerald-500/10'
                                       : estado === 'falta'
                                       ? 'bg-red-500/5 hover:bg-red-500/10'
+                                      : estado === 'justificada'
+                                      ? 'bg-amber-500/5 hover:bg-amber-500/10'
                                       : 'hover:bg-slate-800/80'
-                                  }`}
-                                >
-                                  {/* # */}
-                                  <td className="px-4 py-3 text-white/30 text-xs font-mono">{idx + 1}</td>
+                                  }`}>
+                                    {/* # */}
+                                    <td className="px-4 py-3 text-white/30 text-xs font-mono">{idx + 1}</td>
 
-                                  {/* Alumno */}
-                                  <td className="px-4 py-3">
-                                    <div className="flex items-center gap-3">
-                                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0`}>
-                                        <span className="text-white font-bold text-[10px]">
-                                          {ga.alumno.nombre?.[0]}{ga.alumno.apellidoPaterno?.[0]}
-                                        </span>
+                                    {/* Alumno */}
+                                    <td className="px-4 py-3">
+                                      <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0`}>
+                                          <span className="text-white font-bold text-[10px]">
+                                            {ga.alumno.nombre?.[0]}{ga.alumno.apellidoPaterno?.[0]}
+                                          </span>
+                                        </div>
+                                        <div>
+                                          <p className="font-semibold text-white text-sm">
+                                            {ga.alumno.nombre} {ga.alumno.apellidoPaterno} {ga.alumno.apellidoMaterno || ''}
+                                          </p>
+                                          {ga.alumno.telefono && (
+                                            <p className="text-[11px] text-white/30">{ga.alumno.telefono}</p>
+                                          )}
+                                        </div>
                                       </div>
-                                      <div>
-                                        <p className="font-semibold text-white text-sm">
-                                          {ga.alumno.nombre} {ga.alumno.apellidoPaterno} {ga.alumno.apellidoMaterno || ''}
-                                        </p>
-                                        {ga.alumno.telefono && (
-                                          <p className="text-[11px] text-white/30">{ga.alumno.telefono}</p>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </td>
+                                    </td>
 
-                                  {/* Asistencia */}
-                                  <td className="px-4 py-3 text-center">
-                                    <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
-                                      <input
-                                        type="checkbox"
-                                        checked={estado === 'asistencia'}
-                                        onChange={() => !isPastDate && setEstado(ga.id, 'asistencia')}
-                                        disabled={isPastDate}
-                                        className="sr-only peer"
-                                      />
-                                      <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
-                                        isPastDate ? 'opacity-60 cursor-not-allowed' : ''
-                                      } ${
-                                        estado === 'asistencia'
-                                          ? 'bg-emerald-500 border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.35)]'
-                                          : 'border-white/20 hover:border-emerald-400/50 bg-slate-800/80'
-                                      }`}>
-                                        {estado === 'asistencia' && (
-                                          <CheckCircle2 size={16} className="text-white" />
-                                        )}
-                                      </div>
-                                    </label>
-                                  </td>
+                                    {/* Asistencia */}
+                                    <td className="px-4 py-3 text-center">
+                                      <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
+                                        <input
+                                          type="checkbox"
+                                          checked={estado === 'asistencia'}
+                                          onChange={() => !isPastDate && setEstado(ga.id, 'asistencia')}
+                                          disabled={isPastDate}
+                                          className="sr-only peer"
+                                        />
+                                        <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                                          isPastDate ? 'opacity-60 cursor-not-allowed' : ''
+                                        } ${
+                                          estado === 'asistencia'
+                                            ? 'bg-emerald-500 border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.35)]'
+                                            : 'border-white/20 hover:border-emerald-400/50 bg-slate-800/80'
+                                        }`}>
+                                          {estado === 'asistencia' && (
+                                            <CheckCircle2 size={16} className="text-white" />
+                                          )}
+                                        </div>
+                                      </label>
+                                    </td>
 
-                                  {/* Falta */}
-                                  <td className="px-4 py-3 text-center">
-                                    <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
-                                      <input
-                                        type="checkbox"
-                                        checked={estado === 'falta'}
-                                        onChange={() => !isPastDate && setEstado(ga.id, 'falta')}
-                                        disabled={isPastDate}
-                                        className="sr-only peer"
-                                      />
-                                      <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
-                                        isPastDate ? 'opacity-60 cursor-not-allowed' : ''
-                                      } ${
-                                        estado === 'falta'
-                                          ? 'bg-red-500 border-red-400 shadow-[0_0_12px_rgba(248,113,113,0.35)]'
-                                          : 'border-white/20 hover:border-red-400/50 bg-slate-800/80'
-                                      }`}>
-                                        {estado === 'falta' && (
-                                          <XCircle size={16} className="text-white" />
-                                        )}
-                                      </div>
-                                    </label>
-                                  </td>
-                                </motion.tr>
+                                    {/* Falta */}
+                                    <td className="px-4 py-3 text-center">
+                                      <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
+                                        <input
+                                          type="checkbox"
+                                          checked={estado === 'falta'}
+                                          onChange={() => !isPastDate && setEstado(ga.id, 'falta')}
+                                          disabled={isPastDate}
+                                          className="sr-only peer"
+                                        />
+                                        <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                                          isPastDate ? 'opacity-60 cursor-not-allowed' : ''
+                                        } ${
+                                          estado === 'falta'
+                                            ? 'bg-red-500 border-red-400 shadow-[0_0_12px_rgba(248,113,113,0.35)]'
+                                            : 'border-white/20 hover:border-red-400/50 bg-slate-800/80'
+                                        }`}>
+                                          {estado === 'falta' && (
+                                            <XCircle size={16} className="text-white" />
+                                          )}
+                                        </div>
+                                      </label>
+                                    </td>
+
+                                    {/* Justificada */}
+                                    <td className="px-4 py-3 text-center">
+                                      <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
+                                        <input
+                                          type="checkbox"
+                                          checked={estado === 'justificada'}
+                                          onChange={() => !isPastDate && setEstado(ga.id, 'justificada')}
+                                          disabled={isPastDate}
+                                          className="sr-only peer"
+                                        />
+                                        <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                                          isPastDate ? 'opacity-60 cursor-not-allowed' : ''
+                                        } ${
+                                          estado === 'justificada'
+                                            ? 'bg-amber-500 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.35)]'
+                                            : 'border-white/20 hover:border-amber-400/50 bg-slate-800/80'
+                                        }`}>
+                                          {estado === 'justificada' && (
+                                            <FileCheck size={16} className="text-white" />
+                                          )}
+                                        </div>
+                                      </label>
+                                    </td>
+                                  </tr>
+
+                                  {/* Sub-fila para observaciones y evidencia cuando es justificada */}
+                                  {estado === 'justificada' && (
+                                    <tr className="bg-amber-500/10 border-b border-amber-500/20">
+                                      <td colSpan="5" className="px-6 py-3">
+                                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                          <div className="flex-1 space-y-1">
+                                            <label className="text-[10px] font-black uppercase tracking-wider text-amber-300">
+                                              Motivo / Justificación del Alumno
+                                            </label>
+                                            <input
+                                              type="text"
+                                              value={obs}
+                                              onChange={(e) => setObservaciones((prev) => ({ ...prev, [ga.id]: e.target.value }))}
+                                              disabled={isPastDate}
+                                              placeholder="Ej. Incapacidad por cita médica / Permiso especial..."
+                                              className="w-full bg-slate-900/90 border border-amber-500/30 rounded-xl px-3 py-1.5 text-xs text-white placeholder-white/30 outline-none focus:border-amber-400 transition"
+                                            />
+                                          </div>
+
+                                          <div className="flex items-center gap-2 pt-4 sm:pt-0 shrink-0">
+                                            {compUrl ? (
+                                              <button
+                                                type="button"
+                                                onClick={() => setActiveDoc({
+                                                  url: compUrl,
+                                                  title: `Justificante - ${ga.alumno.nombre} ${ga.alumno.apellidoPaterno}`
+                                                })}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition cursor-pointer"
+                                              >
+                                                <Eye size={14} /> Ver Evidencia 📎
+                                              </button>
+                                            ) : isUploading ? (
+                                              <span className="flex items-center gap-1.5 text-xs text-amber-300 animate-pulse font-semibold">
+                                                <Loader2 size={14} className="animate-spin" /> Subiendo...
+                                              </span>
+                                            ) : !isPastDate ? (
+                                              <>
+                                                <input
+                                                  type="file"
+                                                  id={`file-input-${ga.id}`}
+                                                  className="hidden"
+                                                  accept=".pdf,image/*"
+                                                  onChange={(e) => {
+                                                    const f = e.target.files ? e.target.files[0] : null;
+                                                    if (f) handleFileUpload(ga.id, f);
+                                                  }}
+                                                />
+                                                <label
+                                                  htmlFor={`file-input-${ga.id}`}
+                                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-slate-800 transition cursor-pointer select-none"
+                                                >
+                                                  <Upload size={14} /> Adjuntar Receta / Foto
+                                                </label>
+                                              </>
+                                            ) : null}
+                                          </div>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  )}
+                                </React.Fragment>
                               );
                             })}
                           </tbody>
@@ -481,6 +627,14 @@ export default function Asistencia() {
           <p className="text-white/30 text-sm mt-1">Elige un grupo arriba y podrás registrar la asistencia del día</p>
         </div>
       )}
+
+      {/* Visor de Comprobante en Modal */}
+      <DocumentViewerModal
+        isOpen={!!activeDoc}
+        onClose={() => setActiveDoc(null)}
+        url={activeDoc?.url}
+        title={activeDoc?.title}
+      />
     </div>
   );
 }

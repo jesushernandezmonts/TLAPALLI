@@ -248,24 +248,14 @@ export default function MisGrupos() {
           </h1>
           <p className="mt-1 text-base font-semibold text-white/75">Gestiona tus grupos y alumnos</p>
         </div>
-        <div className="flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setModalJustificanteOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-800/90 border border-white/20 hover:bg-slate-800 text-white rounded-xl font-bold text-sm transition shadow-lg cursor-pointer"
-          >
-            <FileCheck size={16} className="text-pink-400" /> Justificar Falta
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleOpenModal('grupo')}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white rounded-xl font-bold text-sm transition shadow-lg cursor-pointer"
-          >
-            <Plus size={16} /> Nuevo Grupo
-          </motion.button>
-        </div>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => handleOpenModal('grupo')}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white rounded-xl font-bold text-sm transition shadow-lg cursor-pointer"
+        >
+          <Plus size={16} /> Nuevo Grupo
+        </motion.button>
       </div>
 
       {/* Stats con StatCard */}
@@ -594,12 +584,6 @@ export default function MisGrupos() {
           </div>
         )}
       </Modal>
-
-      <ModalJustificante
-        isOpen={modalJustificanteOpen}
-        onClose={() => setModalJustificanteOpen(false)}
-        onSuccess={() => showToast('Justificante enviado', 'Se envió la solicitud de justificante al administrador.', 'success')}
-      />
     </div>
   );
 }

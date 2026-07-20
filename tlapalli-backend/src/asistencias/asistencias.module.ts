@@ -3,9 +3,10 @@ import { AsistenciasController } from './asistencias.controller';
 import { AsistenciasService } from './asistencias.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { GatewayModule } from '../gateway/gateway.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
-  imports: [PrismaModule, GatewayModule],
+  imports: [PrismaModule, GatewayModule, CloudinaryModule],
   controllers: [AsistenciasController],
   providers: [AsistenciasService],
 })

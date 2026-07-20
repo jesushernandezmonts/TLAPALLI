@@ -6,12 +6,16 @@ export class AlumnoAsistenciaDto {
   grupoAlumnoId: number;
 
   @IsString()
-  @IsIn(['asistencia', 'falta'])
+  @IsIn(['asistencia', 'falta', 'justificada'])
   estado: string;
 
   @IsOptional()
   @IsString()
   observaciones?: string;
+
+  @IsOptional()
+  @IsString()
+  comprobanteUrl?: string;
 }
 
 export class CreateAsistenciasDto {

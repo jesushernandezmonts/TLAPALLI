@@ -102,7 +102,8 @@ export class AsistenciasService {
             grupoAlumnoId: a.grupoAlumnoId,
             fecha: fechaDate,
             estado: a.estado,
-            observaciones: a.observaciones,
+            observaciones: a.observaciones || null,
+            comprobanteUrl: a.comprobanteUrl || null,
           },
         });
       }
@@ -177,17 +178,18 @@ export class AsistenciasService {
     });
 
     // Agrupar por fecha para dar un resumen
-    const historialMap = new Map<string, { total: number; asistencias: number; faltas: number }>();
+    const historialMap = new Map<string, { total: number; asistencias: number; faltas: number; justificadas: number }>();
 
     for (const a of asistencias) {
       const fechaKey = a.fecha.toISOString().split('T')[0];
       if (!historialMap.has(fechaKey)) {
-        historialMap.set(fechaKey, { total: 0, asistencias: 0, faltas: 0 });
+        historialMap.set(fechaKey, { total: 0, asistencias: 0, faltas: 0, justificadas: 0 });
       }
       const entry = historialMap.get(fechaKey)!;
       entry.total++;
       if (a.estado === 'asistencia') entry.asistencias++;
       else if (a.estado === 'falta') entry.faltas++;
+      else if (a.estado === 'justificada') entry.justificadas++;
     }
 
     return Array.from(historialMap.entries())

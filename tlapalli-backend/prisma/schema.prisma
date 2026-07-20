@@ -122,8 +122,9 @@ model Asistencia {
   id             Int          @id @default(autoincrement())
   inscripcionId  Int?         @map("inscripcion_id")
   fecha          DateTime     @default(now())
-  estado         String       // asistencia, falta
+  estado         String       // asistencia, falta, justificada
   observaciones  String?
+  comprobanteUrl String?      @map("comprobante_url")
   inscripcion    Inscripcion? @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
 
   // Relación opcional con GrupoAlumno para pasar lista por grupos
