@@ -18,6 +18,8 @@ function Alumnos() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
   const [tallerFilter, setTallerFilter] = useState('todos');
+  const [periodoFilter, setPeriodoFilter] = useState('todos');
+  const [anioFilter, setAnioFilter] = useState('todos');
   const [talleres, setTalleres] = useState([]);
   const [inscripciones, setInscripciones] = useState([]);
   const [documentosPorAlumno, setDocumentosPorAlumno] = useState({});
@@ -249,7 +251,13 @@ function Alumnos() {
     const matchesTaller =
       tallerFilter === 'todos' ||
       inscripciones.some(i => i.alumnoId === a.id && String(i.tallerId) === tallerFilter);
-    return matchesSearch && matchesStatus && matchesTaller;
+    const matchesPeriodo =
+      periodoFilter === 'todos' ||
+      inscripciones.some(i => i.alumnoId === a.id && i.periodo === periodoFilter);
+    const matchesAnio =
+      anioFilter === 'todos' ||
+      inscripciones.some(i => i.alumnoId === a.id && String(i.anio) === anioFilter);
+    return matchesSearch && matchesStatus && matchesTaller && matchesPeriodo && matchesAnio;
   });
   const totalPages = Math.max(1, Math.ceil(filtered.length / alumnosPerPage));
   const startIndex = (currentPage - 1) * alumnosPerPage;
@@ -257,7 +265,7 @@ function Alumnos() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, statusFilter, tallerFilter]);
+  }, [search, statusFilter, tallerFilter, periodoFilter, anioFilter]);
 
   const getTalleresAlumno = (alumnoId) =>
     inscripciones
@@ -319,13 +327,47 @@ function Alumnos() {
             }}
             className="sm:w-56"
           />
-          {(statusFilter !== 'todos' || tallerFilter !== 'todos' || search) && (
+          <FilterDropdown
+            value={periodoFilter}
+            options={[
+              { value: 'todos', label: 'Todos los periodos' },
+              { value: 'ordinario', label: 'Ordinario' },
+              { value: 'verano', label: 'Verano' },
+            ]}
+            isOpen={openFilter === 'periodo'}
+            onToggle={() => setOpenFilter(openFilter === 'periodo' ? null : 'periodo')}
+            onChange={(value) => {
+              setPeriodoFilter(value);
+              setOpenFilter(null);
+            }}
+            className="sm:w-48"
+          />
+          <FilterDropdown
+            value={anioFilter}
+            options={[
+              { value: 'todos', label: 'Todos los años' },
+              ...Array.from({ length: 5 }, (_, i) => String(new Date().getFullYear() - 2 + i)).map(year => ({
+                value: year,
+                label: year,
+              })),
+            ]}
+            isOpen={openFilter === 'anio'}
+            onToggle={() => setOpenFilter(openFilter === 'anio' ? null : 'anio')}
+            onChange={(value) => {
+              setAnioFilter(value);
+              setOpenFilter(null);
+            }}
+            className="sm:w-40"
+          />
+          {(statusFilter !== 'todos' || tallerFilter !== 'todos' || periodoFilter !== 'todos' || anioFilter !== 'todos' || search) && (
             <button
               type="button"
               onClick={() => {
                 setSearch('');
                 setStatusFilter('todos');
                 setTallerFilter('todos');
+                setPeriodoFilter('todos');
+                setAnioFilter('todos');
                 setOpenFilter(null);
               }}
               className="w-full rounded-2xl border border-white/15 bg-slate-800/90 px-4 py-3 text-xs font-black uppercase tracking-wider text-white/70 transition hover:border-pink-400/30 hover:bg-pink-500/15 hover:text-white sm:w-auto"

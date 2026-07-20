@@ -108,6 +108,8 @@ model Inscripcion {
   tallerId         Int          @map("taller_id")
   fechaInscripcion DateTime     @default(now()) @map("fecha_inscripcion")
   estatusPago      String       @default("pendiente") @map("estatus_pago") // pendiente, al_corriente, deudor
+  periodo          String       @default("ordinario") // 'ordinario' | 'verano'
+  anio             Int          @default(2026)
   alumno           Alumno       @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
   taller           Taller       @relation(fields: [tallerId], references: [id])
   asistencias      Asistencia[]

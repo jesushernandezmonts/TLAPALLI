@@ -33,6 +33,8 @@ export class InscripcionesService {
         alumnoId: dto.alumnoId,
         tallerId: dto.tallerId,
         estatusPago: dto.estatusPago || 'pendiente',
+        periodo: dto.periodo,
+        anio: dto.anio,
       },
       include: { alumno: true, taller: true },
     });

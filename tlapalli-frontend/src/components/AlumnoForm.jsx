@@ -28,6 +28,8 @@ function AlumnoForm({ alumno, onClose, onSave }) {
   const [talleres, setTalleres] = useState([]);
   const [selectedTallerIds, setSelectedTallerIds] = useState([]);
   const [originalInscripciones, setOriginalInscripciones] = useState([]);
+  const [formPeriodo, setFormPeriodo] = useState('ordinario');
+  const [formAnio, setFormAnio] = useState(new Date().getFullYear());
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // Estados para archivos (creación y edición)
@@ -115,6 +117,10 @@ function AlumnoForm({ alumno, onClose, onSave }) {
       const activas = data.filter(i => i.estatusPago !== 'baja');
       setOriginalInscripciones(activas);
       setSelectedTallerIds(activas.map(i => i.tallerId));
+      if (activas.length > 0) {
+        setFormPeriodo(activas[0].periodo || 'ordinario');
+        setFormAnio(activas[0].anio || new Date().getFullYear());
+      }
     } catch (err) {
       console.error('Error al cargar inscripciones del alumno', err);
     }
@@ -250,6 +256,8 @@ function AlumnoForm({ alumno, onClose, onSave }) {
           await api.post('/inscripciones', {
             alumnoId: savedAlumno.id,
             tallerId,
+            periodo: formPeriodo,
+            anio: Number(formAnio),
           });
         }
       }
@@ -450,6 +458,34 @@ function AlumnoForm({ alumno, onClose, onSave }) {
               </div>
             )}
           </div>
+
+          {selectedTallerIds.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:col-span-4">
+              <div className="space-y-1">
+                <label className="text-[10px] text-white/40 uppercase font-black px-1">Periodo de Inscripción</label>
+                <select
+                  value={formPeriodo}
+                  onChange={(e) => setFormPeriodo(e.target.value)}
+                  className="bg-slate-800/80 border border-white/15 rounded-xl px-3 py-2 text-sm text-white w-full outline-none focus:border-pink-500/50 transition cursor-pointer"
+                >
+                  <option value="ordinario">Ordinario</option>
+                  <option value="verano">Verano</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] text-white/40 uppercase font-black px-1">Año de Inscripción</label>
+                <select
+                  value={formAnio}
+                  onChange={(e) => setFormAnio(Number(e.target.value))}
+                  className="bg-slate-800/80 border border-white/15 rounded-xl px-3 py-2 text-sm text-white w-full outline-none focus:border-pink-500/50 transition cursor-pointer"
+                >
+                  {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Expediente Digital Inicial */}
