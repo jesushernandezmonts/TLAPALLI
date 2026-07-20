@@ -15,6 +15,14 @@ export class ReportesService {
     });
   }
 
+  async findOne(id: number) {
+    const report = await this.prisma.reporte.findUnique({ where: { id } });
+    if (!report) {
+      throw new NotFoundException('Reporte no encontrado');
+    }
+    return report;
+  }
+
   async findAll() {
     return this.prisma.reporte.findMany({
       orderBy: { creadoEn: 'desc' },

@@ -539,11 +539,11 @@ export default function Reportes() {
   const handleDownload = async (report) => {
     setDownloadingId(report.id);
     try {
-      const url = getFullUrl(report.url);
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Error al descargar');
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
+      // Usar el endpoint proxy del backend para evitar CORS/401 de Cloudinary
+      const response = await api.get(`/reportes/download/${report.id}`, {
+        responseType: 'blob',
+      });
+      const blobUrl = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
       const a = document.createElement('a');
       a.href = blobUrl;
       a.download = `${report.nombre}.pdf`;
@@ -553,7 +553,6 @@ export default function Reportes() {
       setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
     } catch (err) {
       console.error('Error al descargar el reporte:', err);
-      // Fallback: abrir en pestaña nueva
       window.open(getFullUrl(report.url), '_blank');
     } finally {
       setDownloadingId(null);
@@ -1172,10 +1171,10 @@ function ReportPreviewModal({ report, data, onClose }) {
   const handleDownloadModal = async () => {
     setDlLoading(true);
     try {
-      const response = await fetch(pdfUrl);
-      if (!response.ok) throw new Error('Error al descargar');
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
+      const response = await api.get(`/reportes/download/${report.id}`, {
+        responseType: 'blob',
+      });
+      const blobUrl = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
       const a = document.createElement('a');
       a.href = blobUrl;
       a.download = `${report.nombre}.pdf`;
