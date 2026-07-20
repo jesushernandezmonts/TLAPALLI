@@ -396,6 +396,7 @@ export default function Reportes() {
   const [busqueda, setBusqueda]         = useState('');
   const [fechaFiltro, setFechaFiltro]         = useState('');
   const [previewReport, setPreviewReport]     = useState(null);
+  const [downloadingId, setDownloadingId]     = useState(null);
   const itemsPerPage = 5;
 
   const reportesFiltrados = useMemo(() => {
@@ -532,6 +533,30 @@ export default function Reportes() {
       setGenerating(null);
       setPrinting(null);
       setTimeout(() => setDone(null), 2500);
+    }
+  };
+
+  const handleDownload = async (report) => {
+    setDownloadingId(report.id);
+    try {
+      const url = getFullUrl(report.url);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Error al descargar');
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${report.nombre}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    } catch (err) {
+      console.error('Error al descargar el reporte:', err);
+      // Fallback: abrir en pestaña nueva
+      window.open(getFullUrl(report.url), '_blank');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -819,16 +844,16 @@ export default function Reportes() {
                       </td>
                       <td data-label="Acciones" className="text-right">
                         <div className="flex justify-end gap-2">
-                          <a
-                            href={getFullUrl(report.url)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            download
-                            className="p-2.5 bg-slate-800/80 hover:bg-emerald-500/20 hover:text-emerald-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-emerald-500/30 text-white/60 flex items-center justify-center cursor-pointer"
+                          <button
+                            onClick={() => handleDownload(report)}
+                            disabled={downloadingId === report.id}
+                            className="p-2.5 bg-slate-800/80 hover:bg-emerald-500/20 hover:text-emerald-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-emerald-500/30 text-white/60 flex items-center justify-center cursor-pointer disabled:opacity-50"
                             title="Descargar PDF"
                           >
-                            <Download size={16} />
-                          </a>
+                            {downloadingId === report.id
+                              ? <Loader2 size={16} className="animate-spin" />
+                              : <Download size={16} />}
+                          </button>
                           <button
                             onClick={() => setPreviewReport(report)}
                             className="p-2.5 bg-slate-800/80 hover:bg-pink-500/20 hover:text-pink-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-pink-500/30 text-white/60 cursor-pointer"
@@ -1134,6 +1159,7 @@ function PrintActividades({ data: d }) {
 /* ── Report Preview Modal ── */
 function ReportPreviewModal({ report, data, onClose }) {
   const pdfUrl = getFullUrl(report.url);
+  const [dlLoading, setDlLoading] = useState(false);
 
   const reportComponent = {
     general: <PrintGeneral data={data} />,
@@ -1141,6 +1167,28 @@ function ReportPreviewModal({ report, data, onClose }) {
     alumnos: <PrintAlumnos data={data} />,
     talleres: <PrintTalleres data={data} />,
     actividades: <PrintActividades data={data} />,
+  };
+
+  const handleDownloadModal = async () => {
+    setDlLoading(true);
+    try {
+      const response = await fetch(pdfUrl);
+      if (!response.ok) throw new Error('Error al descargar');
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${report.nombre}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    } catch (err) {
+      console.error('Error al descargar el reporte:', err);
+      window.open(pdfUrl, '_blank');
+    } finally {
+      setDlLoading(false);
+    }
   };
 
   return createPortal(
@@ -1172,16 +1220,14 @@ function ReportPreviewModal({ report, data, onClose }) {
               </div>
             </div>
             <div className="flex items-center gap-1.5">
-              <a
-                href={pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                download
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/20 cursor-pointer"
+              <button
+                onClick={handleDownloadModal}
+                disabled={dlLoading}
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-60"
               >
-                <Download size={14} />
-                Descargar PDF
-              </a>
+                {dlLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                {dlLoading ? 'Descargando...' : 'Descargar PDF'}
+              </button>
               <button
                 onClick={onClose}
                 className="p-1.5 rounded-xl hover:bg-slate-800/90 text-white/50 hover:text-white transition-all duration-200"
