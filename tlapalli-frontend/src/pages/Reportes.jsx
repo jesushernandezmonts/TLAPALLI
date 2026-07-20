@@ -536,24 +536,53 @@ export default function Reportes() {
     }
   };
 
+  const generateAndDownloadPdf = async (tipo, nombreArchivo) => {
+    // Mostrar la sección de impresión
+    setPrinting(tipo);
+    await new Promise(r => setTimeout(r, 500)); // esperar render del DOM
+
+    const element = document.getElementById('print-section');
+    if (!element) return;
+    const prevDisplay = element.style.display;
+    element.style.display = 'block';
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      const pdf = new jsPDF({ unit: 'mm', format: 'letter', orientation: 'portrait' });
+      const pdfWidth  = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const ratio     = pdfWidth / canvas.width;
+      const totalPdfH = canvas.height * ratio;
+      let yOffset = 0;
+      while (yOffset < totalPdfH) {
+        if (yOffset > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, -yOffset, pdfWidth, totalPdfH);
+        yOffset += pdfHeight;
+      }
+      pdf.save(nombreArchivo);
+    } catch (err) {
+      console.error('Error al generar PDF:', err);
+    } finally {
+      element.style.display = prevDisplay;
+      setPrinting(null);
+    }
+  };
+
   const handleDownload = async (report) => {
     setDownloadingId(report.id);
     try {
-      // Usar el endpoint proxy del backend para evitar CORS/401 de Cloudinary
-      const response = await api.get(`/reportes/download/${report.id}`, {
-        responseType: 'blob',
-      });
-      const blobUrl = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = `${report.nombre}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-    } catch (err) {
-      console.error('Error al descargar el reporte:', err);
-      window.open(getFullUrl(report.url), '_blank');
+      const dateStr = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
+        .replace(/ /g, '_').replace(/\./g, '').replace(/,/g, '');
+      const filename = `${report.nombre}_${dateStr}.pdf`;
+      await generateAndDownloadPdf(report.tipo, filename);
     } finally {
       setDownloadingId(null);
     }
@@ -942,7 +971,7 @@ export default function Reportes() {
           report={previewReport}
           data={data}
           onClose={() => setPreviewReport(null)}
-          onPrint={handleModalPrint}
+          onDownload={generateAndDownloadPdf}
         />
       )}
     </div>
@@ -1156,8 +1185,7 @@ function PrintActividades({ data: d }) {
 }
 
 /* ── Report Preview Modal ── */
-function ReportPreviewModal({ report, data, onClose }) {
-  const pdfUrl = getFullUrl(report.url);
+function ReportPreviewModal({ report, data, onClose, onDownload }) {
   const [dlLoading, setDlLoading] = useState(false);
 
   const reportComponent = {
@@ -1171,20 +1199,11 @@ function ReportPreviewModal({ report, data, onClose }) {
   const handleDownloadModal = async () => {
     setDlLoading(true);
     try {
-      const response = await api.get(`/reportes/download/${report.id}`, {
-        responseType: 'blob',
-      });
-      const blobUrl = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = `${report.nombre}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-    } catch (err) {
-      console.error('Error al descargar el reporte:', err);
-      window.open(pdfUrl, '_blank');
+      const dateStr = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
+        .replace(/ /g, '_').replace(/\./g, '').replace(/,/g, '');
+      const filename = `${report.nombre}_${dateStr}.pdf`;
+      onClose(); // cerrar modal antes de renderizar la plantilla
+      await onDownload(report.tipo, filename);
     } finally {
       setDlLoading(false);
     }
