@@ -1,11 +1,11 @@
-import { Injectable, Logger, LoggerService as NestLoggerService } from '@nestjs/common';
+import { Injectable, Logger, LoggerService as NestLoggerService, Optional, Inject } from '@nestjs/common';
 
 @Injectable()
 export class AppLogger implements NestLoggerService {
   private readonly logger: Logger;
 
-  constructor(context: string = 'Tlapalli') {
-    this.logger = new Logger(context);
+  constructor(@Optional() @Inject('LOGGER_CONTEXT') context?: string) {
+    this.logger = new Logger(context || 'Tlapalli');
   }
 
   log(message: string, context?: string) {
