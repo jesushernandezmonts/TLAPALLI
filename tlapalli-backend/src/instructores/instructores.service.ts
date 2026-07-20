@@ -3,12 +3,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInstructorDto } from './dto/create-instructor.dto';
 import { UpdateInstructorDto } from './dto/update-instructor.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { CreateJustificacionDto } from './dto/create-justificacion.dto';
+import { ReviewJustificacionDto } from './dto/review-justificacion.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { MailerService } from '../mail/mailer.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { AppGateway } from '../gateway/app.gateway';
-
 
 @Injectable()
 export class InstructoresService {
@@ -383,5 +384,77 @@ export class InstructoresService {
       data: { fotoUrl },
       select: { id: true, nombre: true, email: true, rol: true, fotoUrl: true },
     });
+  }
+
+  // ========== JUSTIFICACIONES ==========
+
+  async crearJustificacion(userId: number, dto: CreateJustificacionDto, comprobanteUrl?: string) {
+    const usuario = await this.prisma.usuario.findUnique({ where: { id: userId } });
+    if (!usuario || !usuario.instructorId) {
+      throw new BadRequestException('El usuario autenticado no está vinculado a un perfil de instructor');
+    }
+
+    const justificacion = await this.prisma.justificacionInstructor.create({
+      data: {
+        instructorId: usuario.instructorId,
+        tallerId: dto.tallerId || null,
+        fechaFalta: new Date(dto.fechaFalta),
+        motivo: dto.motivo,
+        comprobanteUrl: comprobanteUrl || null,
+        estatus: 'pendiente',
+      },
+      include: {
+        instructor: { select: { nombre: true, email: true } },
+        taller: { select: { nombreTaller: true } },
+      },
+    });
+
+    this.gateway.emitInstructoresUpdated();
+    return justificacion;
+  }
+
+  async findMisJustificaciones(userId: number) {
+    const usuario = await this.prisma.usuario.findUnique({ where: { id: userId } });
+    if (!usuario || !usuario.instructorId) {
+      return [];
+    }
+
+    return this.prisma.justificacionInstructor.findMany({
+      where: { instructorId: usuario.instructorId },
+      include: {
+        taller: { select: { nombreTaller: true } },
+      },
+      orderBy: { creadoEn: 'desc' },
+    });
+  }
+
+  async findAllJustificaciones() {
+    return this.prisma.justificacionInstructor.findMany({
+      include: {
+        instructor: { select: { id: true, nombre: true, email: true, telefono: true } },
+        taller: { select: { id: true, nombreTaller: true } },
+      },
+      orderBy: { creadoEn: 'desc' },
+    });
+  }
+
+  async revisarJustificacion(id: number, dto: ReviewJustificacionDto) {
+    const justificacion = await this.prisma.justificacionInstructor.findUnique({ where: { id } });
+    if (!justificacion) throw new NotFoundException('Justificante no encontrado');
+
+    const updated = await this.prisma.justificacionInstructor.update({
+      where: { id },
+      data: {
+        estatus: dto.estatus,
+        observacionesAdmin: dto.observacionesAdmin || null,
+      },
+      include: {
+        instructor: { select: { id: true, nombre: true, email: true } },
+        taller: { select: { id: true, nombreTaller: true } },
+      },
+    });
+
+    this.gateway.emitInstructoresUpdated();
+    return updated;
   }
 }

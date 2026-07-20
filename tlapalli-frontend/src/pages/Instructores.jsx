@@ -34,13 +34,27 @@ function Instructores() {
   const [sortDir, setSortDir] = useState('asc');
   const [activeDoc, setActiveDoc] = useState(null);
 
+  // Justificaciones state
+  const [activeTab, setActiveTab] = useState('instructores'); // 'instructores' | 'justificaciones'
+  const [justificaciones, setJustificaciones] = useState([]);
+  const [loadingJustificaciones, setLoadingJustificaciones] = useState(false);
+  const [revisarModalOpen, setRevisarModalOpen] = useState(false);
+  const [selectedJustificacion, setSelectedJustificacion] = useState(null);
+  const [nuevoEstatus, setNuevoEstatus] = useState('aprobada');
+  const [observacionesAdmin, setObservacionesAdmin] = useState('');
+  const [revisando, setRevisando] = useState(false);
+
   useEffect(() => {
     fetchInstructores();
     fetchTalleres();
+    fetchJustificaciones();
   }, []);
 
   // Refrescar en tiempo real
-  useSocket('instructores:updated', fetchInstructores);
+  useSocket('instructores:updated', () => {
+    fetchInstructores();
+    fetchJustificaciones();
+  });
   useSocket('talleres:updated', fetchTalleres);
 
   useEffect(() => {
@@ -72,6 +86,46 @@ function Instructores() {
       setTalleres(data);
     } catch (err) {
       console.error('Error al cargar talleres', err);
+    }
+  };
+
+  const fetchJustificaciones = async () => {
+    try {
+      setLoadingJustificaciones(true);
+      const { data } = await api.get('/instructores/justificaciones/all');
+      setJustificaciones(data);
+    } catch (err) {
+      console.error('Error al cargar justificantes', err);
+    } finally {
+      setLoadingJustificaciones(false);
+    }
+  };
+
+  const handleAbrirRevisar = (justificacion, estatusDeseado = 'aprobada') => {
+    setSelectedJustificacion(justificacion);
+    setNuevoEstatus(estatusDeseado);
+    setObservacionesAdmin(justificacion.observacionesAdmin || '');
+    setRevisarModalOpen(true);
+  };
+
+  const handleRevisarSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedJustificacion) return;
+    setRevisando(true);
+    try {
+      await api.patch(`/instructores/justificaciones/${selectedJustificacion.id}/revisar`, {
+        estatus: nuevoEstatus,
+        observacionesAdmin: observacionesAdmin.trim() || undefined,
+      });
+      showToast('Estatus actualizado', `Justificante marcado como ${nuevoEstatus}.`, 'success');
+      setRevisarModalOpen(false);
+      setSelectedJustificacion(null);
+      fetchJustificaciones();
+    } catch (err) {
+      console.error('Error al revisar justificante', err);
+      showToast('Error', err.response?.data?.message || 'No se pudo actualizar el justificante', 'error');
+    } finally {
+      setRevisando(false);
     }
   };
 
@@ -270,8 +324,32 @@ function Instructores() {
             Gestión de Instructores
           </h1>
           <p className="mt-1 text-base font-semibold text-white/75 drop-shadow-[0_2px_5px_rgba(0,0,0,0.55)]">
-            Administra el cuerpo docente
+            Administra el cuerpo docente y justificantes de asistencia
           </p>
+        </div>
+
+        <div className="flex bg-slate-900/90 border border-white/15 rounded-2xl p-1 shrink-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab('instructores')}
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer ${
+              activeTab === 'instructores' ? 'bg-pink-600 text-white shadow-lg' : 'text-white/60 hover:text-white'
+            }`}
+          >
+            Docentes ({instructores.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('justificaciones')}
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
+              activeTab === 'justificaciones' ? 'bg-pink-600 text-white shadow-lg' : 'text-white/60 hover:text-white'
+            }`}
+          >
+            Justificantes
+            {justificaciones.filter(j => j.estatus === 'pendiente').length > 0 && (
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" title="Hay justificantes pendientes" />
+            )}
+          </button>
         </div>
       </div>
 
@@ -283,165 +361,301 @@ function Instructores() {
         <StatCard icon={Ban} label="Inactivos" value={instructores.filter(i => i.estado === 'Inactivo').length} color="rose" />
       </div>
 
-      {/* Barra de Controles Unificada en Glassmorphic */}
-      <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 ring-1 ring-white/5 mt-2">
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por nombre, teléfono o taller..."
-          onClear={() => setCurrentPage(1)}
-        />
-
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-          {/* Filtro por Estado */}
-          <div className="relative" ref={dropdownRef}>
-            <FilterDropdown
-              icon={<Filter size={16} />}
-              value={estadoFilter}
-              options={[
-                { value: 'todos', label: 'Todos los Estados' },
-                { value: 'Activo', label: 'Activos' },
-                { value: 'Pendiente', label: 'Pendientes' },
-                { value: 'Inactivo', label: 'Inactivos' },
-              ]}
-              isOpen={openDropdown}
-              onToggle={() => setOpenDropdown(!openDropdown)}
-              onChange={(value) => { setEstadoFilter(value); setOpenDropdown(false); setCurrentPage(1); }}
-              className="sm:w-48"
+      {activeTab === 'instructores' ? (
+        <>
+          {/* Barra de Controles Unificada en Glassmorphic */}
+          <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/20 bg-slate-950/45 p-5 shadow-2xl shadow-black/25 ring-1 ring-white/5 mt-2">
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Buscar por nombre, teléfono o taller..."
+              onClear={() => setCurrentPage(1)}
             />
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+              {/* Filtro por Estado */}
+              <div className="relative" ref={dropdownRef}>
+                <FilterDropdown
+                  icon={<Filter size={16} />}
+                  value={estadoFilter}
+                  options={[
+                    { value: 'todos', label: 'Todos los Estados' },
+                    { value: 'Activo', label: 'Activos' },
+                    { value: 'Pendiente', label: 'Pendientes' },
+                    { value: 'Inactivo', label: 'Inactivos' },
+                  ]}
+                  isOpen={openDropdown}
+                  onToggle={() => setOpenDropdown(!openDropdown)}
+                  onChange={(value) => { setEstadoFilter(value); setOpenDropdown(false); setCurrentPage(1); }}
+                  className="sm:w-48"
+                />
+              </div>
+
+              {/* Botón Nuevo Instructor */}
+              <button 
+                onClick={handleNew} 
+                className="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white font-black uppercase tracking-wider text-xs px-6 py-3.5 rounded-2xl transition flex items-center justify-center gap-2 cursor-pointer shrink-0 ring-1 ring-pink-300/20"
+              >
+                <Plus size={16} />
+                <span className="whitespace-nowrap">Nuevo Instructor</span>
+              </button>
+            </div>
           </div>
 
-          {/* Botón Nuevo Instructor */}
-          <button 
-            onClick={handleNew} 
-            className="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white font-black uppercase tracking-wider text-xs px-6 py-3.5 rounded-2xl transition flex items-center justify-center gap-2 cursor-pointer shrink-0 ring-1 ring-pink-300/20"
-          >
-            <Plus size={16} />
-            <span className="whitespace-nowrap">Nuevo Instructor</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="responsive-table-container relative z-10 mt-2">
-        <table className="responsive-table">
-          <thead>
-            <tr>
-              <th>Instructor</th>
-              <th className="hidden md:table-cell">Correo</th>
-              <th className="hidden lg:table-cell">Teléfono</th>
-              <th className="hidden sm:table-cell">Taller Asignado</th>
-              <th className="text-center">Estado</th>
-              <th className="text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {loading ? (
-              <tr><td colSpan="6" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando instructores...</td></tr>
-            ) : filtered.length === 0 ? (
-              <tr><td colSpan="6" className="p-20 text-center text-white/20 italic font-medium">No se encontraron registros.</td></tr>
-            ) : (
-              paginatedInstructores.map((i, index) => {
-                const badge = getEstadoBadge(i.estado);
-                return (
-                  <tr key={i.id} className="hover:bg-slate-800/80 transition group">
-                    <td data-label="Instructor">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 shrink-0 font-bold">
-                          {i.nombre ? i.nombre[0].toUpperCase() : '?'}
-                        </div>
-                        <div>
-                          <div className="font-bold text-white/90 drop-shadow-sm">{i.nombre}</div>
-                          <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">ID: #{startIndex + index + 1}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td data-label="Correo" className="hidden md:table-cell">
-                      <div className="flex items-center gap-2 text-sm text-white/80 font-medium">
-                        <Mail size={14} className="text-pink-500/40 shrink-0" />
-                        {i.email || <span className="opacity-20 italic">Sin correo</span>}
-                      </div>
-                    </td>
-                    <td data-label="Teléfono" className="text-sm text-white/80 font-medium hidden lg:table-cell">{i.telefono || <span className="opacity-20">N/A</span>}</td>
-                    <td data-label="Taller" className="hidden sm:table-cell">
-                      <div className="flex items-center gap-2 text-sm text-white/80 font-medium">
-                        {i.taller?.nombreTaller ? (
-                          <>
-                            <Palette size={14} className="text-pink-500/50 shrink-0" />
-                            {i.taller.nombreTaller}
-                          </>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                            Disponible / Sin Taller
+          <div className="responsive-table-container relative z-10 mt-2">
+            <table className="responsive-table">
+              <thead>
+                <tr>
+                  <th onClick={() => handleSort('nombre')} className="cursor-pointer hover:text-white transition">
+                    Instructor
+                  </th>
+                  <th onClick={() => handleSort('taller')} className="cursor-pointer hover:text-white transition">
+                    Taller Asignado
+                  </th>
+                  <th>Contacto</th>
+                  <th className="text-center">Documentos</th>
+                  <th className="text-center" onClick={() => handleSort('estado')}>
+                    Estado
+                  </th>
+                  <th className="text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {loading ? (
+                  <tr><td colSpan="6" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando instructores...</td></tr>
+                ) : filtered.length === 0 ? (
+                  <tr><td colSpan="6" className="p-20 text-center text-white/20 italic font-medium">No se encontraron instructores.</td></tr>
+                ) : (
+                  paginatedInstructores.map((i) => {
+                    const statusConfig = getEstadoBadge(i.estado);
+                    return (
+                      <tr key={i.id} className="hover:bg-slate-800/80 transition group">
+                        <td data-label="Instructor">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 font-bold overflow-hidden border border-pink-500/20">
+                              {i.nombre[0].toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="font-bold text-white/90 drop-shadow-sm">{i.nombre}</div>
+                              {i.email && <div className="text-xs text-white/40">{i.email}</div>}
+                            </div>
+                          </div>
+                        </td>
+                        <td data-label="Taller">
+                          {i.taller ? (
+                            <span className="text-sm font-semibold text-white/80">{i.taller.nombreTaller}</span>
+                          ) : (
+                            <span className="text-xs text-white/30 italic">Sin taller asignado</span>
+                          )}
+                        </td>
+                        <td data-label="Contacto" className="text-xs text-white/70">
+                          {i.telefono ? i.telefono : <span className="text-white/30 italic">No registrado</span>}
+                        </td>
+                        <td data-label="Documentos" className="text-center">
+                          <div className="flex justify-center gap-2">
+                            {i.curriculumUrl ? (
+                              <button 
+                                onClick={() => setActiveDoc({
+                                  url: i.curriculumUrl,
+                                  title: `CV - ${i.nombre}`
+                                })}
+                                className="px-2.5 py-1 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/20 text-[10px] font-black uppercase tracking-tighter transition" 
+                                title="Ver Curriculum Vitae"
+                              >
+                                CV ✓
+                              </button>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-lg bg-slate-800/80 text-white/20 text-[10px] font-bold uppercase border border-white/5">
+                                CV -
+                              </span>
+                            )}
+                            {i.temarioUrl ? (
+                              <button 
+                                onClick={() => setActiveDoc({
+                                  url: i.temarioUrl,
+                                  title: `Temario - ${i.nombre}`
+                                })}
+                                className="px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 text-[10px] font-black uppercase tracking-tighter transition" 
+                                title="Ver Temario / Syllabus"
+                              >
+                                Temario ✓
+                              </button>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-lg bg-slate-800/80 text-white/20 text-[10px] font-bold uppercase border border-white/5">
+                                Temario -
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td data-label="Estado" className="text-center">
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${statusConfig.classes}`}>
+                            {statusConfig.icon}
+                            {statusConfig.label}
                           </span>
-                        )}
-                      </div>
-                    </td>
-                    <td data-label="Estado" className="text-center">
-                      <StatusBadge status={i.estado.toLowerCase()} label={i.estado} />
-                    </td>
-                    <td data-label="Acciones" className="text-right">
-                      <div className="flex justify-end gap-1 sm:gap-2">
-                        <button 
-                          onClick={() => handleViewDetail(i)} 
-                          className="p-2.5 bg-slate-800/80 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-purple-500/30 text-white/60" 
-                          title="Ver detalle"
-                        >
-                          <Eye size={16} />
-                        </button>
-                        {i.email && i.estado !== 'Inactivo' && (
-                          <button 
-                            onClick={() => handleReenviarActivacion(i.id)} 
-                            disabled={sendingEmail === i.id}
-                            className="p-2.5 bg-slate-800/80 hover:bg-blue-500/20 hover:text-blue-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-blue-500/30 text-white/60 disabled:opacity-30" 
-                            title={i.estado === 'Activo' ? 'Reenviar enlace de restablecimiento' : 'Reenviar activación'}
-                          >
-                            {sendingEmail === i.id ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
-                          </button>
-                        )}
-                        <button 
-                          onClick={() => handleEdit(i)} 
-                          className="p-2.5 bg-slate-800/80 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-cyan-500/30 text-white/60" 
-                          title="Editar"
-                        >
-                          <Edit3 size={16} />
-                        </button>
-                        <button 
-                          onClick={() => handleToggleActivo(i.id, i.estado)} 
-                          className={`p-2.5 bg-slate-800/80 rounded-xl transition-all duration-300 border border-white/15 text-white/60 ${
-                            i.estado === 'Inactivo' 
-                              ? 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30' 
-                              : 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30'
-                          }`}
-                          title={i.estado === 'Inactivo' ? 'Reactivar' : 'Desactivar'}
-                        >
-                          <Power size={16} />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(i.id)} 
-                          className="p-2.5 bg-slate-800/80 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-rose-500/30 text-white/60" 
-                          title="Eliminar"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                        </td>
+                        <td data-label="Acciones" className="text-right">
+                          <div className="flex justify-end gap-1.5">
+                            <button 
+                              onClick={() => handleViewDetail(i)} 
+                              className="p-2.5 bg-slate-800/80 hover:bg-purple-500/20 hover:text-purple-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-purple-500/30 text-white/60" 
+                              title="Ver Ficha y Documentos"
+                            >
+                              <Eye size={16} />
+                            </button>
+                            {i.email && i.estado !== 'Inactivo' && (
+                              <button 
+                                onClick={() => handleReenviarActivacion(i.id)} 
+                                disabled={sendingEmail === i.id}
+                                className="p-2.5 bg-slate-800/80 hover:bg-blue-500/20 hover:text-blue-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-blue-500/30 text-white/60 disabled:opacity-30" 
+                                title={i.estado === 'Activo' ? 'Reenviar enlace de restablecimiento' : 'Reenviar activación'}
+                              >
+                                {sendingEmail === i.id ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
+                              </button>
+                            )}
+                            <button 
+                              onClick={() => handleEdit(i)} 
+                              className="p-2.5 bg-slate-800/80 hover:bg-cyan-500/20 hover:text-cyan-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-cyan-500/30 text-white/60" 
+                              title="Editar"
+                            >
+                              <Edit3 size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleToggleActivo(i.id, i.estado)} 
+                              className={`p-2.5 bg-slate-800/80 rounded-xl transition-all duration-300 border border-white/15 text-white/60 ${
+                                i.estado === 'Inactivo' 
+                                  ? 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30' 
+                                  : 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30'
+                              }`}
+                              title={i.estado === 'Inactivo' ? 'Reactivar' : 'Desactivar'}
+                            >
+                              <Power size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(i.id)} 
+                              className="p-2.5 bg-slate-800/80 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl transition-all duration-300 border border-white/15 hover:border-rose-500/30 text-white/60" 
+                              title="Eliminar"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        startIndex={startIndex}
-        itemsPerPage={instructoresPerPage}
-        filteredLength={filtered.length}
-        onPageChange={setCurrentPage}
-      />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            startIndex={startIndex}
+            itemsPerPage={instructoresPerPage}
+            filteredLength={filtered.length}
+            onPageChange={setCurrentPage}
+          />
+        </>
+      ) : (
+        /* Pestaña: Justificantes de Faltas (Revisión Administrador) */
+        <div className="responsive-table-container relative z-10 mt-2">
+          <table className="responsive-table">
+            <thead>
+              <tr>
+                <th>Instructor / Maestro</th>
+                <th>Taller Afectado</th>
+                <th>Fecha de Falta</th>
+                <th>Motivo</th>
+                <th className="text-center">Comprobante</th>
+                <th className="text-center">Estatus</th>
+                <th className="text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {loadingJustificaciones ? (
+                <tr><td colSpan="7" className="p-20 text-center animate-pulse text-white/20 font-bold">Cargando justificantes...</td></tr>
+              ) : justificaciones.length === 0 ? (
+                <tr><td colSpan="7" className="p-20 text-center text-white/20 italic font-medium">No hay justificantes registrados.</td></tr>
+              ) : (
+                justificaciones.map((j) => {
+                  const isPendiente = j.estatus === 'pendiente';
+                  const isAprobada = j.estatus === 'aprobada';
+                  return (
+                    <tr key={j.id} className="hover:bg-slate-800/80 transition group">
+                      <td data-label="Instructor">
+                        <div>
+                          <div className="font-bold text-white/90">{j.instructor?.nombre || 'Docente'}</div>
+                          <div className="text-xs text-white/40">{j.instructor?.email || '-'}</div>
+                        </div>
+                      </td>
+                      <td data-label="Taller">
+                        <span className="text-xs font-semibold text-white/80">
+                          {j.taller?.nombreTaller || 'General / Varios'}
+                        </span>
+                      </td>
+                      <td data-label="Fecha" className="text-xs text-white/90 font-mono">
+                        {new Date(j.fechaFalta).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td data-label="Motivo" className="text-xs text-white/70 max-w-[200px]">
+                        <p className="truncate" title={j.motivo}>{j.motivo}</p>
+                      </td>
+                      <td data-label="Comprobante" className="text-center">
+                        {j.comprobanteUrl ? (
+                          <button
+                            onClick={() => setActiveDoc({
+                              url: j.comprobanteUrl,
+                              title: `Evidencia - ${j.instructor?.nombre || 'Docente'}`
+                            })}
+                            className="px-2.5 py-1 rounded-lg bg-pink-500/15 border border-pink-500/30 text-pink-300 text-[10px] font-black uppercase hover:bg-pink-500/25 transition cursor-pointer"
+                          >
+                            Ver Adjunto 📎
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-white/30 italic">Sin adjunto</span>
+                        )}
+                      </td>
+                      <td data-label="Estatus" className="text-center">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
+                          isAprobada
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : j.estatus === 'rechazada'
+                            ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                            : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                        }`}>
+                          {j.estatus}
+                        </span>
+                        {j.observacionesAdmin && (
+                          <p className="text-[9px] text-white/40 italic mt-0.5 truncate max-w-[120px]" title={j.observacionesAdmin}>
+                            Obs: {j.observacionesAdmin}
+                          </p>
+                        )}
+                      </td>
+                      <td data-label="Acciones" className="text-right">
+                        <div className="flex justify-end gap-1.5">
+                          <button
+                            onClick={() => handleAbrirRevisar(j, 'aprobada')}
+                            className="px-3 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 rounded-xl font-bold text-[11px] border border-emerald-500/30 transition cursor-pointer"
+                            title="Aprobar Justificante"
+                          >
+                            Aprobar
+                          </button>
+                          <button
+                            onClick={() => handleAbrirRevisar(j, 'rechazada')}
+                            className="px-3 py-1.5 bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 rounded-xl font-bold text-[11px] border border-rose-500/30 transition cursor-pointer"
+                            title="Rechazar Justificante"
+                          >
+                            Rechazar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* ConfirmModal */}
       <ConfirmModal
@@ -600,6 +814,87 @@ function Instructores() {
              title={editInstructor ? 'Editar Instructor' : 'Nuevo Instructor'}
              maxWidth="max-w-3xl">
         <InstructorForm instructor={editInstructor} talleres={talleres} onClose={() => setModalOpen(false)} onSave={handleSave} />
+      </Modal>
+
+      {/* Modal para Revisar Justificante (Admin) */}
+      <Modal
+        isOpen={revisarModalOpen}
+        onClose={() => { setRevisarModalOpen(false); setSelectedJustificacion(null); }}
+        title={`Evaluar Justificante - ${selectedJustificacion?.instructor?.nombre || 'Docente'}`}
+        maxWidth="max-w-md"
+      >
+        {selectedJustificacion && (
+          <form onSubmit={handleRevisarSubmit} className="space-y-4 text-left">
+            <div className="bg-slate-800/80 border border-white/15 rounded-xl p-3 space-y-1 text-xs">
+              <p className="text-white/50 font-bold uppercase text-[10px]">Fecha de Falta</p>
+              <p className="text-white font-semibold">
+                {new Date(selectedJustificacion.fechaFalta).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+              <p className="text-white/50 font-bold uppercase text-[10px] pt-1">Motivo</p>
+              <p className="text-white/80">{selectedJustificacion.motivo}</p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase text-white/50 tracking-wider">Acción / Dictamen *</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setNuevoEstatus('aprobada')}
+                  className={`py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+                    nuevoEstatus === 'aprobada'
+                      ? 'bg-emerald-600 text-white shadow-lg border border-emerald-400'
+                      : 'bg-slate-800 text-white/50 border border-white/10 hover:text-white'
+                  }`}
+                >
+                  ✓ Aprobar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNuevoEstatus('rechazada')}
+                  className={`py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+                    nuevoEstatus === 'rechazada'
+                      ? 'bg-rose-600 text-white shadow-lg border border-rose-400'
+                      : 'bg-slate-800 text-white/50 border border-white/10 hover:text-white'
+                  }`}
+                >
+                  ✕ Rechazar
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase text-white/50 tracking-wider">
+                Observaciones del Administrador (Opcional)
+              </label>
+              <textarea
+                value={observacionesAdmin}
+                onChange={(e) => setObservacionesAdmin(e.target.value)}
+                rows="3"
+                placeholder="Notas o justificación de la decisión..."
+                className="bg-slate-800/80 border border-white/15 rounded-xl p-3 text-xs text-white placeholder-white/25 w-full outline-none focus:border-pink-500/50 transition resize-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-white/15">
+              <button
+                type="button"
+                onClick={() => { setRevisarModalOpen(false); setSelectedJustificacion(null); }}
+                className="px-4 py-2 bg-slate-800/80 hover:bg-slate-800/90 text-white/70 rounded-xl font-bold transition text-xs"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={revisando}
+                className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-white transition shadow-lg ${
+                  nuevoEstatus === 'aprobada' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'
+                }`}
+              >
+                {revisando ? 'Guardando...' : 'Confirmar Dictamen'}
+              </button>
+            </div>
+          </form>
+        )}
       </Modal>
 
       <DocumentViewerModal

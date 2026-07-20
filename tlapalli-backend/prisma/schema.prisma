@@ -86,6 +86,7 @@ model Taller {
   activo            Boolean       @default(true)
   inscripciones     Inscripcion[]
   instructores      Instructor[]
+  justificaciones   JustificacionInstructor[]
 }
 
 model Instructor {
@@ -101,6 +102,7 @@ model Instructor {
   temarioUrl    String?  @map("temario_url")
   curriculumUrl String?  @map("curriculum_url")
   grupos        Grupo[]
+  justificaciones JustificacionInstructor[]
 }
 
 model Inscripcion {
@@ -234,3 +236,23 @@ model AlumnoRefreshToken {
 
   @@index([alumnoId])
 }
+
+// === JUSTIFICACIONES DE INSTRUCTORES ===
+model JustificacionInstructor {
+  id                 Int         @id @default(autoincrement())
+  instructorId       Int         @map("instructor_id")
+  tallerId           Int?        @map("taller_id")
+  fechaFalta         DateTime    @map("fecha_falta")
+  motivo             String
+  comprobanteUrl     String?     @map("comprobante_url")
+  estatus            String      @default("pendiente") // pendiente, aprobada, rechazada
+  observacionesAdmin String?     @map("observaciones_admin")
+  creadoEn           DateTime    @default(now()) @map("creado_en")
+  actualizadoEn      DateTime    @updatedAt @map("actualizado_en")
+
+  instructor         Instructor  @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  taller             Taller?     @relation(fields: [tallerId], references: [id])
+
+  @@index([instructorId])
+}
+

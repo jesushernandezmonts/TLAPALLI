@@ -11,6 +11,9 @@ import { Roles } from '../auth/strategies/roles.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
+import { CreateJustificacionDto } from './dto/create-justificacion.dto';
+import { ReviewJustificacionDto } from './dto/review-justificacion.dto';
+
 @Controller('instructores')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class InstructoresController {
@@ -166,5 +169,47 @@ export class InstructoresController {
   @Roles('admin')
   removeTemario(@Param('id', ParseIntPipe) id: number) {
     return this.instructoresService.removeTemario(id);
+  }
+
+  // ========== ENDPOINTS DE JUSTIFICANTES ==========
+
+  @Post('me/justificaciones')
+  @Roles('admin', 'profesor')
+  @UseInterceptors(FileInterceptor('comprobante', {
+    storage: memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  }))
+  async crearJustificacion(
+    @Request() req,
+    @Body() dto: CreateJustificacionDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    let comprobanteUrl: string | undefined;
+    if (file) {
+      const uploadResult = await this.cloudinaryService.uploadFile(file, 'instructores/justificantes');
+      comprobanteUrl = uploadResult.secureUrl;
+    }
+    return this.instructoresService.crearJustificacion(req.user.id, dto, comprobanteUrl);
+  }
+
+  @Get('me/justificaciones')
+  @Roles('admin', 'profesor')
+  getMisJustificaciones(@Request() req) {
+    return this.instructoresService.findMisJustificaciones(req.user.id);
+  }
+
+  @Get('justificaciones/all')
+  @Roles('admin')
+  getAllJustificaciones() {
+    return this.instructoresService.findAllJustificaciones();
+  }
+
+  @Patch('justificaciones/:id/revisar')
+  @Roles('admin')
+  revisarJustificacion(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ReviewJustificacionDto,
+  ) {
+    return this.instructoresService.revisarJustificacion(id, dto);
   }
 }
