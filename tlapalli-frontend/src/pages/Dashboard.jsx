@@ -20,6 +20,7 @@ function Dashboard() {
   const [formDescripcion, setFormDescripcion] = useState('');
   const [formTipo, setFormTipo] = useState('interna');
   const [formUbicacion, setFormUbicacion] = useState('galeria');
+  const [formUbicacionOtro, setFormUbicacionOtro] = useState('');
   const [editingActividadId, setEditingActividadId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
@@ -133,6 +134,7 @@ function Dashboard() {
     setFormDescripcion('');
     setFormTipo('interna');
     setFormUbicacion('galeria');
+    setFormUbicacionOtro('');
     setEditingActividadId(null);
   };
 
@@ -146,7 +148,14 @@ function Dashboard() {
     setFormHora(`${hours}:${minutes}`);
     setFormDescripcion(act.descripcion || '');
     setFormTipo(act.tipo);
-    setFormUbicacion(act.ubicacion);
+    const isDefaultUbicacion = ['galeria', 'audioteca', 'auditorio'].includes(act.ubicacion.toLowerCase());
+    if (isDefaultUbicacion) {
+      setFormUbicacion(act.ubicacion.toLowerCase());
+      setFormUbicacionOtro('');
+    } else {
+      setFormUbicacion('otro');
+      setFormUbicacionOtro(act.ubicacion);
+    }
     setSaveError(null);
     setSaveSuccess(null);
   };
@@ -175,7 +184,8 @@ function Dashboard() {
     const missing = [];
     if (!formTitulo.trim()) missing.push('Título');
     if (!formHora) missing.push('Hora');
-    if (!formUbicacion) missing.push('Ubicación');
+    const actualUbicacion = formUbicacion === 'otro' ? formUbicacionOtro.trim() : formUbicacion;
+    if (!actualUbicacion) missing.push('Ubicación');
     if (!formTipo) missing.push('Tipo');
     if (!selectedDay) missing.push('Día');
     
@@ -200,7 +210,7 @@ function Dashboard() {
       descripcion: formDescripcion,
       fecha: actDate.toISOString(),
       tipo: formTipo,
-      ubicacion: formUbicacion,
+      ubicacion: actualUbicacion,
     };
 
     try {
@@ -411,17 +421,17 @@ function Dashboard() {
                     <div className="absolute bottom-1 md:bottom-2 flex gap-1 justify-center w-full items-center">
                       {dayActividades.length === 1 ? (
                         <span 
-                          className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full ring-1 ring-white/20 ${locationColors[dayActividades[0].ubicacion] || 'bg-white/40'}`}
+                          className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full ring-1 ring-white/20 ${locationColors[dayActividades[0].ubicacion.toLowerCase()] || 'bg-emerald-400'}`}
                         />
                       ) : dayActividades.length <= 3 ? (
                         dayActividades.map((act, idx) => (
                           <span 
                             key={act.id || idx} 
-                            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ring-1 ring-white/10 ${locationColors[act.ubicacion] || 'bg-white/40'}`}
+                            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ring-1 ring-white/10 ${locationColors[act.ubicacion.toLowerCase()] || 'bg-emerald-400'}`}
                           />
                         ))
                       ) : (
-                        <span className={`text-[7px] md:text-[10px] font-black px-1.5 py-0.5 rounded-full ring-1 ring-white/20 ${locationColors[dayActividades[0].ubicacion] || 'bg-white/40'} text-black/90 leading-none`}>
+                        <span className={`text-[7px] md:text-[10px] font-black px-1.5 py-0.5 rounded-full ring-1 ring-white/20 ${locationColors[dayActividades[0].ubicacion.toLowerCase()] || 'bg-emerald-400'} text-black/90 leading-none`}>
                           +{dayActividades.length}
                         </span>
                       )}
@@ -460,11 +470,13 @@ function Dashboard() {
               if (panelActs.length > 0) {
                 return panelActs.map((act) => {
                   const actTime = new Date(act.fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
-                  const borderCol = act.ubicacion === 'galeria' 
+                  const borderCol = act.ubicacion.toLowerCase() === 'galeria' 
                     ? 'border-l-rose-500/60' 
-                    : act.ubicacion === 'audioteca' 
+                    : act.ubicacion.toLowerCase() === 'audioteca' 
                     ? 'border-l-sky-400/60' 
-                    : 'border-l-amber-400/60';
+                    : act.ubicacion.toLowerCase() === 'auditorio'
+                    ? 'border-l-amber-400/60'
+                    : 'border-l-emerald-400/60';
                   const typeLabel = act.tipo === 'interna' ? 'Interna' : 'Externa';
                   const typeBadge = act.tipo === 'interna'
                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
@@ -536,11 +548,13 @@ function Dashboard() {
               <div className="space-y-3">
                 {modalActividades.map((act) => {
                   const actTime = new Date(act.fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
-                  const borderCol = act.ubicacion === 'galeria' 
+                  const borderCol = act.ubicacion.toLowerCase() === 'galeria' 
                     ? 'border-rose-500/50' 
-                    : act.ubicacion === 'audioteca' 
+                    : act.ubicacion.toLowerCase() === 'audioteca' 
                     ? 'border-sky-400/50' 
-                    : 'border-amber-400/50';
+                    : act.ubicacion.toLowerCase() === 'auditorio'
+                    ? 'border-amber-400/50'
+                    : 'border-emerald-500/50';
 
                   const typeCol = act.tipo === 'interna'
                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
@@ -636,6 +650,7 @@ function Dashboard() {
                   { value: 'galeria', label: '🎨 Galería' },
                   { value: 'audioteca', label: '🎧 Audioteca' },
                   { value: 'auditorio', label: '🎭 Auditorio' },
+                  { value: 'otro', label: '➕ Otro...' },
                 ]}
                 isOpen={openFormDropdown === 'ubicacion'}
                 onToggle={() => setOpenFormDropdown(openFormDropdown === 'ubicacion' ? null : 'ubicacion')}
@@ -659,6 +674,20 @@ function Dashboard() {
                   setOpenFormDropdown(null);
                 }}
               />
+
+              {formUbicacion === 'otro' && (
+                <div className="sm:col-span-2">
+                  <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-1 block">Especificar Ubicación *</label>
+                  <input 
+                    type="text" 
+                    value={formUbicacionOtro} 
+                    onChange={(e) => setFormUbicacionOtro(e.target.value)} 
+                    placeholder="Ej. Patio Central"
+                    required
+                    className="w-full bg-slate-900/95 border border-white/15 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 transition-all placeholder-white/30"
+                  />
+                </div>
+              )}
             </div>
 
             <div>

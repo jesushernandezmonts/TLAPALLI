@@ -16,6 +16,5 @@ export class CreateActividadDto {
   tipo: string;
 
   @IsString()
-  @IsIn(['galeria', 'audioteca', 'auditorio'])
   ubicacion: string;
 }
