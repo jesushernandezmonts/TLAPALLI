@@ -1,4 +1,5 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateInscripcionDto {
   @IsNumber()
@@ -17,5 +18,6 @@ export class CreateInscripcionDto {
 
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
   anio?: number;
 }

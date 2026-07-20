@@ -256,7 +256,7 @@ function Alumnos() {
       inscripciones.some(i => i.alumnoId === a.id && i.periodo === periodoFilter);
     const matchesAnio =
       anioFilter === 'todos' ||
-      inscripciones.some(i => i.alumnoId === a.id && String(i.anio) === anioFilter);
+      inscripciones.some(i => i.alumnoId === a.id && Number(i.anio ?? new Date().getFullYear()) === Number(anioFilter));
     return matchesSearch && matchesStatus && matchesTaller && matchesPeriodo && matchesAnio;
   });
   const totalPages = Math.max(1, Math.ceil(filtered.length / alumnosPerPage));
