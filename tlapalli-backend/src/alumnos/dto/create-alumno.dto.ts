@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsDateString, Length, IsBoolean, IsEmail } from 'class-validator';
+import { IsString, IsOptional, IsDateString, Length, IsBoolean, IsEmail, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateAlumnoDto {
   @IsString()
@@ -39,4 +40,14 @@ export class CreateAlumnoDto {
   @IsOptional()
   @IsEmail({}, { message: 'El email no tiene un formato válido' })
   email?: string;
+
+  @IsOptional()
+  @IsString()
+  periodo?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  anio?: number;
 }
+

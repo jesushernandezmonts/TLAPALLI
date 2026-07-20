@@ -226,6 +226,8 @@ function AlumnoForm({ alumno, onClose, onSave }) {
         email: (form.email || '').trim() || undefined,
         padecimientos: form.padecimientos.trim() || null,
       };
+      delete cleanedForm.periodo;
+      delete cleanedForm.anio;
       if (!alumno) {
         if (!cleanedForm.curp) delete cleanedForm.curp;
         if (!cleanedForm.fechaNacimiento) delete cleanedForm.fechaNacimiento;

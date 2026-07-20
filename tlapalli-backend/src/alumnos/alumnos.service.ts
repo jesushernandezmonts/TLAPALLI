@@ -127,7 +127,7 @@ export class AlumnosService {
   // ========== MÉTODOS ADMIN/INSTRUCTOR ==========
 
   async create(dto: CreateAlumnoDto) {
-    const { fechaNacimiento, email, ...rest } = dto;
+    const { fechaNacimiento, email, periodo, anio, ...rest } = dto;
     const fecha = fechaNacimiento ? new Date(fechaNacimiento) : undefined;
     let savedAlumno;
     try {
@@ -192,7 +192,7 @@ export class AlumnosService {
 
   async update(id: number, dto: UpdateAlumnoDto) {
     await this.findOne(id);
-    const { fechaNacimiento, ...rest } = dto;
+    const { fechaNacimiento, periodo, anio, ...rest } = dto;
     const data: any = { ...rest };
     if (fechaNacimiento !== undefined) {
       data.fechaNacimiento = fechaNacimiento ? new Date(fechaNacimiento) : null;
