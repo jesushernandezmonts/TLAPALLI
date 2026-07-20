@@ -253,7 +253,7 @@ function Alumnos() {
       inscripciones.some(i => i.alumnoId === a.id && String(i.tallerId) === tallerFilter);
     const matchesPeriodo =
       periodoFilter === 'todos' ||
-      inscripciones.some(i => i.alumnoId === a.id && i.periodo === periodoFilter);
+      inscripciones.some(i => i.alumnoId === a.id && (i.periodo || 'ordinario') === periodoFilter);
     const matchesAnio =
       anioFilter === 'todos' ||
       inscripciones.some(i => i.alumnoId === a.id && Number(i.anio ?? new Date().getFullYear()) === Number(anioFilter));
