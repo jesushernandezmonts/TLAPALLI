@@ -3,9 +3,11 @@ import { Type } from 'class-transformer';
 
 export class CreateInscripcionDto {
   @IsNumber()
+  @Type(() => Number)
   alumnoId: number;
 
   @IsNumber()
+  @Type(() => Number)
   tallerId: number;
 
   @IsOptional()
