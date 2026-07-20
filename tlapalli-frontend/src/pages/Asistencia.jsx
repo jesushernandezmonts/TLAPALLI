@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ClipboardList, Loader2, AlertCircle, RefreshCw, Users,
@@ -442,7 +442,7 @@ export default function Asistencia() {
                               const isUploading = uploadingMap[ga.id] || false;
 
                               return (
-                                <React.Fragment key={ga.id}>
+                                <Fragment key={ga.id}>
                                   <tr className={`transition-colors ${
                                     estado === 'asistencia'
                                       ? 'bg-emerald-500/5 hover:bg-emerald-500/10'
@@ -607,7 +607,7 @@ export default function Asistencia() {
                                       </td>
                                     </tr>
                                   )}
-                                </React.Fragment>
+                                </Fragment>
                               );
                             })}
                           </tbody>
