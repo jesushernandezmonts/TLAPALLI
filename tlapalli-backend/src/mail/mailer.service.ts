@@ -1,58 +1,82 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as nodemailer from 'nodemailer';
 import { MailService } from '@sendgrid/mail';
 import { AppLogger } from '../common/logger/logger.service';
 
 @Injectable()
 export class MailerService {
-  private sgMail: MailService;
-
+  private transporter: nodemailer.Transporter | null = null;
+  private sgMail: MailService | null = null;
   private logger: AppLogger;
 
   constructor(private configService: ConfigService) {
     this.logger = new AppLogger('MailerService');
-    const apiKey = this.configService.get('SENDGRID_API_KEY') || '';
 
-    if (!apiKey || apiKey.includes('tu-api-key')) {
-      this.logger.email('MODO DESARROLLO: SendGrid no configurado, usando logger');
-      return;
+    const smtpUser = this.configService.get<string>('SMTP_USER');
+    const smtpPass = this.configService.get<string>('SMTP_PASS');
+    const smtpHost = this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
+    const smtpPort = parseInt(this.configService.get<string>('SMTP_PORT') || '587', 10);
+
+    // 1. Configurar Nodemailer con Gmail SMTP (Prioridad 1 para garantizar entrega a la Bandeja Principal)
+    if (smtpUser && smtpPass && !smtpPass.includes('tu-') && !smtpPass.includes('cambiar-')) {
+      this.transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465, // true para puerto 465, false para 587
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+      });
+      this.logger.log('📧 Servicio de correo inicializado con Gmail SMTP (Bandeja Principal)');
     }
 
-    this.sgMail = new MailService();
-    this.sgMail.setApiKey(apiKey);
+    // 2. Configurar SendGrid como fallback opcional
+    const apiKey = this.configService.get<string>('SENDGRID_API_KEY') || '';
+    if (apiKey && !apiKey.includes('tu-api-key')) {
+      this.sgMail = new MailService();
+      this.sgMail.setApiKey(apiKey);
+    }
   }
 
   async sendMail(to: string, subject: string, html: string) {
-    const from = this.configService.get('SMTP_FROM') || 'jesushernandezmonts@gmail.com';
+    const from = this.configService.get<string>('SMTP_FROM') || 'TLAPALLI <jesushernandezmonts@gmail.com>';
 
-    if (!this.configService.get('SENDGRID_API_KEY') || this.configService.get('SENDGRID_API_KEY')!.includes('tu-api-key')) {
-      this.logger.email('MODO DESARROLLO: ENVÍO DE EMAIL SIMULADO');
-      this.logger.email(`PARA: ${to}`);
-      this.logger.email(`ASUNTO: ${subject}`);
-      const link = html.match(/href="([^"]*)"/)?.[1];
-      if (link) this.logger.info(`🔗 ENLACE: ${link}`);
-      return;
-    }
-
-    try {
-      const msg = {
-        to,
-        from,
-        subject,
-        html,
-      };
-      await this.sgMail.send(msg);
-      this.logger.success(`Email enviado a ${to} via SendGrid`);
-    } catch (error) {
-      this.logger.error(`Error enviando email a ${to} via SendGrid: ${error.message}`, error.stack, 'MailerService');
-      if (error.response) {
-        this.logger.error(`SendGrid error body: ${JSON.stringify(error.response.body)}`, '', 'MailerService');
+    // A. Intentar envío directo con Gmail SMTP (Nodemailer)
+    if (this.transporter) {
+      try {
+        await this.transporter.sendMail({
+          from,
+          to,
+          subject,
+          html,
+        });
+        this.logger.success(`Email enviado exitosamente a ${to} via Gmail SMTP`);
+        return;
+      } catch (error: any) {
+        this.logger.error(`Error enviando email via Gmail SMTP: ${error.message}`, error.stack, 'MailerService');
       }
-      // Log del link como fallback
-      const link = html.match(/href="([^"]*)"/)?.[1];
-      if (link) this.logger.info(`🔗 ENLACE (backup): ${link}`);
-      throw error;
     }
+
+    // B. Fallback a SendGrid
+    if (this.sgMail) {
+      try {
+        const msg = { to, from, subject, html };
+        await this.sgMail.send(msg);
+        this.logger.success(`Email enviado a ${to} via SendGrid (Fallback)`);
+        return;
+      } catch (error: any) {
+        this.logger.error(`Error enviando email via SendGrid: ${error.message}`, error.stack, 'MailerService');
+      }
+    }
+
+    // C. Simulación si no hay transportes activos
+    this.logger.email('MODO DESARROLLO/SIMULACIÓN: Email procesado');
+    this.logger.email(`PARA: ${to}`);
+    this.logger.email(`ASUNTO: ${subject}`);
+    const link = html.match(/href="([^"]*)"/)?.[1];
+    if (link) this.logger.info(`🔗 ENLACE: ${link}`);
   }
 
   async sendResetPasswordEmail(email: string, token: string) {
