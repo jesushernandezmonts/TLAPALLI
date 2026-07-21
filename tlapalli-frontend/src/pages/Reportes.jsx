@@ -5,11 +5,13 @@ import {
   FileText, TrendingUp, Users, BookOpen, Calendar,
   Download, Loader2, AlertCircle, RefreshCw, CheckCircle2, Trash2,
   ChevronLeft, ChevronRight, Search, Filter, X, CalendarDays, CalendarX,
-  Printer
+  Printer, Database
 } from 'lucide-react';
 import api from '../services/api';
 import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
+import { useAuth } from '../context/AuthContext';
+import BackupsModal from '../components/BackupsModal';
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 const getFullUrl = (url) => {
@@ -384,6 +386,10 @@ function MiniCalendar({ value, onChange, onClear }) {
 
 /* ─── componente principal ────────────────────────────────────────────────── */
 export default function Reportes() {
+  const { user } = useAuth();
+  const isAdmin = user?.rol === 'admin';
+  const [showBackupsModal, setShowBackupsModal] = useState(false);
+
   const [data, setData]         = useState(null);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState(null);
@@ -664,13 +670,32 @@ export default function Reportes() {
             Genera y descarga reportes oficiales en PDF
           </p>
         </div>
-        <button
-          onClick={fetchData}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800/90 border border-white/15 text-white/50 hover:text-white text-xs font-bold transition"
-        >
-          <RefreshCw size={14} /> Actualizar datos
-        </button>
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowBackupsModal(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:brightness-110 border border-indigo-400/30 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/25 cursor-pointer"
+            >
+              <Database size={14} /> Respaldos de BD
+            </motion.button>
+          )}
+
+          <button
+            onClick={fetchData}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800/90 border border-white/15 text-white/50 hover:text-white text-xs font-bold transition cursor-pointer"
+          >
+            <RefreshCw size={14} /> Actualizar datos
+          </button>
+        </div>
       </div>
+
+      {/* Modal de Respaldos de Base de Datos para Admin */}
+      <BackupsModal
+        isOpen={showBackupsModal}
+        onClose={() => setShowBackupsModal(false)}
+      />
 
       {/* ── KPI bar ── */}
       {data && (
