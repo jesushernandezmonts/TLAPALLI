@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import * as Sentry from '@sentry/nestjs';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -49,6 +50,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         this.logger.warn(`⚠️ Bad request: ${request.method} ${request.url} - ${message}`);
       } else if (status >= 500) {
         this.logger.error(`❌ ${status} en ${request.method} ${request.url}: ${message}`, exception.stack);
+        if (process.env.SENTRY_DSN) {
+          Sentry.captureException(exception);
+        }
       }
     } else if (exception instanceof Error) {
       // Errores no HTTP
@@ -56,6 +60,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? 'Error interno del servidor'
         : exception.message;
       this.logger.error(`💥 Error no manejado: ${request.method} ${request.url} - ${exception.message}`, exception.stack);
+      if (process.env.SENTRY_DSN) {
+        Sentry.captureException(exception);
+      }
     }
 
     // Construir respuesta de error estandarizada
@@ -72,3 +79,4 @@ export class AllExceptionsFilter implements ExceptionFilter {
     response.status(status).json(errorResponse);
   }
 }
+

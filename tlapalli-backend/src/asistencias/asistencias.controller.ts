@@ -44,6 +44,19 @@ export class AsistenciasController {
     return { comprobanteUrl: result.secureUrl };
   }
 
+  // Sincronización masiva de asistencias tomadas offline
+  @Post('sync-bulk')
+  syncBulk(
+    @Body() dtoList: CreateAsistenciasDto[],
+    @Request() req,
+  ) {
+    const instructorId = req.user.instructorId;
+    if (!instructorId) {
+      throw new Error('Usuario no es instructor');
+    }
+    return this.asistenciasService.syncBulk(dtoList, instructorId);
+  }
+
   // Obtener alumnos de un grupo para pasar lista
   @Get('grupo/:grupoId/alumnos')
   getAlumnosByGrupo(

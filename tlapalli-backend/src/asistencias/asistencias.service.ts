@@ -114,6 +114,58 @@ export class AsistenciasService {
     });
   }
 
+  // Sincronizar asistencias capturadas en modo offline
+  async syncBulk(dtoList: CreateAsistenciasDto[], instructorId: number) {
+    const results: Array<{ fecha: string; grupoId: number; success: boolean; error?: string }> = [];
+    for (const dto of dtoList) {
+      try {
+        // Para sincronización offline, permitir guardar sin la restricción estricta de fecha pasada si fue tomada offline
+        const { grupoId, fecha, asistencias } = dto;
+        await this.verifyGrupoOwnership(grupoId, instructorId);
+
+        const fechaDate = new Date(fecha + 'T00:00:00.000Z');
+
+        await this.prisma.$transaction(async (tx) => {
+          const existingAsistencias = await tx.asistencia.findMany({
+            where: {
+              fecha: {
+                gte: fechaDate,
+                lt: new Date(fechaDate.getTime() + 24 * 60 * 60 * 1000),
+              },
+              grupoAlumno: { grupoId },
+            },
+            select: { id: true },
+          });
+
+          if (existingAsistencias.length > 0) {
+            await tx.asistencia.deleteMany({
+              where: { id: { in: existingAsistencias.map((a) => a.id) } },
+            });
+          }
+
+          for (const a of asistencias) {
+            await tx.asistencia.create({
+              data: {
+                grupoAlumnoId: a.grupoAlumnoId,
+                fecha: fechaDate,
+                estado: a.estado,
+                observaciones: a.observaciones || null,
+                comprobanteUrl: a.comprobanteUrl || null,
+              },
+            });
+          }
+        });
+        results.push({ fecha, grupoId, success: true });
+      } catch (err: any) {
+        results.push({ fecha: dto.fecha, grupoId: dto.grupoId, success: false, error: err.message });
+      }
+    }
+
+    this.gateway.emitAsistenciasUpdated();
+    return { message: 'Sincronización completada', resultados: results };
+  }
+
+
   // Obtener asistencias de un grupo en una fecha
   async getAsistenciasByFecha(grupoId: number, query: AsistenciaQueryDto, instructorId: number) {
     await this.verifyGrupoOwnership(grupoId, instructorId);

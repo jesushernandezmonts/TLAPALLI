@@ -5,9 +5,20 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import * as Sentry from '@sentry/nestjs';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 const logger = new Logger('Bootstrap');
+
+// Inicializar Sentry si SENTRY_DSN está definido en el entorno
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: 1.0,
+  });
+  logger.log('📡 Sentry monitoreo inicializado correctamente');
+}
 
 // Variables de entorno REQUERIDAS en producción
 const REQUIRED_ENV_VARS_PRODUCTION = [
@@ -19,6 +30,7 @@ const REQUIRED_ENV_VARS_PRODUCTION = [
   'GOOGLE_CLIENT_SECRET',
   'GOOGLE_CALLBACK_URL',
 ];
+
 
 function validateEnv() {
   const missing: string[] = [];

@@ -3,12 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ClipboardList, Loader2, AlertCircle, RefreshCw, Users,
   CheckCircle2, XCircle, CalendarDays, ChevronDown, ChevronUp,
-  History, Save, BookOpenCheck, FileCheck, Paperclip, Upload, Eye
+  History, Save, BookOpenCheck, FileCheck, Paperclip, Upload, Eye,
+  Wifi, WifiOff
 } from 'lucide-react';
 import api from '../services/api';
 import Toast from '../components/Toast';
 import CustomDatePicker from '../components/CustomDatePicker';
 import DocumentViewerModal from '../components/DocumentViewerModal';
+import { offlineStorage } from '../services/offlineStorage';
 
 const GRUPO_COLORS = [
   { from: 'from-pink-600', to: 'to-rose-600', bg: 'bg-pink-500/10', border: 'border-pink-500/30', text: 'text-pink-300', avatar: 'from-pink-500 to-rose-500' },
@@ -42,6 +44,10 @@ export default function Asistencia() {
   const [toast, setToast] = useState(null);
   const [isPastDate, setIsPastDate] = useState(false);
 
+  // Estados de conexión offline y sincronización
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [pendingCount, setPendingCount] = useState(offlineStorage.getPendingAsistencias().length);
+
   const checkIsPastDate = (dateStr) => {
     const today = new Date();
     const todayStart = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
@@ -54,20 +60,74 @@ export default function Asistencia() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  useEffect(() => { fetchGrupos(); }, []);
+  useEffect(() => {
+    fetchGrupos();
+
+    const handleOnline = async () => {
+      setIsOnline(true);
+      showToast('En línea', 'Conexión restablecida. Sincronizando datos pendientes...', 'success');
+      await syncPendingOfflineAsistencias();
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      showToast('Modo Offline', 'Sin conexión a internet. Los cambios se guardarán localmente.', 'warning');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    if (navigator.onLine) {
+      syncPendingOfflineAsistencias();
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (selectedGrupoId) loadAlumnosAndAsistencias();
   }, [selectedGrupoId]);
 
+  const syncPendingOfflineAsistencias = async () => {
+    const pendientes = offlineStorage.getPendingAsistencias();
+    if (pendientes.length === 0) return;
+
+    try {
+      await api.post('/asistencias/sync-bulk', pendientes);
+      offlineStorage.clearPendingAsistencias();
+      setPendingCount(0);
+      showToast('Sincronización Exitosa', `Se sincronizaron ${pendientes.length} registro(s) tomados sin conexión.`, 'success');
+      if (selectedGrupoId) loadAlumnosAndAsistencias();
+    } catch (err) {
+      console.error('Error sincronizando asistencias offline:', err);
+    }
+  };
+
   const fetchGrupos = async () => {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await api.get('/grupos');
-      setGrupos(data);
+      if (navigator.onLine) {
+        const { data } = await api.get('/grupos');
+        setGrupos(data);
+        offlineStorage.saveCachedGrupos(data);
+      } else {
+        const cached = offlineStorage.getCachedGrupos();
+        setGrupos(cached);
+        if (cached.length === 0) {
+          setError('Sin conexión a internet y no hay grupos en caché local');
+        }
+      }
     } catch (err) {
-      setError('No se pudieron cargar los grupos');
+      const cached = offlineStorage.getCachedGrupos();
+      if (cached.length > 0) {
+        setGrupos(cached);
+      } else {
+        setError('No se pudieron cargar los grupos');
+      }
       console.error(err);
     } finally {
       setLoading(false);
@@ -78,11 +138,65 @@ export default function Asistencia() {
     if (!selectedGrupoId) return;
     try {
       setLoadingAlumnos(true);
-      const { data: alumnosData } = await api.get(`/asistencias/grupo/${selectedGrupoId}/alumnos`);
-      setAlumnos(alumnosData);
+      if (navigator.onLine) {
+        const { data: alumnosData } = await api.get(`/asistencias/grupo/${selectedGrupoId}/alumnos`);
+        setAlumnos(alumnosData);
+        offlineStorage.saveCachedAlumnos(selectedGrupoId, alumnosData);
 
-      try {
-        const { data: asistenciasData } = await api.get(`/asistencias/grupo/${selectedGrupoId}?fecha=${fecha}`);
+        try {
+          const { data: asistenciasData } = await api.get(`/asistencias/grupo/${selectedGrupoId}?fecha=${fecha}`);
+          const asistenciasMap = {};
+          const obsMap = {};
+          const compMap = {};
+          asistenciasData.forEach((a) => {
+            asistenciasMap[a.grupoAlumnoId] = a.estado;
+            if (a.observaciones) obsMap[a.grupoAlumnoId] = a.observaciones;
+            if (a.comprobanteUrl) compMap[a.grupoAlumnoId] = a.comprobanteUrl;
+          });
+          setAsistenciasPrevias(asistenciasMap);
+          setAsistencias(asistenciasMap);
+          setObservaciones(obsMap);
+          setComprobantes(compMap);
+        } catch {
+          setAsistenciasPrevias({});
+          setAsistencias({});
+          setObservaciones({});
+          setComprobantes({});
+        }
+
+        try {
+          const { data: historialData } = await api.get(`/asistencias/grupo/${selectedGrupoId}/historial`);
+          setHistorial(historialData);
+        } catch { setHistorial([]); }
+      } else {
+        const cachedAlumnos = offlineStorage.getCachedAlumnos(selectedGrupoId);
+        setAlumnos(cachedAlumnos);
+        setAsistenciasPrevias({});
+        setAsistencias({});
+        setObservaciones({});
+        setComprobantes({});
+      }
+    } catch (err) {
+      const cachedAlumnos = offlineStorage.getCachedAlumnos(selectedGrupoId);
+      if (cachedAlumnos.length > 0) {
+        setAlumnos(cachedAlumnos);
+      } else {
+        showToast('Error', 'No se pudieron cargar los alumnos', 'error');
+      }
+      console.error(err);
+    } finally {
+      setLoadingAlumnos(false);
+    }
+  };
+
+  const handleFechaChange = async (newFecha) => {
+    setFecha(newFecha);
+    setIsPastDate(checkIsPastDate(newFecha));
+    if (!selectedGrupoId) return;
+    try {
+      setLoadingAlumnos(true);
+      if (navigator.onLine) {
+        const { data: asistenciasData } = await api.get(`/asistencias/grupo/${selectedGrupoId}?fecha=${newFecha}`);
         const asistenciasMap = {};
         const obsMap = {};
         const compMap = {};
@@ -95,44 +209,12 @@ export default function Asistencia() {
         setAsistencias(asistenciasMap);
         setObservaciones(obsMap);
         setComprobantes(compMap);
-      } catch {
+      } else {
         setAsistenciasPrevias({});
         setAsistencias({});
         setObservaciones({});
         setComprobantes({});
       }
-
-      try {
-        const { data: historialData } = await api.get(`/asistencias/grupo/${selectedGrupoId}/historial`);
-        setHistorial(historialData);
-      } catch { setHistorial([]); }
-    } catch (err) {
-      console.error(err);
-      showToast('Error', 'No se pudieron cargar los alumnos', 'error');
-    } finally {
-      setLoadingAlumnos(false);
-    }
-  };
-
-  const handleFechaChange = async (newFecha) => {
-    setFecha(newFecha);
-    setIsPastDate(checkIsPastDate(newFecha));
-    if (!selectedGrupoId) return;
-    try {
-      setLoadingAlumnos(true);
-      const { data: asistenciasData } = await api.get(`/asistencias/grupo/${selectedGrupoId}?fecha=${newFecha}`);
-      const asistenciasMap = {};
-      const obsMap = {};
-      const compMap = {};
-      asistenciasData.forEach((a) => {
-        asistenciasMap[a.grupoAlumnoId] = a.estado;
-        if (a.observaciones) obsMap[a.grupoAlumnoId] = a.observaciones;
-        if (a.comprobanteUrl) compMap[a.grupoAlumnoId] = a.comprobanteUrl;
-      });
-      setAsistenciasPrevias(asistenciasMap);
-      setAsistencias(asistenciasMap);
-      setObservaciones(obsMap);
-      setComprobantes(compMap);
     } catch {
       setAsistenciasPrevias({});
       setAsistencias({});
@@ -149,6 +231,10 @@ export default function Asistencia() {
 
   const handleFileUpload = async (grupoAlumnoId, file) => {
     if (!file) return;
+    if (!navigator.onLine) {
+      showToast('Sin conexión', 'Para adjuntar comprobantes se requiere conexión a internet', 'error');
+      return;
+    }
     if (file.size > 10 * 1024 * 1024) {
       showToast('Archivo demasiado grande', 'El límite es de 10MB', 'error');
       return;
@@ -178,18 +264,33 @@ export default function Asistencia() {
       observaciones: observaciones[id] || undefined,
       comprobanteUrl: comprobantes[id] || undefined,
     }));
+
+    const payload = {
+      grupoId: Number(selectedGrupoId),
+      fecha,
+      asistencias: asistenciasArray,
+    };
+
+    if (!navigator.onLine) {
+      offlineStorage.savePendingAsistencia(payload);
+      setAsistenciasPrevias({ ...asistencias });
+      setPendingCount(offlineStorage.getPendingAsistencias().length);
+      showToast('Guardado Local (Offline)', 'La asistencia se enviará al servidor cuando vuelva la conexión', 'warning');
+      return;
+    }
+
     try {
       setSaving(true);
-      await api.post(`/asistencias/grupo/${selectedGrupoId}`, {
-        grupoId: Number(selectedGrupoId),
-        fecha,
-        asistencias: asistenciasArray,
-      });
+      await api.post(`/asistencias/grupo/${selectedGrupoId}`, payload);
       showToast('Asistencias guardadas', 'Lista registrada correctamente', 'success');
+      setAsistenciasPrevias({ ...asistencias });
       const { data: historialData } = await api.get(`/asistencias/grupo/${selectedGrupoId}/historial`);
       setHistorial(historialData);
     } catch (err) {
-      showToast('Error al guardar', err.response?.data?.message || 'Ocurrió un error', 'error');
+      offlineStorage.savePendingAsistencia(payload);
+      setAsistenciasPrevias({ ...asistencias });
+      setPendingCount(offlineStorage.getPendingAsistencias().length);
+      showToast('Guardado en cola offline', 'Error de conexión. Se guardó localmente para intentar más tarde', 'warning');
     } finally {
       setSaving(false);
     }
@@ -232,8 +333,8 @@ export default function Asistencia() {
     <div className="space-y-8">
       <Toast toast={toast} />
 
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4">
+      {/* Header con indicadores de red */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.65)]">
             Pasar Lista
@@ -242,7 +343,26 @@ export default function Asistencia() {
             Registra la asistencia de tus grupos
           </p>
         </div>
+
+        <div className="flex items-center flex-wrap gap-3">
+          {isOnline ? (
+            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold shadow-sm">
+              <Wifi size={14} /> En Línea
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold animate-pulse shadow-sm">
+              <WifiOff size={14} /> Modo Offline
+            </div>
+          )}
+
+          {pendingCount > 0 && (
+            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-pink-500/20 border border-pink-500/40 text-pink-300 text-xs font-bold shadow-sm">
+              <RefreshCw size={12} className="animate-spin" /> {pendingCount} lista(s) por sincronizar
+            </div>
+          )}
+        </div>
       </div>
+
 
       {/* Selector de Grupo y Fecha */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
