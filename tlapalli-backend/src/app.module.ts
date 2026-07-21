@@ -20,7 +20,6 @@ import { GatewayModule } from './gateway/gateway.module';
 import { CommonModule } from './common/common.module';
 import { HealthController } from './health/health.controller';
 import { AlumnoDocumentosModule } from './alumno-documentos.module';
-import { BackupsModule } from './backups/backups.module';
 
 @Module({
   imports: [
@@ -44,7 +43,6 @@ import { BackupsModule } from './backups/backups.module';
     GatewayModule,
     CommonModule,
     AlumnoDocumentosModule,
-    BackupsModule,
   ],
   controllers: [HealthController],
 })
