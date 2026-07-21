@@ -20,16 +20,30 @@ export class MailerService {
 
     // 1. Configurar Nodemailer con Gmail SMTP (Prioridad 1 para garantizar entrega a la Bandeja Principal)
     if (smtpUser && smtpPass && !smtpPass.includes('tu-') && !smtpPass.includes('cambiar-')) {
-      this.transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: smtpPort === 465, // true para puerto 465, false para 587
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
-      });
-      this.logger.log('📧 Servicio de correo inicializado con Gmail SMTP (Bandeja Principal)');
+      const isGmail = smtpUser.includes('@gmail.com') || smtpHost.includes('gmail');
+
+      this.transporter = nodemailer.createTransport(
+        isGmail
+          ? {
+              service: 'gmail',
+              auth: {
+                user: smtpUser,
+                pass: smtpPass,
+              },
+            }
+          : {
+              host: smtpHost,
+              port: smtpPort,
+              secure: smtpPort === 465,
+              auth: {
+                user: smtpUser,
+                pass: smtpPass,
+              },
+            }
+      );
+      this.logger.log(`📧 Servicio de correo inicializado con ${isGmail ? 'Gmail Service' : 'SMTP'} (${smtpUser})`);
+    } else {
+      this.logger.warn('⚠️ SMTP_USER o SMTP_PASS no están configurados en el entorno. Revisa tus variables de entorno.');
     }
 
     // 2. Configurar SendGrid como fallback opcional
