@@ -9,7 +9,8 @@ import {
   UserSquare2, 
   Palette, 
   CreditCard, 
-  ClipboardList, 
+  ClipboardList,
+  ClipboardCheck,
   LogOut,
   User,
   X,
@@ -80,6 +81,10 @@ function Sidebar({ isOpen, onClose }) {
               <NavLink to="/talleres" onClick={onClose} className={linkClass}>
                 <Palette size={20} />
                 <span className="font-medium">Talleres</span>
+              </NavLink>
+              <NavLink to="/asistencia-admin" onClick={onClose} className={linkClass}>
+                <ClipboardCheck size={20} />
+                <span className="font-medium">Asistencias</span>
               </NavLink>
               <NavLink to="/reportes" onClick={onClose} className={linkClass}>
                 <BarChart3 size={20} />

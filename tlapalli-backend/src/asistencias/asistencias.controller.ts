@@ -23,15 +23,23 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('asistencias')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('profesor')
+@Roles('admin', 'profesor')
 export class AsistenciasController {
   constructor(
     private readonly asistenciasService: AsistenciasService,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
+  // Supervisión global de pases de lista de instructores para Administrador
+  @Get('supervision-instructores')
+  @Roles('admin')
+  getSupervisionInstructores() {
+    return this.asistenciasService.getSupervisionInstructores();
+  }
+
   // Subir comprobante probatorio de falta del alumno (PDF o Imagen)
   @Post('upload-comprobante')
+  @Roles('profesor')
   @UseInterceptors(FileInterceptor('comprobante', {
     storage: memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
@@ -46,6 +54,7 @@ export class AsistenciasController {
 
   // Sincronización masiva de asistencias tomadas offline
   @Post('sync-bulk')
+  @Roles('profesor')
   syncBulk(
     @Body() dtoList: CreateAsistenciasDto[],
     @Request() req,
@@ -59,19 +68,22 @@ export class AsistenciasController {
 
   // Obtener alumnos de un grupo para pasar lista
   @Get('grupo/:grupoId/alumnos')
+  @Roles('admin', 'profesor')
   getAlumnosByGrupo(
     @Param('grupoId', ParseIntPipe) grupoId: number,
     @Request() req,
   ) {
+    const isAdmin = req.user.rol === 'admin';
     const instructorId = req.user.instructorId;
-    if (!instructorId) {
-      throw new Error('Usuario no es instructor');
+    if (!isAdmin && !instructorId) {
+      throw new BadRequestException('Usuario no es instructor ni administrador');
     }
-    return this.asistenciasService.getAlumnosByGrupo(grupoId, instructorId);
+    return this.asistenciasService.getAlumnosByGrupo(grupoId, instructorId, isAdmin);
   }
 
   // Guardar asistencias de un grupo en una fecha
   @Post('grupo/:grupoId')
+  @Roles('profesor')
   saveAsistencias(
     @Param('grupoId', ParseIntPipe) grupoId: number,
     @Body() createAsistenciasDto: CreateAsistenciasDto,
@@ -88,28 +100,32 @@ export class AsistenciasController {
 
   // Obtener asistencias de un grupo en una fecha específica
   @Get('grupo/:grupoId')
+  @Roles('admin', 'profesor')
   getAsistenciasByFecha(
     @Param('grupoId', ParseIntPipe) grupoId: number,
     @Query() query: AsistenciaQueryDto,
     @Request() req,
   ) {
+    const isAdmin = req.user.rol === 'admin';
     const instructorId = req.user.instructorId;
-    if (!instructorId) {
-      throw new Error('Usuario no es instructor');
+    if (!isAdmin && !instructorId) {
+      throw new BadRequestException('Usuario no es instructor ni administrador');
     }
-    return this.asistenciasService.getAsistenciasByFecha(grupoId, query, instructorId);
+    return this.asistenciasService.getAsistenciasByFecha(grupoId, query, instructorId, isAdmin);
   }
 
   // Obtener historial de asistencias de un grupo
   @Get('grupo/:grupoId/historial')
+  @Roles('admin', 'profesor')
   getHistorial(
     @Param('grupoId', ParseIntPipe) grupoId: number,
     @Request() req,
   ) {
+    const isAdmin = req.user.rol === 'admin';
     const instructorId = req.user.instructorId;
-    if (!instructorId) {
-      throw new Error('Usuario no es instructor');
+    if (!isAdmin && !instructorId) {
+      throw new BadRequestException('Usuario no es instructor ni administrador');
     }
-    return this.asistenciasService.getHistorial(grupoId, instructorId);
+    return this.asistenciasService.getHistorial(grupoId, instructorId, isAdmin);
   }
 }

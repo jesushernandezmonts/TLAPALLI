@@ -11,9 +11,9 @@ export class AsistenciasService {
   ) {}
 
   // Obtener alumnos de un grupo con su grupoAlumnoId para pasar lista
-  async getAlumnosByGrupo(grupoId: number, instructorId: number) {
-    // Verificar que el grupo pertenece al instructor
-    await this.verifyGrupoOwnership(grupoId, instructorId);
+  async getAlumnosByGrupo(grupoId: number, instructorId: number, isAdmin = false) {
+    // Verificar que el grupo pertenece al instructor (o admin)
+    await this.verifyGrupoOwnership(grupoId, instructorId, isAdmin);
 
     return this.prisma.grupoAlumno.findMany({
       where: { grupoId },
@@ -167,8 +167,8 @@ export class AsistenciasService {
 
 
   // Obtener asistencias de un grupo en una fecha
-  async getAsistenciasByFecha(grupoId: number, query: AsistenciaQueryDto, instructorId: number) {
-    await this.verifyGrupoOwnership(grupoId, instructorId);
+  async getAsistenciasByFecha(grupoId: number, query: AsistenciaQueryDto, instructorId?: number, isAdmin = false) {
+    await this.verifyGrupoOwnership(grupoId, instructorId, isAdmin);
 
     const fechaStr = query.fecha || new Date().toISOString().split('T')[0];
     const fechaDate = new Date(fechaStr + 'T00:00:00.000Z');
@@ -211,8 +211,8 @@ export class AsistenciasService {
   }
 
   // Obtener historial de fechas con asistencias registradas
-  async getHistorial(grupoId: number, instructorId: number) {
-    await this.verifyGrupoOwnership(grupoId, instructorId);
+  async getHistorial(grupoId: number, instructorId?: number, isAdmin = false) {
+    await this.verifyGrupoOwnership(grupoId, instructorId, isAdmin);
 
     const asistencias = await this.prisma.asistencia.findMany({
       where: {
@@ -252,8 +252,135 @@ export class AsistenciasService {
       .sort((a, b) => b.fecha.localeCompare(a.fecha));
   }
 
-  // Helper: verificar que el grupo pertenece al instructor
-  private async verifyGrupoOwnership(grupoId: number, instructorId: number) {
+  // Resumen de supervisión de asistencias para Administrador
+  async getSupervisionInstructores() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStart = new Date(todayStr + 'T00:00:00.000Z');
+    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+
+    const instructores = await this.prisma.instructor.findMany({
+      where: { activo: true },
+      include: {
+        taller: {
+          select: { id: true, nombreTaller: true },
+        },
+        grupos: {
+          select: {
+            id: true,
+            nombre: true,
+            descripcion: true,
+            _count: {
+              select: { alumnos: true },
+            },
+          },
+        },
+      },
+      orderBy: { nombre: 'asc' },
+    });
+
+    // Pases de lista realizados hoy
+    const asistenciasHoy = await this.prisma.asistencia.findMany({
+      where: {
+        fecha: {
+          gte: todayStart,
+          lt: todayEnd,
+        },
+      },
+      select: {
+        grupoAlumno: {
+          select: { grupoId: true },
+        },
+      },
+    });
+
+    const gruposConAsistenciaHoy = new Set(
+      asistenciasHoy
+        .map((a) => a.grupoAlumno?.grupoId)
+        .filter((id): id is number => id !== null && id !== undefined),
+    );
+
+    const supervisiones = await Promise.all(
+      instructores.map(async (inst) => {
+        const grupoIds = inst.grupos.map((g) => g.id);
+
+        let totalRegistros = 0;
+        let asistenciasCount = 0;
+        let faltasCount = 0;
+        let justificadasCount = 0;
+        let ultimaFecha: string | null = null;
+        let listaTomadaHoy = false;
+
+        if (grupoIds.length > 0) {
+          listaTomadaHoy = grupoIds.some((id) => gruposConAsistenciaHoy.has(id));
+
+          const stats = await this.prisma.asistencia.groupBy({
+            by: ['estado'],
+            where: {
+              grupoAlumno: {
+                grupoId: { in: grupoIds },
+              },
+            },
+            _count: { _all: true },
+          });
+
+          for (const s of stats) {
+            const count = s._count._all;
+            totalRegistros += count;
+            if (s.estado === 'asistencia') asistenciasCount += count;
+            else if (s.estado === 'falta') faltasCount += count;
+            else if (s.estado === 'justificada') justificadasCount += count;
+          }
+
+          const ultimaAsistencia = await this.prisma.asistencia.findFirst({
+            where: {
+              grupoAlumno: {
+                grupoId: { in: grupoIds },
+              },
+            },
+            orderBy: { fecha: 'desc' },
+            select: { fecha: true },
+          });
+
+          if (ultimaAsistencia) {
+            ultimaFecha = ultimaAsistencia.fecha.toISOString().split('T')[0];
+          }
+        }
+
+        const porcentajeAsistencia =
+          totalRegistros > 0 ? Math.round((asistenciasCount / totalRegistros) * 100) : 0;
+
+        return {
+          id: inst.id,
+          nombre: inst.nombre,
+          email: inst.email,
+          telefono: inst.telefono,
+          estado: inst.estado,
+          taller: inst.taller?.nombreTaller || 'Sin taller asignado',
+          tallerId: inst.tallerId,
+          totalGrupos: inst.grupos.length,
+          grupos: inst.grupos.map((g) => ({
+            id: g.id,
+            nombreGrupo: g.nombre,
+            descripcion: g.descripcion,
+            totalAlumnos: g._count.alumnos,
+            listaTomadaHoy: gruposConAsistenciaHoy.has(g.id),
+          })),
+          listaTomadaHoy,
+          ultimaFecha,
+          porcentajeAsistencia,
+          totalRegistros,
+          asistenciasCount,
+          faltasCount,
+          justificadasCount,
+        };
+      }),
+    );
+
+    return supervisiones;
+  }
+
+  // Helper: verificar que el grupo pertenece al instructor (o al admin)
+  private async verifyGrupoOwnership(grupoId: number, instructorId?: number, isAdmin = false) {
     const grupo = await this.prisma.grupo.findUnique({
       where: { id: grupoId },
     });
@@ -262,7 +389,7 @@ export class AsistenciasService {
       throw new NotFoundException(`Grupo con ID ${grupoId} no encontrado`);
     }
 
-    if (grupo.instructorId !== instructorId) {
+    if (!isAdmin && grupo.instructorId !== instructorId) {
       throw new ForbiddenException('No tienes permisos para acceder a este grupo');
     }
   }

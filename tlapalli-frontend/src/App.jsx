@@ -32,6 +32,7 @@ import AlumnoLayout from './pages/alumno/AlumnoLayout';
 import AlumnoPrivateRoute from './pages/alumno/AlumnoPrivateRoute';
 
 import Mapeo from './pages/Mapeo';
+import AdminAsistencias from './pages/AdminAsistencias';
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
           <Route path="/instructores" element={<Instructores />} />
           <Route path="/talleres" element={<Talleres />} />
           <Route path="/inscripciones" element={<Inscripciones />} />
+          <Route path="/asistencia-admin" element={<AdminAsistencias />} />
           <Route path="/reportes" element={<Reportes />} />
           <Route path="/mapeo" element={<Mapeo />} />
           <Route path="/servicio-social" element={<ServicioSocial />} />
