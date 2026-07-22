@@ -200,14 +200,14 @@ function AdminAsistencias() {
 
       {/* Controles de Búsqueda y Filtro */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/40 p-4 rounded-2xl border border-white/5">
-        <div className="w-full sm:w-80">
+        <div className="w-full sm:w-72">
           <SearchBar
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+            onChange={(val) => {
+              setSearch(val);
               setCurrentPage(1);
             }}
-            placeholder="Buscar por profesor o taller..."
+            placeholder="Buscar profesor o taller..."
           />
         </div>
 
