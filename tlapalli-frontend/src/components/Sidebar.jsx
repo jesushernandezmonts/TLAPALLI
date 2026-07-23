@@ -124,21 +124,19 @@ function Sidebar({ isOpen, onClose }) {
           )}
         </nav>
 
-        {/* Botón Guía Interactiva para Profesor */}
-        {user?.rol === 'profesor' && (
-          <div className="pt-2 pb-1" data-tour="sidebar-help-tour">
-            <button
-              onClick={() => {
-                window.dispatchEvent(new Event('open-teacher-tour'));
-                if (window.innerWidth < 1024) onClose();
-              }}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-600/20 to-orange-600/20 hover:from-pink-600/30 hover:to-orange-600/30 text-pink-300 py-2.5 rounded-2xl border border-pink-500/30 transition-all duration-300 font-bold text-xs"
-            >
-              <HelpCircle size={16} />
-              Guía del Sistema
-            </button>
-          </div>
-        )}
+        {/* Botón Guía Interactiva del Sistema */}
+        <div className="pt-2 pb-1" data-tour="sidebar-help-tour">
+          <button
+            onClick={() => {
+              window.dispatchEvent(new Event('open-teacher-tour'));
+              if (window.innerWidth < 1024) onClose();
+            }}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-600/20 to-orange-600/20 hover:from-pink-600/30 hover:to-orange-600/30 text-pink-300 py-2.5 rounded-2xl border border-pink-500/30 transition-all duration-300 font-bold text-xs cursor-pointer"
+          >
+            <HelpCircle size={16} />
+            Guía del Sistema
+          </button>
+        </div>
 
         {/* Información del usuario y logout */}
         <div className="border-t border-white/15 pt-4 mt-2">

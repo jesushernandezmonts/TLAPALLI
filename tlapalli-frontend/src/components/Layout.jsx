@@ -13,8 +13,8 @@ function Layout() {
     <div className="flex h-screen bg-transparent text-white font-['Outfit'] overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      {/* Tour interactivo de guía para profesor */}
-      {user?.rol === 'profesor' && <TeacherTour />}
+      {/* Tour interactivo de guía para profesor/instructor */}
+      {user && <TeacherTour />}
 
       <div className="flex-1 flex flex-col min-w-0 relative">
         {/* Botón flotante para móvil */}
@@ -26,15 +26,13 @@ function Layout() {
             <Menu size={24} />
           </button>
 
-          {user?.rol === 'profesor' && (
-            <button
-              onClick={() => window.dispatchEvent(new Event('open-teacher-tour'))}
-              className="p-3 bg-gradient-to-r from-pink-600/30 to-orange-600/30 border border-pink-500/40 rounded-2xl text-pink-300 hover:text-white transition-all shadow-2xl pointer-events-auto cursor-pointer flex items-center gap-1.5 text-xs font-bold"
-            >
-              <HelpCircle size={20} />
-              Guía
-            </button>
-          )}
+          <button
+            onClick={() => window.dispatchEvent(new Event('open-teacher-tour'))}
+            className="p-3 bg-gradient-to-r from-pink-600/30 to-orange-600/30 border border-pink-500/40 rounded-2xl text-pink-300 hover:text-white transition-all shadow-2xl pointer-events-auto cursor-pointer flex items-center gap-1.5 text-xs font-bold"
+          >
+            <HelpCircle size={20} />
+            Guía
+          </button>
         </div>
 
         <main className="flex-1 overflow-auto p-4 md:p-8 pt-20 lg:pt-8">

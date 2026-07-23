@@ -70,13 +70,15 @@ export default function TeacherTour({ forceOpen = false, onCloseForce }) {
 
   // Manejar apertura automática o forzada
   useEffect(() => {
-    if (user?.rol !== 'profesor') return;
+    const isProfesor = user?.rol?.toLowerCase() === 'profesor';
 
     if (forceOpen) {
       setCurrentStep(0);
       setIsOpen(true);
       return;
     }
+
+    if (!isProfesor) return;
 
     const count = parseInt(localStorage.getItem(storageKey) || '0', 10);
     if (count < 3) {
@@ -163,7 +165,7 @@ export default function TeacherTour({ forceOpen = false, onCloseForce }) {
     if (onCloseForce) onCloseForce();
   };
 
-  if (!isOpen || user?.rol !== 'profesor') return null;
+  if (!isOpen) return null;
 
   const step = TOUR_STEPS[currentStep];
   const StepIcon = step.icon;
