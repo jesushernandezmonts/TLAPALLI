@@ -103,6 +103,7 @@ model Instructor {
   curriculumUrl String?  @map("curriculum_url")
   grupos        Grupo[]
   justificaciones JustificacionInstructor[]
+  actividades   Actividad[]
 }
 
 model Inscripcion {
@@ -145,13 +146,17 @@ model Pago {
 }
 
 model Actividad {
-  id          Int      @id @default(autoincrement())
-  titulo      String
-  descripcion String?
-  fecha       DateTime
-  tipo        String   // 'interna' | 'externa'
-  ubicacion   String   // 'galeria' | 'audioteca' | 'auditorio'
-  creadoEn    DateTime @default(now()) @map("creado_en")
+  id                 Int         @id @default(autoincrement())
+  titulo             String
+  descripcion        String?
+  fecha              DateTime
+  tipo               String      // 'interna' | 'externa'
+  ubicacion          String      // 'galeria' | 'audioteca' | 'auditorio'
+  estatus            String      @default("aprobado") // 'pendiente' | 'aprobado' | 'rechazado' | 'cancelado'
+  instructorId       Int?        @map("instructor_id")
+  instructor         Instructor? @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+  observacionesAdmin String?     @map("observaciones_admin")
+  creadoEn           DateTime    @default(now()) @map("creado_en")
 }
 
 model Reporte {

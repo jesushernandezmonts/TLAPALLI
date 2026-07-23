@@ -15,12 +15,53 @@ export class ActividadesService {
         fecha: new Date(dto.fecha),
         tipo: dto.tipo,
         ubicacion: dto.ubicacion,
+        estatus: 'aprobado',
+      },
+      include: {
+        instructor: true,
       },
     });
   }
 
-  async findAll() {
+  async proponer(dto: CreateActividadDto, instructorId?: number) {
+    return this.prisma.actividad.create({
+      data: {
+        titulo: dto.titulo,
+        descripcion: dto.descripcion,
+        fecha: new Date(dto.fecha),
+        tipo: dto.tipo || 'interna',
+        ubicacion: dto.ubicacion || 'galeria',
+        estatus: 'pendiente',
+        instructorId: instructorId || null,
+      },
+      include: {
+        instructor: true,
+      },
+    });
+  }
+
+  async findAll(user?: any) {
+    if (user?.rol === 'admin') {
+      return this.prisma.actividad.findMany({
+        include: {
+          instructor: true,
+        },
+        orderBy: { fecha: 'asc' },
+      });
+    }
+
+    // Para profesor: devolver aprobados o propuestos por él mismo
+    const instructorId = user?.instructorId;
     return this.prisma.actividad.findMany({
+      where: {
+        OR: [
+          { estatus: 'aprobado' },
+          ...(instructorId ? [{ instructorId: instructorId }] : []),
+        ],
+      },
+      include: {
+        instructor: true,
+      },
       orderBy: { fecha: 'asc' },
     });
   }
@@ -28,6 +69,7 @@ export class ActividadesService {
   async findOne(id: number) {
     const actividad = await this.prisma.actividad.findUnique({
       where: { id },
+      include: { instructor: true },
     });
     if (!actividad) {
       throw new NotFoundException(`Actividad con ID ${id} no encontrada`);
@@ -36,7 +78,7 @@ export class ActividadesService {
   }
 
   async update(id: number, dto: UpdateActividadDto) {
-    await this.findOne(id); // Verifica existencia
+    await this.findOne(id);
 
     const data: any = { ...dto };
     if (dto.fecha) {
@@ -46,11 +88,45 @@ export class ActividadesService {
     return this.prisma.actividad.update({
       where: { id },
       data,
+      include: { instructor: true },
+    });
+  }
+
+  async aprobar(id: number) {
+    await this.findOne(id);
+    return this.prisma.actividad.update({
+      where: { id },
+      data: { estatus: 'aprobado' },
+      include: { instructor: true },
+    });
+  }
+
+  async rechazar(id: number, observaciones?: string) {
+    await this.findOne(id);
+    return this.prisma.actividad.update({
+      where: { id },
+      data: { 
+        estatus: 'rechazado',
+        observacionesAdmin: observaciones || null,
+      },
+      include: { instructor: true },
+    });
+  }
+
+  async cancelar(id: number, observaciones?: string) {
+    await this.findOne(id);
+    return this.prisma.actividad.update({
+      where: { id },
+      data: { 
+        estatus: 'cancelado',
+        observacionesAdmin: observaciones || null,
+      },
+      include: { instructor: true },
     });
   }
 
   async remove(id: number) {
-    await this.findOne(id); // Verifica existencia
+    await this.findOne(id);
     return this.prisma.actividad.delete({
       where: { id },
     });

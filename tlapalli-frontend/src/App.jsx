@@ -14,6 +14,7 @@ import Pagos from './pages/Pagos';
 import Reportes from './pages/Reportes';
 import MisGrupos from './pages/MisGrupos';
 import Asistencia from './pages/Asistencia';
+import EventosProfesor from './pages/EventosProfesor';
 import MiPerfil from './pages/MiPerfil';
 import ServicioSocial from './pages/ServicioSocial';
 import Layout from './components/Layout';
@@ -66,6 +67,7 @@ function App() {
           <Route path="/mis-grupos" element={<MisGrupos />} />
           <Route path="/asistencia" element={<Asistencia />} />
           <Route path="/pagos" element={<Pagos />} />
+          <Route path="/mis-eventos" element={<EventosProfesor />} />
         </Route>
       </Route>
 

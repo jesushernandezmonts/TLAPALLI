@@ -17,7 +17,8 @@ import {
   BarChart3,
   HeartHandshake,
   MapPin,
-  HelpCircle
+  HelpCircle,
+  CalendarDays
 } from 'lucide-react';
 
 function Sidebar({ isOpen, onClose }) {
@@ -134,6 +135,12 @@ function Sidebar({ isOpen, onClose }) {
                 <NavLink to="/pagos" onClick={onClose} className={linkClass}>
                   <CreditCard size={20} />
                   <span className="font-medium">Pagos</span>
+                </NavLink>
+              </div>
+              <div data-tour="sidebar-mis-eventos">
+                <NavLink to="/mis-eventos" onClick={onClose} className={linkClass}>
+                  <CalendarDays size={20} />
+                  <span className="font-medium">Mis Eventos</span>
                 </NavLink>
               </div>
             </>

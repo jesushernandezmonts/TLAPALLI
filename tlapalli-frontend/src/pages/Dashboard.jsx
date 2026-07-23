@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import { Loader2, Plus, Trash2, Edit3, Clock, MapPin, Download, ChevronDown, ChevronLeft, ChevronRight, AlertTriangle, CalendarX, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Loader2, Plus, Trash2, Edit3, Clock, MapPin, Download, ChevronDown, ChevronLeft, ChevronRight, AlertTriangle, CalendarX, TrendingUp, TrendingDown, Minus, CheckCircle2, XCircle, Ban } from 'lucide-react';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -178,6 +178,37 @@ function Dashboard() {
     }
   };
 
+  const handleAprobarActividad = async (id) => {
+    try {
+      await api.patch(`/actividades/${id}/aprobar`);
+      await fetchActividades();
+    } catch (err) {
+      console.error('Error aprobando actividad', err);
+    }
+  };
+
+  const handleRechazarActividad = async (id) => {
+    const obs = window.prompt('Motivo u observaciones de rechazo (opcional):');
+    if (obs === null) return;
+    try {
+      await api.patch(`/actividades/${id}/rechazar`, { observaciones: obs });
+      await fetchActividades();
+    } catch (err) {
+      console.error('Error rechazando actividad', err);
+    }
+  };
+
+  const handleCancelarActividad = async (id) => {
+    const obs = window.prompt('Motivo de cancelación (opcional):');
+    if (obs === null) return;
+    try {
+      await api.patch(`/actividades/${id}/cancelar`, { observaciones: obs });
+      await fetchActividades();
+    } catch (err) {
+      console.error('Error cancelando actividad', err);
+    }
+  };
+
   const handleSaveActividad = async (e) => {
     e.preventDefault();
     
@@ -315,6 +346,86 @@ function Dashboard() {
         />
       </div>
 
+
+      {/* Sección de Propuestas Pendientes de Profesores */}
+      {(() => {
+        const pendientes = actividades.filter(a => a.estatus === 'pendiente');
+        if (pendientes.length === 0) return null;
+
+        return (
+          <div className="bg-slate-900/95 border border-amber-500/40 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <Clock size={22} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-white">Propuestas de Eventos Pendientes</h2>
+                  <p className="text-xs text-amber-200/80 font-semibold">
+                    Los profesores han enviado {pendientes.length} propuesta{pendientes.length > 1 ? 's' : ''} para revisión
+                  </p>
+                </div>
+              </div>
+              <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-xs font-black">
+                {pendientes.length} Pendiente{pendientes.length > 1 ? 's' : ''}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {pendientes.map((act) => {
+                const fechaFormatted = new Date(act.fecha).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                return (
+                  <div key={act.id} className="bg-slate-800/90 border border-white/15 rounded-2xl p-4 space-y-3 relative hover:border-amber-500/40 transition flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-pink-400 uppercase tracking-wider bg-pink-500/10 px-2 py-0.5 rounded-full border border-pink-500/20">
+                          {act.instructor?.nombre ? `Profe: ${act.instructor.nombre}` : 'Profesor'}
+                        </span>
+                        <span className="text-[10px] text-white/50 font-semibold">{fechaFormatted} hrs</span>
+                      </div>
+
+                      <div>
+                        <h4 className="font-bold text-white text-base leading-snug">{act.titulo}</h4>
+                        {act.descripcion && <p className="text-xs text-white/60 line-clamp-2 mt-1">{act.descripcion}</p>}
+                      </div>
+
+                      <div className="text-[11px] text-white/50 flex items-center gap-2">
+                        <MapPin size={12} className="text-amber-400" />
+                        <span>Ubicación: <strong className="text-white/80">{act.ubicacion}</strong></span>
+                      </div>
+                    </div>
+
+                    {/* Botones de Acción Directa para Admin */}
+                    <div className="flex items-center gap-2 pt-3 border-t border-white/10">
+                      <button
+                        onClick={() => handleAprobarActividad(act.id)}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition shadow-md cursor-pointer"
+                        title="Aprobar propuesta"
+                      >
+                        <CheckCircle2 size={14} /> Aprobar
+                      </button>
+                      <button
+                        onClick={() => handleRechazarActividad(act.id)}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl transition shadow-md cursor-pointer"
+                        title="Rechazar propuesta"
+                      >
+                        <XCircle size={14} /> Rechazar
+                      </button>
+                      <button
+                        onClick={() => handleCancelarActividad(act.id)}
+                        className="p-2 bg-slate-700 hover:bg-slate-600 text-white/70 hover:text-white rounded-xl transition cursor-pointer"
+                        title="Cancelar evento"
+                      >
+                        <Ban size={14} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Calendario y Próximas Clases */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
