@@ -110,12 +110,27 @@ export default function TeacherTour({ forceOpen = false, onCloseForce }) {
     const el = document.querySelector(step.target);
     if (el) {
       const rect = el.getBoundingClientRect();
-      setTargetRect({
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
-      });
+      // Verificar si el elemento está completamente visible dentro del viewport
+      const isVisible = (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        rect.left >= 0 &&
+        rect.top >= 0 &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth) &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+      );
+
+      if (isVisible) {
+        setTargetRect({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        });
+      } else {
+        // Si está oculto u fuera de pantalla (ej. sidebar en móvil), centrar modal
+        setTargetRect(null);
+      }
     } else {
       setTargetRect(null);
     }
@@ -124,9 +139,11 @@ export default function TeacherTour({ forceOpen = false, onCloseForce }) {
   useEffect(() => {
     if (!isOpen) return;
     updateTargetRect();
+    const timer = setTimeout(updateTargetRect, 100);
     window.addEventListener('resize', updateTargetRect);
     window.addEventListener('scroll', updateTargetRect, true);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('resize', updateTargetRect);
       window.removeEventListener('scroll', updateTargetRect, true);
     };
