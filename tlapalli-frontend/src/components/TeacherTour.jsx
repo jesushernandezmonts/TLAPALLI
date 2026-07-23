@@ -12,7 +12,8 @@ import {
   ClipboardCheck,
   CreditCard,
   User,
-  LayoutDashboard
+  LayoutDashboard,
+  AlertTriangle
 } from 'lucide-react';
 
 const TOUR_STEPS = [
@@ -32,8 +33,9 @@ const TOUR_STEPS = [
   },
   {
     target: '[data-tour="sidebar-asistencia"]',
-    title: 'Pasar Lista',
-    description: 'Registra la asistencia diaria de tus alumnos de forma rápida, marcar justificantes o consultar el historial de asistencias.',
+    title: 'Pasar Lista y Política de Bloqueo',
+    description: 'Registra la asistencia diaria de tus alumnos de forma rápida, marca justificantes o consulta el historial de asistencias.',
+    warning: 'Solo cuentas con 2 oportunidades para omitir pasar lista. Si acumulas más fallas, tu cuenta en el sistema se bloqueará automáticamente y deberás comunicarte con la Licenciada para que la desactive/desbloquee.',
     icon: ClipboardCheck,
     badge: 'Paso 3 de 6',
   },
@@ -286,6 +288,18 @@ export default function TeacherTour({ forceOpen = false, onCloseForce }) {
                 <p className="mt-1 text-sm text-white/70 leading-relaxed font-medium">
                   {step.description}
                 </p>
+
+                {step.warning && (
+                  <div className="mt-3.5 p-3 bg-rose-500/10 border border-rose-500/40 rounded-2xl flex items-start gap-2.5 shadow-lg shadow-rose-950/20">
+                    <AlertTriangle size={18} className="text-rose-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-extrabold text-rose-300 text-xs block mb-0.5 uppercase tracking-wide">⚠️ Regla Importante de Bloqueo</span>
+                      <p className="text-xs text-rose-200/90 leading-relaxed font-medium">
+                        {step.warning}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
