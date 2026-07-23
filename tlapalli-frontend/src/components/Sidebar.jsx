@@ -16,7 +16,8 @@ import {
   X,
   BarChart3,
   HeartHandshake,
-  MapPin
+  MapPin,
+  HelpCircle
 } from 'lucide-react';
 
 function Sidebar({ isOpen, onClose }) {
@@ -101,25 +102,48 @@ function Sidebar({ isOpen, onClose }) {
             </>
           ) : (
             <>
-              <NavLink to="/mis-grupos" onClick={onClose} className={linkClass}>
-                <LayoutDashboard size={20} />
-                <span className="font-medium">Mis Grupos</span>
-              </NavLink>
-              <NavLink to="/asistencia" onClick={onClose} className={linkClass}>
-                <ClipboardList size={20} />
-                <span className="font-medium">Pasar Lista</span>
-              </NavLink>
-              <NavLink to="/pagos" onClick={onClose} className={linkClass}>
-                <CreditCard size={20} />
-                <span className="font-medium">Pagos</span>
-              </NavLink>
+              <div data-tour="sidebar-mis-grupos">
+                <NavLink to="/mis-grupos" onClick={onClose} className={linkClass}>
+                  <LayoutDashboard size={20} />
+                  <span className="font-medium">Mis Grupos</span>
+                </NavLink>
+              </div>
+              <div data-tour="sidebar-asistencia">
+                <NavLink to="/asistencia" onClick={onClose} className={linkClass}>
+                  <ClipboardList size={20} />
+                  <span className="font-medium">Pasar Lista</span>
+                </NavLink>
+              </div>
+              <div data-tour="sidebar-pagos">
+                <NavLink to="/pagos" onClick={onClose} className={linkClass}>
+                  <CreditCard size={20} />
+                  <span className="font-medium">Pagos</span>
+                </NavLink>
+              </div>
             </>
           )}
         </nav>
 
+        {/* Botón Guía Interactiva para Profesor */}
+        {user?.rol === 'profesor' && (
+          <div className="pt-2 pb-1" data-tour="sidebar-help-tour">
+            <button
+              onClick={() => {
+                window.dispatchEvent(new Event('open-teacher-tour'));
+                if (window.innerWidth < 1024) onClose();
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-600/20 to-orange-600/20 hover:from-pink-600/30 hover:to-orange-600/30 text-pink-300 py-2.5 rounded-2xl border border-pink-500/30 transition-all duration-300 font-bold text-xs"
+            >
+              <HelpCircle size={16} />
+              Guía del Sistema
+            </button>
+          </div>
+        )}
+
         {/* Información del usuario y logout */}
-        <div className="border-t border-white/15 pt-4 mt-4">
+        <div className="border-t border-white/15 pt-4 mt-2">
           <button
+            data-tour="sidebar-perfil"
             onClick={() => { navigate('/mi-perfil'); onClose(); }}
             className="w-full flex items-center gap-3 mb-3 px-1 hover:bg-slate-800/80 rounded-2xl py-2 transition-all group text-left"
           >

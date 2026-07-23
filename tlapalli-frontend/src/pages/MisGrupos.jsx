@@ -249,6 +249,7 @@ export default function MisGrupos() {
           <p className="mt-1 text-base font-semibold text-white/75">Gestiona tus grupos y alumnos</p>
         </div>
         <motion.button
+          data-tour="btn-nuevo-grupo"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => handleOpenModal('grupo')}
