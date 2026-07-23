@@ -67,38 +67,54 @@ function Sidebar({ isOpen, onClose }) {
         <nav className="flex flex-col gap-2 flex-1 overflow-y-auto">
           {user?.rol === 'admin' ? (
             <>
-              <NavLink to="/dashboard" onClick={onClose} className={linkClass}>
-                <LayoutDashboard size={20} />
-                <span className="font-medium">Dashboard</span>
-              </NavLink>
-              <NavLink to="/alumnos" onClick={onClose} className={linkClass}>
-                <Users size={20} />
-                <span className="font-medium">Alumnos</span>
-              </NavLink>
-              <NavLink to="/instructores" onClick={onClose} className={linkClass}>
-                <UserSquare2 size={20} />
-                <span className="font-medium">Instructores</span>
-              </NavLink>
-              <NavLink to="/talleres" onClick={onClose} className={linkClass}>
-                <Palette size={20} />
-                <span className="font-medium">Talleres</span>
-              </NavLink>
-              <NavLink to="/asistencia-admin" onClick={onClose} className={linkClass}>
-                <ClipboardCheck size={20} />
-                <span className="font-medium">Asistencias</span>
-              </NavLink>
-              <NavLink to="/reportes" onClick={onClose} className={linkClass}>
-                <BarChart3 size={20} />
-                <span className="font-medium">Reportes</span>
-              </NavLink>
-              <NavLink to="/mapeo" onClick={onClose} className={linkClass}>
-                <MapPin size={20} />
-                <span className="font-medium">Mapeo</span>
-              </NavLink>
-              <NavLink to="/servicio-social" onClick={onClose} className={linkClass}>
-                <HeartHandshake size={20} />
-                <span className="font-medium">Servicio Social</span>
-              </NavLink>
+              <div data-tour="sidebar-dashboard">
+                <NavLink to="/dashboard" onClick={onClose} className={linkClass}>
+                  <LayoutDashboard size={20} />
+                  <span className="font-medium">Dashboard</span>
+                </NavLink>
+              </div>
+              <div data-tour="sidebar-alumnos">
+                <NavLink to="/alumnos" onClick={onClose} className={linkClass}>
+                  <Users size={20} />
+                  <span className="font-medium">Alumnos</span>
+                </NavLink>
+              </div>
+              <div data-tour="sidebar-instructores">
+                <NavLink to="/instructores" onClick={onClose} className={linkClass}>
+                  <UserSquare2 size={20} />
+                  <span className="font-medium">Instructores</span>
+                </NavLink>
+              </div>
+              <div data-tour="sidebar-talleres">
+                <NavLink to="/talleres" onClick={onClose} className={linkClass}>
+                  <Palette size={20} />
+                  <span className="font-medium">Talleres</span>
+                </NavLink>
+              </div>
+              <div data-tour="sidebar-asistencia-admin">
+                <NavLink to="/asistencia-admin" onClick={onClose} className={linkClass}>
+                  <ClipboardCheck size={20} />
+                  <span className="font-medium">Asistencias</span>
+                </NavLink>
+              </div>
+              <div data-tour="sidebar-reportes">
+                <NavLink to="/reportes" onClick={onClose} className={linkClass}>
+                  <BarChart3 size={20} />
+                  <span className="font-medium">Reportes</span>
+                </NavLink>
+              </div>
+              <div data-tour="sidebar-mapeo">
+                <NavLink to="/mapeo" onClick={onClose} className={linkClass}>
+                  <MapPin size={20} />
+                  <span className="font-medium">Mapeo</span>
+                </NavLink>
+              </div>
+              <div data-tour="sidebar-servicio-social">
+                <NavLink to="/servicio-social" onClick={onClose} className={linkClass}>
+                  <HeartHandshake size={20} />
+                  <span className="font-medium">Servicio Social</span>
+                </NavLink>
+              </div>
             </>
           ) : (
             <>
@@ -128,7 +144,11 @@ function Sidebar({ isOpen, onClose }) {
         <div className="pt-2 pb-1" data-tour="sidebar-help-tour">
           <button
             onClick={() => {
-              window.dispatchEvent(new Event('open-teacher-tour'));
+              if (user?.rol === 'admin') {
+                window.dispatchEvent(new Event('open-admin-tour'));
+              } else {
+                window.dispatchEvent(new Event('open-teacher-tour'));
+              }
               if (window.innerWidth < 1024) onClose();
             }}
             className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-600/20 to-orange-600/20 hover:from-pink-600/30 hover:to-orange-600/30 text-pink-300 py-2.5 rounded-2xl border border-pink-500/30 transition-all duration-300 font-bold text-xs cursor-pointer"

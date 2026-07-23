@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TeacherTour from './TeacherTour';
+import AdminTour from './AdminTour';
 import { useAuth } from '../context/AuthContext';
 import { User, Bell, Search, Menu, HelpCircle } from 'lucide-react';
 
@@ -13,8 +14,8 @@ function Layout() {
     <div className="flex h-screen bg-transparent text-white font-['Outfit'] overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      {/* Tour interactivo de guía para profesor/instructor */}
-      {user && <TeacherTour />}
+      {/* Tours interactivos según rol del usuario */}
+      {user?.rol === 'admin' ? <AdminTour /> : <TeacherTour />}
 
       <div className="flex-1 flex flex-col min-w-0 relative">
         {/* Botón flotante para móvil */}
@@ -27,7 +28,13 @@ function Layout() {
           </button>
 
           <button
-            onClick={() => window.dispatchEvent(new Event('open-teacher-tour'))}
+            onClick={() => {
+              if (user?.rol === 'admin') {
+                window.dispatchEvent(new Event('open-admin-tour'));
+              } else {
+                window.dispatchEvent(new Event('open-teacher-tour'));
+              }
+            }}
             className="p-3 bg-gradient-to-r from-pink-600/30 to-orange-600/30 border border-pink-500/40 rounded-2xl text-pink-300 hover:text-white transition-all shadow-2xl pointer-events-auto cursor-pointer flex items-center gap-1.5 text-xs font-bold"
           >
             <HelpCircle size={20} />
