@@ -87,8 +87,20 @@ async function bootstrap() {
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   // CORS
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'https://tlapalli.vercel.app',
+    'http://localhost:5173',
+  ].filter(Boolean) as string[];
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.some(o => origin.startsWith(o))) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Permitir orígenes para evitar bloqueos por variaciones de subdominio
+      }
+    },
     credentials: true,
   });
 

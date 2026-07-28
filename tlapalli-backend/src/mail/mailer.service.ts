@@ -30,6 +30,9 @@ export class MailerService {
                 user: smtpUser,
                 pass: smtpPass,
               },
+              connectionTimeout: 5000,
+              greetingTimeout: 5000,
+              socketTimeout: 5000,
             }
           : {
               host: smtpHost,
@@ -39,6 +42,9 @@ export class MailerService {
                 user: smtpUser,
                 pass: smtpPass,
               },
+              connectionTimeout: 5000,
+              greetingTimeout: 5000,
+              socketTimeout: 5000,
             }
       );
       this.logger.log(`📧 Servicio de correo inicializado con ${isGmail ? 'Gmail Service' : 'SMTP'} (${smtpUser})`);
