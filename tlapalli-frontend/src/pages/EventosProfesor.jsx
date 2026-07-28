@@ -102,7 +102,7 @@ export default function EventosProfesor() {
     } catch (err) {
       console.error(err);
       showToast('Error', err.response?.data?.message || 'No se pudo aprobar el evento', 'error');
-    } fontally {
+    } finally {
       setActionLoading(null);
     }
   };
