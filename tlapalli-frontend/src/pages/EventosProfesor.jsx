@@ -13,12 +13,17 @@ import {
   ChevronRight,
   Info,
   Sparkles,
-  CalendarDays
+  CalendarDays,
+  User,
+  Check,
+  X,
+  Filter
 } from 'lucide-react';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
 import StatCard from '../components/StatCard';
+import { useAuth } from '../context/AuthContext';
 
 const LOCATION_OPTIONS = [
   { value: 'galeria', label: 'Galería', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' },
@@ -28,17 +33,24 @@ const LOCATION_OPTIONS = [
 ];
 
 export default function EventosProfesor() {
+  const { user } = useAuth();
+  const isAdmin = user?.rol === 'admin';
+
   const [actividades, setActividades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+  const [actionLoading, setActionLoading] = useState(null);
+
+  // Filtro de estatus para la lista
+  const [statusFilter, setStatusFilter] = useState('todos'); // 'todos', 'pendiente', 'aprobado', 'rechazado'
+
   // Calendario
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateString, setSelectedDateString] = useState(
     new Date().toISOString().split('T')[0]
   );
 
-  // Modal proponer evento
+  // Modal proponer / crear evento
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -49,6 +61,11 @@ export default function EventosProfesor() {
     tipo: 'interna',
     ubicacion: 'galeria',
   });
+
+  // Modal para rechazar evento (Admin)
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedEventToReject, setSelectedEventToReject] = useState(null);
+  const [observaciones, setObservaciones] = useState('');
 
   // Toast
   const [toast, setToast] = useState(null);
@@ -72,6 +89,47 @@ export default function EventosProfesor() {
       setError('No se pudieron cargar los eventos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Acciones de Admin (Aprobar y Rechazar)
+  const handleAprobar = async (id) => {
+    try {
+      setActionLoading(id);
+      await api.patch(`/actividades/${id}/aprobar`);
+      showToast('Evento Aprobado', 'El evento ha sido aprobado exitosamente y ya está publicado.', 'success');
+      await fetchActividades();
+    } catch (err) {
+      console.error(err);
+      showToast('Error', err.response?.data?.message || 'No se pudo aprobar el evento', 'error');
+    } fontally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleOpenRejectModal = (actividad) => {
+    setSelectedEventToReject(actividad);
+    setObservaciones('');
+    setShowRejectModal(true);
+  };
+
+  const handleRechazar = async (e) => {
+    e.preventDefault();
+    if (!selectedEventToReject) return;
+
+    try {
+      setSaving(true);
+      await api.patch(`/actividades/${selectedEventToReject.id}/rechazar`, { observaciones });
+      showToast('Evento Rechazado', 'La propuesta de evento ha sido rechazada.', 'info');
+      setShowRejectModal(false);
+      setSelectedEventToReject(null);
+      setObservaciones('');
+      await fetchActividades();
+    } catch (err) {
+      console.error(err);
+      showToast('Error al rechazar', err.response?.data?.message || 'No se pudo rechazar el evento', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -115,36 +173,51 @@ export default function EventosProfesor() {
     try {
       setSaving(true);
       const fullDateTime = `${formData.fecha}T${formData.hora}:00`;
-      
-      await api.post('/actividades/proponer', {
+      const payload = {
         titulo: formData.titulo,
         descripcion: formData.descripcion,
         fecha: new Date(fullDateTime).toISOString(),
         tipo: formData.tipo,
         ubicacion: formData.ubicacion,
-      });
+      };
+      
+      if (isAdmin) {
+        // Admin crea evento directamente aprobado
+        await api.post('/actividades', payload);
+        showToast('Evento Creado', 'El evento fue creado y publicado directamente.', 'success');
+      } else {
+        // Profesor propone evento
+        await api.post('/actividades/proponer', payload);
+        showToast('Propuesta enviada', 'Tu propuesta de evento se registró y está pendiente de aprobación por el Administrador.', 'success');
+      }
 
-      showToast('Propuesta enviada', 'Tu propuesta de evento se registró y está pendiente de aprobación por el Administrador.', 'success');
       setShowModal(false);
       await fetchActividades();
     } catch (err) {
       console.error(err);
-      showToast('Error al proponer', err.response?.data?.message || 'No se pudo enviar la propuesta', 'error');
+      showToast('Error al guardar', err.response?.data?.message || 'No se pudo guardar la actividad', 'error');
     } finally {
       setSaving(false);
     }
   };
 
-  // Filtrar eventos por fecha seleccionada
+  // Filtrar eventos por fecha seleccionada y filtro de estatus
   const actividadesDelDia = useMemo(() => {
     return actividades.filter(act => {
       const actDate = new Date(act.fecha);
       const actStr = `${actDate.getFullYear()}-${String(actDate.getMonth() + 1).padStart(2, '0')}-${String(actDate.getDate()).padStart(2, '0')}`;
-      return actStr === selectedDateString;
+      const matchesDate = actStr === selectedDateString;
+      const matchesFilter = statusFilter === 'todos' || act.estatus === statusFilter;
+      return matchesDate && matchesFilter;
     });
-  }, [actividades, selectedDateString]);
+  }, [actividades, selectedDateString, statusFilter]);
 
-  // Contadores de estatus del profesor
+  // Lista de solicitudes pendientes de aprobación (para Admin)
+  const pendientesAprobacion = useMemo(() => {
+    return actividades.filter(a => a.estatus === 'pendiente');
+  }, [actividades]);
+
+  // Contadores de estatus
   const stats = useMemo(() => {
     const pendientes = actividades.filter(a => a.estatus === 'pendiente').length;
     const aprobados = actividades.filter(a => a.estatus === 'aprobado').length;
@@ -169,10 +242,12 @@ export default function EventosProfesor() {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.65)]">
-            Mis Eventos y Propuestas
+            {isAdmin ? 'Gestión de Eventos y Calendario' : 'Mis Eventos y Propuestas'}
           </h1>
           <p className="mt-1 text-base font-semibold text-white/75">
-            Propón actividades culturales y consulta el calendario confirmado
+            {isAdmin 
+              ? 'Revisa y aprueba solicitudes de eventos de profesores o crea eventos institucionales' 
+              : 'Propón actividades culturales y consulta el calendario confirmado'}
           </p>
         </div>
 
@@ -182,16 +257,107 @@ export default function EventosProfesor() {
           onClick={handleOpenProponerModal}
           className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-500 hover:to-orange-500 text-white rounded-2xl font-black text-sm transition shadow-lg shadow-pink-600/30 cursor-pointer"
         >
-          <Plus size={18} /> Proponer Nuevo Evento
+          <Plus size={18} /> {isAdmin ? 'Crear Evento Oficial' : 'Proponer Nuevo Evento'}
         </motion.button>
       </div>
 
       {/* Tarjetas de Estadísticas */}
       <div className="grid grid-cols-3 gap-4">
         <StatCard icon={CalendarDays} label="Confirmados" value={stats.aprobados} color="purple" />
-        <StatCard icon={Clock} label="Pendientes" value={stats.pendientes} color="yellow" />
-        <StatCard icon={XCircle} label="Rechazados/Cancelados" value={stats.rechazados} color="rose" />
+        <StatCard icon={Clock} label="Pendientes de Aprobación" value={stats.pendientes} color="yellow" />
+        <StatCard icon={XCircle} label="Rechazados / Cancelados" value={stats.rechazados} color="rose" />
       </div>
+
+      {/* Sección exclusiva de Admin: Solicitudes Pendientes por Aprobar */}
+      {isAdmin && pendientesAprobacion.length > 0 && (
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-amber-500/10 border-2 border-amber-500/30 rounded-3xl p-6 shadow-xl backdrop-blur-xl space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-amber-500/20 text-amber-400 rounded-2xl border border-amber-500/30">
+                <AlertCircle size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-amber-200 flex items-center gap-2">
+                  Solicitudes Pendientes por Aprobar
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-xs">
+                    {pendientesAprobacion.length}
+                  </span>
+                </h3>
+                <p className="text-xs text-amber-300/70 font-semibold">
+                  Los profesores han enviado propuestas de eventos que requieren tu autorización.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {pendientesAprobacion.map((act) => {
+              const actDate = new Date(act.fecha);
+              const fechaFormatted = actDate.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+              const actTime = actDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
+              const instructorNombre = act.instructor?.nombre || act.instructor?.usuario?.nombre || 'Profesor sin asignar';
+
+              return (
+                <div 
+                  key={act.id} 
+                  className="bg-slate-900/90 border border-amber-500/20 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[11px] text-amber-400 font-bold border-b border-white/5 pb-2">
+                      <span className="flex items-center gap-1.5 truncate">
+                        <User size={13} className="text-amber-300" /> {instructorNombre}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-black text-[10px]">
+                        PENDIENTE
+                      </span>
+                    </div>
+
+                    <h4 className="font-bold text-white text-base leading-snug">{act.titulo}</h4>
+                    {act.descripcion && (
+                      <p className="text-xs text-white/60 line-clamp-2">{act.descripcion}</p>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-white/70 font-semibold pt-1">
+                      <span className="flex items-center gap-1">
+                        <CalendarIcon size={12} className="text-pink-400" /> {fechaFormatted}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} className="text-sky-400" /> {actTime} hrs
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-white/50 font-semibold flex items-center gap-1">
+                      <MapPin size={12} className="text-emerald-400" /> Ubicación: <span className="text-white/80 font-bold capitalize">{act.ubicacion}</span>
+                    </div>
+                  </div>
+
+                  {/* Acciones Aprobar / Rechazar */}
+                  <div className="flex items-center gap-2 pt-3 border-t border-white/10">
+                    <button
+                      onClick={() => handleAprobar(act.id)}
+                      disabled={actionLoading === act.id}
+                      className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
+                    >
+                      {actionLoading === act.id ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                      Aprobar
+                    </button>
+                    <button
+                      onClick={() => handleOpenRejectModal(act)}
+                      disabled={actionLoading === act.id}
+                      className="flex-1 py-2 px-3 bg-rose-600/30 hover:bg-rose-600/50 text-rose-200 border border-rose-500/30 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <X size={14} /> Rechazar
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
       {/* Layout de Calendario + Panel Lateral */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -283,7 +449,7 @@ export default function EventosProfesor() {
         </div>
 
         {/* Detalle del Día Seleccionado (Columna derecha 1/3) */}
-        <div className="bg-slate-900/90 border border-white/15 rounded-3xl p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between">
+        <div className="bg-slate-900/90 border border-white/15 rounded-3xl p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
               <div>
@@ -293,13 +459,35 @@ export default function EventosProfesor() {
               <button
                 onClick={handleOpenProponerModal}
                 className="p-2 bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 rounded-xl transition"
-                title="Proponer para este día"
+                title="Proponer o crear para este día"
               >
                 <Plus size={18} />
               </button>
             </div>
 
-            <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+            {/* Filtro de Estatus */}
+            <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1">
+              {[
+                { id: 'todos', label: 'Todos' },
+                { id: 'pendiente', label: 'Pendientes' },
+                { id: 'aprobado', label: 'Aprobados' },
+                { id: 'rechazado', label: 'Rechazados' },
+              ].map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setStatusFilter(f.id)}
+                  className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition capitalize whitespace-nowrap ${
+                    statusFilter === f.id
+                      ? 'bg-pink-600 text-white shadow-md shadow-pink-600/30'
+                      : 'bg-slate-800 text-white/50 hover:bg-slate-700 hover:text-white'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
               {actividadesDelDia.length === 0 ? (
                 <div className="text-center py-12">
                   <CalendarDays size={40} className="mx-auto text-white/20 mb-3" />
@@ -312,6 +500,8 @@ export default function EventosProfesor() {
                   if (act.estatus === 'pendiente') statusBadge = { bg: 'bg-amber-500/20 text-amber-300 border-amber-500/30', label: '🟡 Pendiente' };
                   else if (act.estatus === 'rechazado') statusBadge = { bg: 'bg-rose-500/20 text-rose-300 border-rose-500/30', label: '🔴 Rechazado' };
                   else if (act.estatus === 'cancelado') statusBadge = { bg: 'bg-gray-500/20 text-gray-300 border-gray-500/30', label: '❌ Cancelado' };
+
+                  const instructorNombre = act.instructor?.nombre || act.instructor?.usuario?.nombre;
 
                   return (
                     <motion.div 
@@ -338,12 +528,37 @@ export default function EventosProfesor() {
                         <span className="flex items-center gap-1">
                           <MapPin size={10} className="text-pink-400" /> {act.ubicacion}
                         </span>
+                        {instructorNombre && (
+                          <span className="flex items-center gap-1 text-amber-300/80">
+                            <User size={10} /> {instructorNombre}
+                          </span>
+                        )}
                       </div>
 
                       {act.observacionesAdmin && (
                         <div className="p-2 bg-rose-500/10 border border-rose-500/20 rounded-xl text-[11px] text-rose-200">
                           <span className="font-bold block text-rose-300">Nota del Administrador:</span>
                           {act.observacionesAdmin}
+                        </div>
+                      )}
+
+                      {/* Si es admin y el evento está pendiente, ofrecer aprobar/rechazar desde la lista del día */}
+                      {isAdmin && act.estatus === 'pendiente' && (
+                        <div className="flex gap-2 pt-2 border-t border-white/10">
+                          <button
+                            onClick={() => handleAprobar(act.id)}
+                            disabled={actionLoading === act.id}
+                            className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-lg transition flex items-center justify-center gap-1"
+                          >
+                            <Check size={12} /> Aprobar
+                          </button>
+                          <button
+                            onClick={() => handleOpenRejectModal(act)}
+                            disabled={actionLoading === act.id}
+                            className="flex-1 py-1.5 bg-rose-600/30 hover:bg-rose-600/50 text-rose-200 border border-rose-500/30 font-bold text-[11px] rounded-lg transition flex items-center justify-center gap-1"
+                          >
+                            <X size={12} /> Rechazar
+                          </button>
                         </div>
                       )}
                     </motion.div>
@@ -355,8 +570,13 @@ export default function EventosProfesor() {
         </div>
       </div>
 
-      {/* Modal de Propuesta de Evento */}
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Proponer Nuevo Evento / Actividad" maxWidth="max-w-md">
+      {/* Modal de Propuesta / Creación de Evento */}
+      <Modal 
+        isOpen={showModal} 
+        onClose={() => setShowModal(false)} 
+        title={isAdmin ? "Crear Evento Oficial" : "Proponer Nuevo Evento / Actividad"} 
+        maxWidth="max-w-md"
+      >
         <form onSubmit={handleSavePropuesta} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-white/70 uppercase mb-1.5">Título del Evento *</label>
@@ -420,7 +640,11 @@ export default function EventosProfesor() {
 
           <div className="p-3 bg-pink-500/10 border border-pink-500/20 rounded-xl text-xs text-pink-200 flex items-start gap-2">
             <Info size={16} className="text-pink-400 flex-shrink-0 mt-0.5" />
-            <span>Al enviar la propuesta, el evento se enviará al Administrador para su aprobación antes de publicarse oficialmente.</span>
+            <span>
+              {isAdmin 
+                ? 'Como Administrador, este evento se publicará de manera oficial de forma directa.'
+                : 'Al enviar la propuesta, el evento se enviará al Administrador para su aprobación antes de publicarse oficialmente.'}
+            </span>
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -434,9 +658,52 @@ export default function EventosProfesor() {
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 py-2.5 bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-500 hover:to-orange-500 disabled:opacity-50 text-white font-black text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg shadow-pink-600/20"
+              className="flex-1 py-2.5 bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-500 hover:to-orange-500 disabled:opacity-50 text-white font-black text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg shadow-pink-600/20 cursor-pointer"
             >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : 'Enviar Propuesta'}
+              {saving ? <Loader2 size={16} className="animate-spin" /> : (isAdmin ? 'Crear Evento' : 'Enviar Propuesta')}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal para Rechazar Evento (Admin) */}
+      <Modal 
+        isOpen={showRejectModal} 
+        onClose={() => setShowRejectModal(false)} 
+        title="Rechazar Propuesta de Evento" 
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleRechazar} className="space-y-4">
+          <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-200">
+            <span className="font-bold block text-rose-300">Evento: {selectedEventToReject?.titulo}</span>
+            <span>Estás a punto de rechazar esta propuesta. Puedes indicarle al profesor el motivo o sugerencias.</span>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-white/70 uppercase mb-1.5">Observaciones / Motivo de Rechazo</label>
+            <textarea
+              rows="3"
+              placeholder="Ej. El espacio ya está ocupado en ese horario. Por favor propón otra fecha..."
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+              className="w-full px-3.5 py-2.5 bg-slate-800 border border-white/15 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-rose-500 text-xs resize-none"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowRejectModal(false)}
+              className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-black text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg shadow-rose-600/20 cursor-pointer"
+            >
+              {saving ? <Loader2 size={16} className="animate-spin" /> : 'Confirmar Rechazo'}
             </button>
           </div>
         </form>

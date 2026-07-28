@@ -116,6 +116,12 @@ function Sidebar({ isOpen, onClose }) {
                   <span className="font-medium">Servicio Social</span>
                 </NavLink>
               </div>
+              <div data-tour="sidebar-eventos-admin">
+                <NavLink to="/eventos" onClick={onClose} className={linkClass}>
+                  <CalendarDays size={20} />
+                  <span className="font-medium">Eventos</span>
+                </NavLink>
+              </div>
             </>
           ) : (
             <>

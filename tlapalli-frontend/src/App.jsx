@@ -58,6 +58,7 @@ function App() {
           <Route path="/reportes" element={<Reportes />} />
           <Route path="/mapeo" element={<Mapeo />} />
           <Route path="/servicio-social" element={<ServicioSocial />} />
+          <Route path="/eventos" element={<EventosProfesor />} />
         </Route>
       </Route>
 
