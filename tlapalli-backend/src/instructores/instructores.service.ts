@@ -70,7 +70,8 @@ export class InstructoresService {
         tallerNombre = taller?.nombreTaller;
       }
 
-      await this.mailerService.sendActivationEmail(dto.email, token, dto.nombre, tallerNombre);
+      this.mailerService.sendActivationEmail(dto.email, token, dto.nombre, tallerNombre)
+        .catch(err => console.error(`Error enviando correo de invitación a ${dto.email}:`, err));
     }
 
     const result = await this.prisma.instructor.findUnique({
@@ -174,7 +175,8 @@ export class InstructoresService {
           tallerNombre = taller?.nombreTaller;
         }
 
-        await this.mailerService.sendActivationEmail(dto.email, token, dto.nombre || existing.nombre, tallerNombre);
+        this.mailerService.sendActivationEmail(dto.email, token, dto.nombre || existing.nombre, tallerNombre)
+          .catch(err => console.error(`Error enviando correo a ${dto.email}:`, err));
       }
     }
 
@@ -278,11 +280,13 @@ export class InstructoresService {
 
     if (isActivo) {
       // Si ya estaba activo, es como un reseteo de password
-      await this.mailerService.sendResetPasswordEmail(instructor.email, token);
+      this.mailerService.sendResetPasswordEmail(instructor.email, token)
+        .catch(err => console.error(`Error enviando correo a ${instructor.email}:`, err));
     } else {
       // Si sigue pendiente, reenviar activación
       const tallerNombre = instructor.taller?.nombreTaller;
-      await this.mailerService.sendActivationEmail(instructor.email, token, instructor.nombre, tallerNombre);
+      this.mailerService.sendActivationEmail(instructor.email, token, instructor.nombre, tallerNombre)
+        .catch(err => console.error(`Error enviando correo a ${instructor.email}:`, err));
     }
     
     return { message: 'Enlace enviado exitosamente' };

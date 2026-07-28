@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Loader2, AlertCircle, UserCheck, Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, AlertCircle, UserCheck, Lock, Eye, EyeOff, CheckCircle2, Info } from 'lucide-react';
 import api from '../services/api';
 
 const GoogleIcon = ({ className }) => (
@@ -17,6 +17,7 @@ function AcceptInvitation() {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [submitError, setSubmitError] = useState('');
   const [profesor, setProfesor] = useState(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -54,14 +55,25 @@ function AcceptInvitation() {
 
   const handleCreatePassword = async (e) => {
     e.preventDefault();
+    setSubmitError('');
 
     if (password.length < 8) {
-      alert('La contraseña debe tener al menos 8 caracteres');
+      setSubmitError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setSubmitError('La contraseña debe tener al menos una letra mayúscula');
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setSubmitError('La contraseña debe tener al menos un número');
       return;
     }
 
     if (password !== confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      setSubmitError('Las contraseñas no coinciden');
       return;
     }
 
@@ -70,7 +82,7 @@ function AcceptInvitation() {
       await api.post('/auth/activate-account', { token, password });
       setSuccess(true);
     } catch (err) {
-      alert(err.response?.data?.message || 'Error al activar la cuenta');
+      setSubmitError(err.response?.data?.message || 'Error al activar la cuenta. El enlace puede haber expirado.');
     } finally {
       setSaving(false);
     }
@@ -127,13 +139,13 @@ function AcceptInvitation() {
               </motion.div>
               <h2 className="text-2xl font-black text-white mb-4">¡Cuenta Activada!</h2>
               <p className="text-white/70 text-sm mb-6 leading-relaxed">
-                Tu contraseña ha sido creada. Ya puedes iniciar sesión con tu correo y contraseña.
+                Tu contraseña ha sido creada exitosamente. Ya puedes iniciar sesión con tu correo y contraseña.
               </p>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/login')}
-                className="w-full py-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 rounded-2xl font-black text-white transition-all"
+                className="w-full py-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 rounded-2xl font-black text-white transition-all cursor-pointer"
               >
                 Ir a Iniciar Sesión
               </motion.button>
@@ -141,12 +153,12 @@ function AcceptInvitation() {
           ) : (
             <div>
               {/* Header */}
-              <div className="flex flex-col items-center mb-8 text-center">
+              <div className="flex flex-col items-center mb-6 text-center">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                  className="w-20 h-20 mb-6 rounded-3xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center border border-white/20"
+                  className="w-20 h-20 mb-4 rounded-3xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center border border-white/20"
                 >
                   <UserCheck className="w-10 h-10 text-pink-400" />
                 </motion.div>
@@ -162,9 +174,23 @@ function AcceptInvitation() {
                 <span className="text-sm font-semibold text-pink-300">{profesor?.email}</span>
               </div>
 
-              {/* Tabs: Crear Contraseña / Google */}
+              {/* Requisitos de la contraseña */}
+              <div className="bg-slate-900/50 rounded-2xl p-3.5 border border-white/10 mb-5">
+                <div className="flex items-start gap-2">
+                  <Info className="w-4 h-4 text-pink-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-xs text-white/60 space-y-1">
+                    <p className="font-semibold text-white/80">Requisitos para tu contraseña:</p>
+                    <ul className="space-y-0.5 ml-2">
+                      <li className={password.length >= 8 ? 'text-emerald-400 font-semibold' : ''}>• Mínimo 8 caracteres</li>
+                      <li className={/[A-Z]/.test(password) ? 'text-emerald-400 font-semibold' : ''}>• Al menos una letra mayúscula</li>
+                      <li className={/[0-9]/.test(password) ? 'text-emerald-400 font-semibold' : ''}>• Al menos un número</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Formulario */}
               <div className="space-y-4">
-                {/* Opción 1: Crear Contraseña */}
                 <form onSubmit={handleCreatePassword} className="space-y-4">
                   <h3 className="text-white font-bold text-sm flex items-center gap-2">
                     <Lock size={16} className="text-pink-400" /> Crear tu contraseña
@@ -174,7 +200,7 @@ function AcceptInvitation() {
                     <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Contraseña (mínimo 8 caracteres)"
+                      placeholder="Contraseña (ej. Profe2026)"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full pl-10 pr-10 py-3 bg-slate-800/80 border border-white/15 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
@@ -195,16 +221,33 @@ function AcceptInvitation() {
                       placeholder="Confirmar contraseña"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-800/80 border border-white/15 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
+                      className="w-full pl-10 pr-10 py-3 bg-slate-800/80 border border-white/15 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition-all"
                     />
+                    {confirmPassword && password === confirmPassword && (
+                      <CheckCircle2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400" />
+                    )}
                   </div>
+
+                  <AnimatePresence>
+                    {submitError && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="flex items-center gap-2 text-red-400 bg-red-400/10 p-3 rounded-xl border border-red-400/20"
+                      >
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        <p className="text-xs font-medium">{submitError}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <motion.button
                     type="submit"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     disabled={saving || !password || !confirmPassword}
-                    className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 disabled:opacity-50 rounded-2xl font-black text-white transition-all"
+                    className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 disabled:opacity-50 rounded-2xl font-black text-white transition-all shadow-lg cursor-pointer"
                   >
                     {saving ? (
                       <>
@@ -217,11 +260,11 @@ function AcceptInvitation() {
                 </form>
 
                 {/* Separador */}
-                <div className="relative flex items-center justify-center">
+                <div className="relative flex items-center justify-center py-1">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-white/15" />
                   </div>
-                  <span className="relative bg-transparent px-4 text-xs text-white/30 font-bold">O también</span>
+                  <span className="relative bg-slate-800 px-3 text-xs text-white/30 font-bold">O también</span>
                 </div>
 
                 {/* Opción 2: Vincular Google */}
@@ -229,7 +272,7 @@ function AcceptInvitation() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleLinkGoogle}
-                  className="w-full flex items-center justify-center gap-3 h-14 bg-white rounded-2xl font-black text-slate-900 hover:bg-slate-100 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] group"
+                  className="w-full flex items-center justify-center gap-3 h-14 bg-white rounded-2xl font-black text-slate-900 hover:bg-slate-100 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] group cursor-pointer"
                 >
                   <GoogleIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
                   Vincular con Google

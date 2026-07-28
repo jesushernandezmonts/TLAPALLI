@@ -1,14 +1,14 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Param, 
-  Delete, 
-  UseGuards, 
-  ParseIntPipe, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+  ParseIntPipe,
   Patch,
-  Req 
+  Req
 } from '@nestjs/common';
 import { ActividadesService } from './actividades.service';
 import { CreateActividadDto } from './dto/create-actividad.dto';
@@ -20,7 +20,7 @@ import { Roles } from '../auth/strategies/roles.decorator';
 @Controller('actividades')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ActividadesController {
-  constructor(private readonly actividadesService: ActividadesService) {}
+  constructor(private readonly actividadesService: ActividadesService) { }
 
   @Post()
   @Roles('admin')
