@@ -83,6 +83,7 @@ function AcceptInvitation() {
       setSaving(true);
       await api.post('/auth/activate-account', { token, password });
       setSuccess(true);
+      setShowPwaModal(true);
     } catch (err) {
       setSubmitError(err.response?.data?.message || 'Error al activar la cuenta. El enlace puede haber expirado.');
     } finally {
