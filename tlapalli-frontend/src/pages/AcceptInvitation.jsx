@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, AlertCircle, UserCheck, Lock, Eye, EyeOff, CheckCircle2, Info } from 'lucide-react';
+import { Loader2, AlertCircle, UserCheck, Lock, Eye, EyeOff, CheckCircle2, Info, Bookmark } from 'lucide-react';
 import api from '../services/api';
+import InstallPwaModal from '../components/InstallPwaModal';
 
 const GoogleIcon = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24">
@@ -24,6 +25,7 @@ function AcceptInvitation() {
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showPwaModal, setShowPwaModal] = useState(false);
   const navigate = useNavigate();
 
   const token = searchParams.get('token');
@@ -129,25 +131,45 @@ function AcceptInvitation() {
               </Link>
             </div>
           ) : success ? (
-            <div className="text-center py-8">
+            <div className="text-center py-6">
+              <InstallPwaModal isOpen={showPwaModal} onClose={() => setShowPwaModal(false)} />
+              
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30"
+                className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/30"
               >
                 <UserCheck className="w-10 h-10 text-emerald-400" />
               </motion.div>
-              <h2 className="text-2xl font-black text-white mb-4">¡Cuenta Activada!</h2>
-              <p className="text-white/70 text-sm mb-6 leading-relaxed">
-                Tu contraseña ha sido creada exitosamente. Ya puedes iniciar sesión con tu correo y contraseña.
+              <h2 className="text-2xl font-black text-white mb-2">¡Cuenta Activada!</h2>
+              <p className="text-white/70 text-sm mb-4 leading-relaxed">
+                Tu contraseña ha sido creada exitosamente. Ya puedes iniciar sesión.
               </p>
+
+              {/* Sugerencia de guardar URL o PWA */}
+              <div className="bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-orange-500/20 border border-pink-500/30 rounded-2xl p-4 mb-6 text-left space-y-2">
+                <div className="flex items-center gap-2 text-pink-300 font-bold text-xs">
+                  <Bookmark size={16} />
+                  <span>💡 Tip para no perder la página:</span>
+                </div>
+                <p className="text-xs text-white/80">
+                  Guarda esta página en tus marcadores (⭐) o agrégala a la pantalla inicio de tu teléfono para ingresar directo a pasar lista cada día.
+                </p>
+                <button
+                  onClick={() => setShowPwaModal(true)}
+                  className="w-full mt-2 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Bookmark size={14} /> Ver cómo guardar / instalar app
+                </button>
+              </div>
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/login')}
-                className="w-full py-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 rounded-2xl font-black text-white transition-all cursor-pointer"
+                className="w-full py-4 bg-slate-700 hover:bg-slate-600 rounded-2xl font-black text-white transition-all cursor-pointer text-center"
               >
-                Ir a Iniciar Sesión
+                Ir a Iniciar Sesión →
               </motion.button>
             </div>
           ) : (

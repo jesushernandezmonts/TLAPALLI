@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, ShieldCheck, Info } from 'lucide-react';
+import { Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, ShieldCheck, Info, Bookmark } from 'lucide-react';
 import api from '../services/api';
+import InstallPwaModal from '../components/InstallPwaModal';
 
 function ActivarCuenta() {
   const [searchParams] = useSearchParams();
@@ -12,6 +13,7 @@ function ActivarCuenta() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [showPwaModal, setShowPwaModal] = useState(false);
   const navigate = useNavigate();
 
   const token = searchParams.get('token');
@@ -64,7 +66,6 @@ function ActivarCuenta() {
     try {
       await api.post('/auth/activate-account', { token, password });
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 4000);
     } catch (err) {
       setError(err.response?.data?.message || 'Error al activar la cuenta. El enlace puede haber expirado.');
     } finally {
@@ -74,6 +75,8 @@ function ActivarCuenta() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-['Outfit']">
+      <InstallPwaModal isOpen={showPwaModal} onClose={() => setShowPwaModal(false)} />
+
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-900/60 via-purple-900/60 to-orange-900/60 z-10" />
         <div 
@@ -207,7 +210,7 @@ function ActivarCuenta() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 disabled={loading}
-                className="w-full relative group h-14 overflow-hidden rounded-2xl font-bold text-white transition-all shadow-lg disabled:opacity-60"
+                className="w-full relative group h-14 overflow-hidden rounded-2xl font-bold text-white transition-all shadow-lg disabled:opacity-60 cursor-pointer"
                 type="submit"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-pink-600 bg-[length:200%_auto] group-hover:bg-right transition-all duration-500" />
@@ -225,27 +228,41 @@ function ActivarCuenta() {
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-8"
+              className="text-center py-4"
             >
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                className="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30"
+                className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/30"
               >
-                <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+                <CheckCircle2 className="w-10 h-10 text-emerald-400" />
               </motion.div>
-              <h2 className="text-2xl font-black text-white mb-3">¡Cuenta Activada!</h2>
-              <p className="text-white/60 text-sm mb-2">
-                Tu cuenta ha sido activada exitosamente.
+              <h2 className="text-2xl font-black text-white mb-2">¡Cuenta Activada!</h2>
+              <p className="text-white/70 text-sm mb-4">
+                Tu contraseña ha sido guardada correctamente.
               </p>
-              <p className="text-white/40 text-xs mb-6">
-                Ya puedes iniciar sesión con tu correo y contraseña, o con Google.
-              </p>
-              <p className="text-white/30 text-xs mb-4">Redirigiendo al login...</p>
+
+              {/* Recomendación de guardar URL */}
+              <div className="bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-orange-500/20 border border-pink-500/30 rounded-2xl p-4 mb-6 text-left space-y-2">
+                <div className="flex items-center gap-2 text-pink-300 font-bold text-xs">
+                  <Bookmark size={16} />
+                  <span>💡 Tip para volver a entrar diariamente:</span>
+                </div>
+                <p className="text-xs text-white/80">
+                  Guarda esta página en tus marcadores (⭐) o agrégala a la pantalla inicio de tu teléfono para ingresar directo a pasar lista.
+                </p>
+                <button
+                  onClick={() => setShowPwaModal(true)}
+                  className="w-full mt-2 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Bookmark size={14} /> Ver cómo guardar / instalar app
+                </button>
+              </div>
+
               <Link 
                 to="/login" 
-                className="inline-flex items-center gap-2 text-pink-400 hover:text-pink-300 font-bold transition-colors"
+                className="w-full block py-3.5 bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm rounded-2xl transition-all text-center"
               >
                 Ir al inicio de sesión ahora →
               </Link>
@@ -267,3 +284,4 @@ function ActivarCuenta() {
 }
 
 export default ActivarCuenta;
+

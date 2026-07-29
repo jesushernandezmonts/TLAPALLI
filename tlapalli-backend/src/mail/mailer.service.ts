@@ -151,6 +151,10 @@ export class MailerService {
           </div>
           <p style="font-size: 12px; color: #999;">O copia y pega este enlace en tu navegador:</p>
           <p style="font-size: 12px; color: #db2777; word-break: break-all;">${activationUrl}</p>
+          <div style="margin-top: 24px; padding: 16px; background-color: #fdf2f8; border-left: 4px solid #db2777; border-radius: 8px;">
+            <p style="margin: 0; font-size: 13px; color: #831843; font-weight: 600;">💡 Tip para ingresar diariamente:</p>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #9d174d; line-height: 1.4;">Una vez que actives tu cuenta, te recomendamos guardar la página del sistema (<strong>${frontendUrl}</strong>) en los <strong>Favoritos (⭐)</strong> de tu navegador o agregar el acceso directo a la pantalla de inicio de tu teléfono móvil.</p>
+          </div>
         </div>
         <div style="background: #f8f4ff; padding: 20px 30px; border-top: 1px solid #f3e8ff;">
           <p style="font-size: 11px; color: #999; margin: 0;">⏰ Este enlace expirará en 24 horas. Si no reconoces esta invitación, puedes ignorar este correo.</p>
@@ -180,6 +184,10 @@ export class MailerService {
           </div>
           <p style="font-size: 12px; color: #999;">O copia y pega este enlace en tu navegador:</p>
           <p style="font-size: 12px; color: #7c3aed; word-break: break-all;">${activationUrl}</p>
+          <div style="margin-top: 24px; padding: 16px; background-color: #f3e8ff; border-left: 4px solid #7c3aed; border-radius: 8px;">
+            <p style="margin: 0; font-size: 13px; color: #581c87; font-weight: 600;">💡 Tip para ingresar diariamente:</p>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #6b21a8; line-height: 1.4;">Te recomendamos guardar la dirección (<strong>${frontendUrl}</strong>) en los <strong>Favoritos (⭐)</strong> de tu navegador o añadir el acceso directo a la pantalla de inicio de tu celular.</p>
+          </div>
         </div>
         <div style="background: #f8f4ff; padding: 20px 30px; border-top: 1px solid #e5e7eb;">
           <p style="font-size: 11px; color: #999; margin: 0;">⏰ Este enlace expirará en 7 días. Si no reconoces este registro, puedes ignorar este correo.</p>
