@@ -81,11 +81,8 @@ function Login() {
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-['Outfit']">
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-900/60 via-purple-900/60 to-orange-900/60 z-10" />
-        <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
-          className="absolute inset-0 bg-cover bg-center"
+        <div 
+          className="absolute inset-0 bg-cover bg-center gpu-accelerated"
           style={{ backgroundImage: "url('/huamantla-bg.jpg')" }}
         />
       </div>
@@ -93,8 +90,8 @@ function Login() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-20 w-full max-w-lg px-4"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative z-20 w-full max-w-lg px-4 gpu-accelerated"
       >
         <div className="bg-slate-800/90 border border-white/20 rounded-[2rem] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
           <div className="flex flex-col items-center mb-6">
