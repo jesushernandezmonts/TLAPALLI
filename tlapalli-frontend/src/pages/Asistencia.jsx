@@ -575,19 +575,22 @@ export default function Asistencia() {
                                     {/* # */}
                                     <td className="px-4 py-3 text-white/30 text-xs font-mono">{idx + 1}</td>
 
-                                    {/* Alumno */}
-                                    <td className="px-4 py-3">
-                                      <div className="flex items-center gap-3">
-                                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0`}>
+                                    {/* Alumno - Clic para marcar/alternar asistencia */}
+                                    <td 
+                                      className={`px-4 py-3 ${isPastDate ? '' : 'cursor-pointer select-none'}`}
+                                      onClick={() => !isPastDate && setEstado(ga.id, estado === 'asistencia' ? 'falta' : 'asistencia')}
+                                    >
+                                      <div className="flex items-center gap-3 group">
+                                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0 shadow-sm`}>
                                           <span className="text-white font-bold text-[10px]">
-                                            {ga.alumno.nombre?.[0]}{ga.alumno.apellidoPaterno?.[0]}
+                                            {ga.alumno?.nombre?.[0] || 'A'}{ga.alumno?.apellidoPaterno?.[0] || ''}
                                           </span>
                                         </div>
                                         <div>
-                                          <p className="font-semibold text-white text-sm">
-                                            {ga.alumno.nombre} {ga.alumno.apellidoPaterno} {ga.alumno.apellidoMaterno || ''}
+                                          <p className="font-semibold text-white text-sm group-hover:text-pink-300 transition-colors">
+                                            {ga.alumno?.nombre || 'Alumno sin nombre'} {ga.alumno?.apellidoPaterno || ''} {ga.alumno?.apellidoMaterno || ''}
                                           </p>
-                                          {ga.alumno.telefono && (
+                                          {ga.alumno?.telefono && (
                                             <p className="text-[11px] text-white/30">{ga.alumno.telefono}</p>
                                           )}
                                         </div>
@@ -692,7 +695,7 @@ export default function Asistencia() {
                                                 type="button"
                                                 onClick={() => setActiveDoc({
                                                   url: compUrl,
-                                                  title: `Justificante - ${ga.alumno.nombre} ${ga.alumno.apellidoPaterno}`
+                                                  title: `Justificante - ${ga.alumno?.nombre || ''} ${ga.alumno?.apellidoPaterno || ''}`
                                                 })}
                                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition cursor-pointer"
                                               >

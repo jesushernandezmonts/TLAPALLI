@@ -17,7 +17,8 @@ import {
   User,
   Check,
   X,
-  Filter
+  Filter,
+  Eye
 } from 'lucide-react';
 import api from '../services/api';
 import Modal from '../components/Modal';
@@ -67,6 +68,15 @@ export default function EventosProfesor() {
   const [selectedEventToReject, setSelectedEventToReject] = useState(null);
   const [observaciones, setObservaciones] = useState('');
 
+  // Modal para ver detalles completos de un evento
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedEventDetail, setSelectedEventDetail] = useState(null);
+
+  const handleOpenDetailModal = (actividad) => {
+    setSelectedEventDetail(actividad);
+    setShowDetailModal(true);
+  };
+
   // Toast
   const [toast, setToast] = useState(null);
   const showToast = (title, message = '', type = 'success') => {
@@ -98,6 +108,7 @@ export default function EventosProfesor() {
       setActionLoading(id);
       await api.patch(`/actividades/${id}/aprobar`);
       showToast('Evento Aprobado', 'El evento ha sido aprobado exitosamente y ya está publicado.', 'success');
+      setShowDetailModal(false);
       await fetchActividades();
     } catch (err) {
       console.error(err);
@@ -111,6 +122,7 @@ export default function EventosProfesor() {
     setSelectedEventToReject(actividad);
     setObservaciones('');
     setShowRejectModal(true);
+    setShowDetailModal(false);
   };
 
   const handleRechazar = async (e) => {
@@ -302,21 +314,29 @@ export default function EventosProfesor() {
               const instructorNombre = act.instructor?.nombre || act.instructor?.usuario?.nombre || 'Profesor sin asignar';
 
               return (
-                <div 
+                <motion.div 
                   key={act.id} 
-                  className="bg-slate-900/90 border border-amber-500/20 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleOpenDetailModal(act)}
+                  className="bg-slate-900/90 border border-amber-500/30 hover:border-amber-400/70 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg cursor-pointer transition-all group"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-[11px] text-amber-400 font-bold border-b border-white/5 pb-2">
                       <span className="flex items-center gap-1.5 truncate">
                         <User size={13} className="text-amber-300" /> {instructorNombre}
                       </span>
-                      <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-black text-[10px]">
-                        PENDIENTE
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-black text-[10px]">
+                          PENDIENTE
+                        </span>
+                        <span className="text-[10px] text-amber-300/80 group-hover:text-amber-200 transition flex items-center gap-0.5 font-bold">
+                          <Eye size={12} /> Ver todo
+                        </span>
+                      </div>
                     </div>
 
-                    <h4 className="font-bold text-white text-base leading-snug">{act.titulo}</h4>
+                    <h4 className="font-bold text-white text-base leading-snug group-hover:text-amber-200 transition-colors">{act.titulo}</h4>
                     {act.descripcion && (
                       <p className="text-xs text-white/60 line-clamp-2">{act.descripcion}</p>
                     )}
@@ -329,15 +349,23 @@ export default function EventosProfesor() {
                         <Clock size={12} className="text-sky-400" /> {actTime} hrs
                       </span>
                     </div>
-                    <div className="text-[11px] text-white/50 font-semibold flex items-center gap-1">
-                      <MapPin size={12} className="text-emerald-400" /> Ubicación: <span className="text-white/80 font-bold capitalize">{act.ubicacion}</span>
+                    <div className="flex items-center justify-between text-[11px] text-white/50 font-semibold">
+                      <span className="flex items-center gap-1">
+                        <MapPin size={12} className="text-emerald-400" /> Ubicación: <span className="text-white/80 font-bold capitalize">{act.ubicacion}</span>
+                      </span>
+                      <span className="text-[10px] text-amber-400 font-bold group-hover:underline flex items-center gap-0.5">
+                        Leer todo &rarr;
+                      </span>
                     </div>
                   </div>
 
                   {/* Acciones Aprobar / Rechazar */}
-                  <div className="flex items-center gap-2 pt-3 border-t border-white/10">
+                  <div className="flex items-center gap-2 pt-3 border-t border-white/10" onClick={(e) => e.stopPropagation()}>
                     <button
-                      onClick={() => handleAprobar(act.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAprobar(act.id);
+                      }}
                       disabled={actionLoading === act.id}
                       className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
                     >
@@ -345,14 +373,17 @@ export default function EventosProfesor() {
                       Aprobar
                     </button>
                     <button
-                      onClick={() => handleOpenRejectModal(act)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenRejectModal(act);
+                      }}
                       disabled={actionLoading === act.id}
                       className="flex-1 py-2 px-3 bg-rose-600/30 hover:bg-rose-600/50 text-rose-200 border border-rose-500/30 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <X size={14} /> Rechazar
                     </button>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -508,7 +539,8 @@ export default function EventosProfesor() {
                       key={act.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-slate-800/80 border border-white/15 rounded-2xl p-4 space-y-2 hover:bg-slate-800 transition"
+                      onClick={() => handleOpenDetailModal(act)}
+                      className="bg-slate-800/80 hover:bg-slate-800 border border-white/15 hover:border-pink-500/40 rounded-2xl p-4 space-y-2 transition cursor-pointer group"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${statusBadge.bg}`}>
@@ -519,7 +551,10 @@ export default function EventosProfesor() {
                         </span>
                       </div>
 
-                      <h4 className="font-bold text-white text-sm">{act.titulo}</h4>
+                      <h4 className="font-bold text-white text-sm group-hover:text-pink-300 transition-colors flex items-center justify-between">
+                        <span>{act.titulo}</span>
+                        <Eye size={14} className="text-white/30 group-hover:text-pink-400 transition" />
+                      </h4>
                       {act.descripcion && (
                         <p className="text-xs text-white/60 line-clamp-2">{act.descripcion}</p>
                       )}
@@ -544,16 +579,22 @@ export default function EventosProfesor() {
 
                       {/* Si es admin y el evento está pendiente, ofrecer aprobar/rechazar desde la lista del día */}
                       {isAdmin && act.estatus === 'pendiente' && (
-                        <div className="flex gap-2 pt-2 border-t border-white/10">
+                        <div className="flex gap-2 pt-2 border-t border-white/10" onClick={(e) => e.stopPropagation()}>
                           <button
-                            onClick={() => handleAprobar(act.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAprobar(act.id);
+                            }}
                             disabled={actionLoading === act.id}
                             className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-lg transition flex items-center justify-center gap-1"
                           >
                             <Check size={12} /> Aprobar
                           </button>
                           <button
-                            onClick={() => handleOpenRejectModal(act)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenRejectModal(act);
+                            }}
                             disabled={actionLoading === act.id}
                             className="flex-1 py-1.5 bg-rose-600/30 hover:bg-rose-600/50 text-rose-200 border border-rose-500/30 font-bold text-[11px] rounded-lg transition flex items-center justify-center gap-1"
                           >
@@ -707,6 +748,147 @@ export default function EventosProfesor() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Modal de Detalle Completo de Evento */}
+      <Modal 
+        isOpen={showDetailModal} 
+        onClose={() => setShowDetailModal(false)} 
+        title="Detalles de la Solicitud / Evento" 
+        maxWidth="max-w-lg"
+      >
+        {selectedEventDetail && (() => {
+          const actDate = new Date(selectedEventDetail.fecha);
+          const fechaFormatted = actDate.toLocaleDateString('es-MX', { 
+            weekday: 'long', 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+          });
+          const actTime = actDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
+          const instructorNombre = selectedEventDetail.instructor?.nombre || selectedEventDetail.instructor?.usuario?.nombre || 'Profesor sin asignar';
+
+          let statusBadge = { bg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', label: '🟢 Aprobado' };
+          if (selectedEventDetail.estatus === 'pendiente') statusBadge = { bg: 'bg-amber-500/20 text-amber-300 border-amber-500/30', label: '🟡 Pendiente de Aprobación' };
+          else if (selectedEventDetail.estatus === 'rechazado') statusBadge = { bg: 'bg-rose-500/20 text-rose-300 border-rose-500/30', label: '🔴 Rechazado' };
+          else if (selectedEventDetail.estatus === 'cancelado') statusBadge = { bg: 'bg-gray-500/20 text-gray-300 border-gray-500/30', label: '❌ Cancelado' };
+
+          return (
+            <div className="space-y-5 text-white">
+              {/* Banner Superior Estatus e Instructor */}
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+                <span className={`px-3 py-1 rounded-full text-xs font-black border ${statusBadge.bg}`}>
+                  {statusBadge.label}
+                </span>
+                <div className="text-xs text-white/80 font-semibold flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-xl border border-white/10">
+                  <User size={14} className="text-amber-400" />
+                  <span>Propuesto por: <strong className="text-amber-300 font-bold">{instructorNombre}</strong></span>
+                </div>
+              </div>
+
+              {/* Título Principal */}
+              <div>
+                <span className="text-[11px] font-bold text-pink-400 uppercase tracking-wider block mb-1">
+                  Actividad {selectedEventDetail.tipo || 'Cultural'}
+                </span>
+                <h3 className="text-xl font-black text-white leading-tight">
+                  {selectedEventDetail.titulo}
+                </h3>
+              </div>
+
+              {/* Información de Fecha, Hora y Ubicación */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-800/80 border border-white/10 p-3.5 rounded-2xl">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-pink-500/20 text-pink-400 rounded-xl">
+                    <CalendarIcon size={18} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-white/50 font-bold uppercase">Fecha</p>
+                    <p className="text-xs font-bold text-white capitalize">{fechaFormatted}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-sky-500/20 text-sky-400 rounded-xl">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-white/50 font-bold uppercase">Hora</p>
+                    <p className="text-xs font-bold text-white">{actTime} hrs</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 sm:col-span-2 border-t border-white/5 pt-2 mt-1">
+                  <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
+                    <MapPin size={18} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-white/50 font-bold uppercase">Espacio / Ubicación</p>
+                    <p className="text-xs font-bold text-emerald-300 capitalize">{selectedEventDetail.ubicacion}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Descripción Completa sin truncar */}
+              <div>
+                <h4 className="text-xs font-bold text-white/70 uppercase mb-2 flex items-center gap-1.5">
+                  <Info size={14} className="text-pink-400" /> Descripción Completa
+                </h4>
+                <div className="bg-slate-950/60 border border-white/10 p-4 rounded-2xl text-xs text-white/90 leading-relaxed whitespace-pre-wrap max-h-[220px] overflow-y-auto">
+                  {selectedEventDetail.descripcion || 'Sin descripción detallada.'}
+                </div>
+              </div>
+
+              {/* Observaciones del Administrador si existen */}
+              {selectedEventDetail.observacionesAdmin && (
+                <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl space-y-1">
+                  <p className="text-xs font-black text-rose-300 flex items-center gap-1.5">
+                    <AlertCircle size={15} /> Observaciones del Administrador
+                  </p>
+                  <p className="text-xs text-rose-100/90 leading-relaxed">
+                    {selectedEventDetail.observacionesAdmin}
+                  </p>
+                </div>
+              )}
+
+              {/* Acciones de Administrador dentro del modal si está pendiente */}
+              {isAdmin && selectedEventDetail.estatus === 'pendiente' && (
+                <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-3">
+                  <p className="text-xs font-bold text-amber-200 text-center">
+                    Como administrador, puedes responder a esta solicitud directamente desde aquí:
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleAprobar(selectedEventDetail.id)}
+                      disabled={actionLoading === selectedEventDetail.id}
+                      className="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
+                    >
+                      {actionLoading === selectedEventDetail.id ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                      Aprobar Solicitud
+                    </button>
+                    <button
+                      onClick={() => handleOpenRejectModal(selectedEventDetail)}
+                      disabled={actionLoading === selectedEventDetail.id}
+                      className="flex-1 py-2.5 px-3 bg-rose-600/40 hover:bg-rose-600/60 text-rose-100 border border-rose-500/30 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <X size={16} /> Rechazar Solicitud
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Botón de Cerrar */}
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition cursor-pointer"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          );
+        })()}
       </Modal>
     </div>
   );
