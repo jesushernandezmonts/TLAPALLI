@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Req, Res, HttpCode, HttpStatus, BadRequestException, UseGuards, Query, Patch, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, Res, HttpCode, HttpStatus, BadRequestException, UnauthorizedException, UseGuards, Query, Patch, Param, ParseIntPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import type { Request, Response } from 'express';
@@ -44,7 +44,7 @@ export class AuthController {
   ) {
     const refreshToken = req.cookies?.alumnoRefreshToken;
     if (!refreshToken) {
-      throw new BadRequestException('Refresh token no encontrado');
+      throw new UnauthorizedException('Refresh token no encontrado');
     }
 
     const result = await this.authService.alumnoRefreshTokens(refreshToken);
@@ -152,7 +152,7 @@ export class AuthController {
   ) {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
-      throw new BadRequestException('Refresh token no encontrado');
+      throw new UnauthorizedException('Refresh token no encontrado');
     }
 
     const result = await this.authService.refreshTokens(refreshToken);

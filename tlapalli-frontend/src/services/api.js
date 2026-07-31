@@ -90,10 +90,14 @@ api.interceptors.response.use(
 
       } catch (refreshError) {
         processQueue(refreshError, null);
-        // Limpiar y redirigir al login
+        // Limpiar y redirigir al login si no estamos en una ruta pública
         accessToken = null;
         if (onRefreshed) onRefreshed(null);
-        window.location.href = loginRedirectUrl;
+        const publicPaths = ['/login', '/forgot-password', '/reset-password', '/activar-cuenta', '/accept-invitation', '/auth/success'];
+        const isPublicPath = publicPaths.some(p => window.location.pathname.includes(p));
+        if (!isPublicPath) {
+          window.location.href = loginRedirectUrl;
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
