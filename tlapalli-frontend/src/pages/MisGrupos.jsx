@@ -293,7 +293,7 @@ export default function MisGrupos() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   whileHover={{ y: -2 }}
-                  className={`relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border ${colors.border} rounded-2xl overflow-hidden transition-all hover:shadow-xl ${colors.glow} group ${isExpanded ? 'ring-1 ring-white/20' : ''}`}
+                  className={`relative bg-slate-900/95 backdrop-blur-2xl border ${colors.border} rounded-2xl overflow-hidden transition-all hover:shadow-2xl ${colors.glow} group ${isExpanded ? 'ring-1 ring-white/20' : ''}`}
                 >
                   {/* Accent bar top */}
                   <div className={`h-1 bg-gradient-to-r ${colors.from} ${colors.to}`} />
@@ -376,7 +376,7 @@ export default function MisGrupos() {
                   initial={{ opacity: 0, y: -10, height: 0 }}
                   animate={{ opacity: 1, y: 0, height: 'auto' }}
                   exit={{ opacity: 0, y: -10, height: 0 }}
-                  className={`bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border ${colors.border} rounded-2xl overflow-hidden`}
+                  className={`bg-slate-900/95 backdrop-blur-2xl border ${colors.border} rounded-2xl overflow-hidden shadow-2xl`}
                 >
                   <div className={`h-1 bg-gradient-to-r ${colors.from} ${colors.to}`} />
                   <div className="p-5 space-y-4">

@@ -366,7 +366,7 @@ export default function Asistencia() {
 
       {/* Selector de Grupo y Fecha */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border border-white/15 rounded-2xl p-5">
+        <div className="bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-2xl p-5 shadow-xl">
           <label className="block text-xs font-bold text-white/70 uppercase tracking-wider mb-3">
             <Users size={14} className="inline mr-1.5 -mt-0.5" />
             Seleccionar Grupo
@@ -392,7 +392,7 @@ export default function Asistencia() {
           {grupos.length === 0 && <p className="mt-2 text-xs text-white/30">No tienes grupos registrados</p>}
         </div>
 
-        <div className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border border-white/15 rounded-2xl p-5">
+        <div className="bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-2xl p-5 shadow-xl">
           <label className="block text-xs font-bold text-white/70 uppercase tracking-wider mb-3">
             <CalendarDays size={14} className="inline mr-1.5 -mt-0.5" />
             Seleccionar Fecha
@@ -418,23 +418,23 @@ export default function Asistencia() {
               {/* Stats */}
               {alumnos.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  <div className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border border-white/15 rounded-xl p-4 text-center">
+                  <div className="bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-xl p-4 text-center shadow-lg">
                     <p className="text-2xl font-black text-white">{totalAlumnos}</p>
                     <p className="text-xs text-white/50 mt-1">Total</p>
                   </div>
-                  <div className="bg-gradient-to-br from-emerald-900/50 to-emerald-800/40 backdrop-blur-xl border border-emerald-500/30 rounded-xl p-4 text-center">
+                  <div className="bg-emerald-950/80 backdrop-blur-2xl border border-emerald-500/40 rounded-xl p-4 text-center shadow-lg">
                     <p className="text-2xl font-black text-emerald-400">{asistenciasCount}</p>
                     <p className="text-xs text-emerald-400/60 mt-1">Asistencias</p>
                   </div>
-                  <div className="bg-gradient-to-br from-red-900/50 to-red-800/40 backdrop-blur-xl border border-red-500/30 rounded-xl p-4 text-center">
+                  <div className="bg-red-950/80 backdrop-blur-2xl border border-red-500/40 rounded-xl p-4 text-center shadow-lg">
                     <p className="text-2xl font-black text-red-400">{faltasCount}</p>
                     <p className="text-xs text-red-400/60 mt-1">Faltas</p>
                   </div>
-                  <div className="bg-gradient-to-br from-amber-900/50 to-amber-800/40 backdrop-blur-xl border border-amber-500/30 rounded-xl p-4 text-center">
+                  <div className="bg-amber-950/80 backdrop-blur-2xl border border-amber-500/40 rounded-xl p-4 text-center shadow-lg">
                     <p className="text-2xl font-black text-amber-400">{justificadasCount}</p>
                     <p className="text-xs text-amber-400/60 mt-1">Justificadas</p>
                   </div>
-                  <div className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border border-white/15 rounded-xl p-4 text-center">
+                  <div className="bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-xl p-4 text-center shadow-lg">
                     <p className="text-2xl font-black text-white/50">{sinRegistro}</p>
                     <p className="text-xs text-white/30 mt-1">Sin registro</p>
                   </div>
@@ -442,7 +442,7 @@ export default function Asistencia() {
               )}
 
               {selectedGrupo && (
-                <div className={`bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border ${colors.border} rounded-2xl overflow-hidden`}>
+                <div className={`bg-slate-900/95 backdrop-blur-2xl border ${colors.border} rounded-2xl overflow-hidden shadow-2xl`}>
                   <div className={`h-1 bg-gradient-to-r ${colors.from} ${colors.to}`} />
                   <div className="p-5">
                     {/* Cabecera con acciones */}
