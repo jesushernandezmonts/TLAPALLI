@@ -22,7 +22,13 @@ const GRUPO_COLORS = [
 ];
 
 const getColorForGrupo = (id) => GRUPO_COLORS[id % GRUPO_COLORS.length];
-const getToday = () => new Date().toISOString().split('T')[0];
+const getToday = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export default function Asistencia() {
   const [grupos, setGrupos] = useState([]);
@@ -49,9 +55,14 @@ export default function Asistencia() {
   const [pendingCount, setPendingCount] = useState(offlineStorage.getPendingAsistencias().length);
 
   const checkIsPastDate = (dateStr) => {
+    if (!dateStr || dateStr.trim().length < 10) return false;
+    const d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return false;
+
     const today = new Date();
-    const todayStart = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
-    const selectedDate = new Date(dateStr + 'T00:00:00.000Z');
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const selectedDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
     return selectedDate.getTime() < todayStart.getTime();
   };
 
@@ -190,6 +201,10 @@ export default function Asistencia() {
   };
 
   const handleFechaChange = async (newFecha) => {
+    if (!newFecha || newFecha.trim().length < 10) return;
+    const testDate = new Date(newFecha + 'T00:00:00');
+    if (isNaN(testDate.getTime())) return;
+
     setFecha(newFecha);
     setIsPastDate(checkIsPastDate(newFecha));
     if (!selectedGrupoId) return;
@@ -215,7 +230,8 @@ export default function Asistencia() {
         setObservaciones({});
         setComprobantes({});
       }
-    } catch {
+    } catch (err) {
+      console.error('Error al cambiar la fecha:', err);
       setAsistenciasPrevias({});
       setAsistencias({});
       setObservaciones({});
