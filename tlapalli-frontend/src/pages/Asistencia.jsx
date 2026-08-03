@@ -550,208 +550,357 @@ export default function Asistencia() {
                       )}
                     </AnimatePresence>
 
-                    {/* TABLA DE ASISTENCIAS */}
+                    {/* TABLA Y CARDAS DE ASISTENCIAS */}
                     {alumnos.length === 0 ? (
                       <div className="text-center py-10">
                         <Users size={40} className="mx-auto text-white/20 mb-3" />
                         <p className="text-white/40 text-sm">Este grupo no tiene alumnos registrados</p>
                       </div>
                     ) : (
-                      <div className="overflow-x-auto rounded-xl border border-white/15">
-                        <table className="w-full text-sm">
-                          {/* Cabecera de la tabla */}
-                          <thead>
-                            <tr className="border-b border-white/15 bg-slate-800/80">
-                              <th className="text-left px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-12">#</th>
-                              <th className="text-left px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider">Alumno</th>
-                              <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-24">✅ Presente</th>
-                              <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-24">❌ Falta</th>
-                              <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-28">📄 Justificada</th>
-                            </tr>
-                          </thead>
-                          {/* Cuerpo de la tabla */}
-                          <tbody className="divide-y divide-slate-800/80">
-                            {alumnos.map((ga, idx) => {
-                              const estado = asistencias[ga.id] || null;
-                              const obs = observaciones[ga.id] || '';
-                              const compUrl = comprobantes[ga.id] || null;
-                              const isUploading = uploadingMap[ga.id] || false;
+                      <>
+                        {/* VISTA MÓVIL: Tarjetas verticales completas (Sin slide de lado) */}
+                        <div className="block md:hidden space-y-3">
+                          {alumnos.map((ga, idx) => {
+                            const estado = asistencias[ga.id] || null;
+                            const obs = observaciones[ga.id] || '';
+                            const compUrl = comprobantes[ga.id] || null;
+                            const isUploading = uploadingMap[ga.id] || false;
 
-                              return (
-                                <Fragment key={ga.id}>
-                                  <tr className={`transition-colors ${
-                                    estado === 'asistencia'
-                                      ? 'bg-emerald-500/5 hover:bg-emerald-500/10'
-                                      : estado === 'falta'
-                                      ? 'bg-red-500/5 hover:bg-red-500/10'
-                                      : estado === 'justificada'
-                                      ? 'bg-amber-500/5 hover:bg-amber-500/10'
-                                      : 'hover:bg-slate-800/80'
-                                  }`}>
-                                    {/* # */}
-                                    <td className="px-4 py-3 text-white/30 text-xs font-mono">{idx + 1}</td>
+                            return (
+                              <div
+                                key={`mobile-${ga.id}`}
+                                className={`p-4 rounded-2xl border transition-all shadow-lg space-y-3 ${
+                                  estado === 'asistencia'
+                                    ? 'bg-emerald-950/70 border-emerald-500/40'
+                                    : estado === 'falta'
+                                    ? 'bg-red-950/70 border-red-500/40'
+                                    : estado === 'justificada'
+                                    ? 'bg-amber-950/70 border-amber-500/40'
+                                    : 'bg-slate-900/90 border-white/15'
+                                }`}
+                              >
+                                {/* Header Alumno */}
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${colors.avatar} flex items-center justify-center shrink-0 font-bold text-white text-xs`}>
+                                      {ga.alumno?.nombre?.[0] || 'A'}{ga.alumno?.apellidoPaterno?.[0] || ''}
+                                    </div>
+                                    <div>
+                                      <p className="font-black text-white text-sm leading-tight">
+                                        <span className="text-white/40 text-xs mr-1.5 font-mono">#{idx + 1}</span>
+                                        {ga.alumno?.nombre || 'Alumno'} {ga.alumno?.apellidoPaterno || ''} {ga.alumno?.apellidoMaterno || ''}
+                                      </p>
+                                      {ga.alumno?.telefono && (
+                                        <p className="text-[11px] text-white/40">{ga.alumno.telefono}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
 
-                                    {/* Alumno - Clic para marcar/alternar asistencia */}
-                                    <td 
-                                      className={`px-4 py-3 ${isPastDate ? '' : 'cursor-pointer select-none'}`}
-                                      onClick={() => !isPastDate && setEstado(ga.id, estado === 'asistencia' ? 'falta' : 'asistencia')}
-                                    >
-                                      <div className="flex items-center gap-3 group">
-                                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                                          <span className="text-white font-bold text-[10px]">
-                                            {ga.alumno?.nombre?.[0] || 'A'}{ga.alumno?.apellidoPaterno?.[0] || ''}
-                                          </span>
-                                        </div>
-                                        <div>
-                                          <p className="font-semibold text-white text-sm group-hover:text-pink-300 transition-colors">
-                                            {ga.alumno?.nombre || 'Alumno sin nombre'} {ga.alumno?.apellidoPaterno || ''} {ga.alumno?.apellidoMaterno || ''}
-                                          </p>
-                                          {ga.alumno?.telefono && (
-                                            <p className="text-[11px] text-white/30">{ga.alumno.telefono}</p>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </td>
+                                {/* Botones de acción táctiles en fila completa */}
+                                <div className="grid grid-cols-3 gap-2 pt-1">
+                                  {/* Presente */}
+                                  <button
+                                    type="button"
+                                    disabled={isPastDate}
+                                    onClick={() => !isPastDate && setEstado(ga.id, estado === 'asistencia' ? null : 'asistencia')}
+                                    className={`py-2 px-1 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border cursor-pointer ${
+                                      estado === 'asistencia'
+                                        ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-600/30'
+                                        : 'bg-slate-800/90 border-white/10 text-white/60 hover:text-white'
+                                    }`}
+                                  >
+                                    <CheckCircle2 size={15} />
+                                    <span>Presente</span>
+                                  </button>
 
-                                    {/* Asistencia */}
-                                    <td className="px-4 py-3 text-center">
-                                      <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
-                                        <input
-                                          type="checkbox"
-                                          checked={estado === 'asistencia'}
-                                          onChange={() => !isPastDate && setEstado(ga.id, 'asistencia')}
-                                          disabled={isPastDate}
-                                          className="sr-only peer"
-                                        />
-                                        <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
-                                          isPastDate ? 'opacity-60 cursor-not-allowed' : ''
-                                        } ${
-                                          estado === 'asistencia'
-                                            ? 'bg-emerald-500 border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.35)]'
-                                            : 'border-white/20 hover:border-emerald-400/50 bg-slate-800/80'
-                                        }`}>
-                                          {estado === 'asistencia' && (
-                                            <CheckCircle2 size={16} className="text-white" />
-                                          )}
-                                        </div>
-                                      </label>
-                                    </td>
+                                  {/* Falta */}
+                                  <button
+                                    type="button"
+                                    disabled={isPastDate}
+                                    onClick={() => !isPastDate && setEstado(ga.id, estado === 'falta' ? null : 'falta')}
+                                    className={`py-2 px-1 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border cursor-pointer ${
+                                      estado === 'falta'
+                                        ? 'bg-red-600 border-red-400 text-white shadow-lg shadow-red-600/30'
+                                        : 'bg-slate-800/90 border-white/10 text-white/60 hover:text-white'
+                                    }`}
+                                  >
+                                    <XCircle size={15} />
+                                    <span>Falta</span>
+                                  </button>
 
-                                    {/* Falta */}
-                                    <td className="px-4 py-3 text-center">
-                                      <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
-                                        <input
-                                          type="checkbox"
-                                          checked={estado === 'falta'}
-                                          onChange={() => !isPastDate && setEstado(ga.id, 'falta')}
-                                          disabled={isPastDate}
-                                          className="sr-only peer"
-                                        />
-                                        <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
-                                          isPastDate ? 'opacity-60 cursor-not-allowed' : ''
-                                        } ${
-                                          estado === 'falta'
-                                            ? 'bg-red-500 border-red-400 shadow-[0_0_12px_rgba(248,113,113,0.35)]'
-                                            : 'border-white/20 hover:border-red-400/50 bg-slate-800/80'
-                                        }`}>
-                                          {estado === 'falta' && (
-                                            <XCircle size={16} className="text-white" />
-                                          )}
-                                        </div>
-                                      </label>
-                                    </td>
+                                  {/* Justificada */}
+                                  <button
+                                    type="button"
+                                    disabled={isPastDate}
+                                    onClick={() => !isPastDate && setEstado(ga.id, estado === 'justificada' ? null : 'justificada')}
+                                    className={`py-2 px-1 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border cursor-pointer ${
+                                      estado === 'justificada'
+                                        ? 'bg-amber-600 border-amber-400 text-white shadow-lg shadow-amber-600/30'
+                                        : 'bg-slate-800/90 border-white/10 text-white/60 hover:text-white'
+                                    }`}
+                                  >
+                                    <FileCheck size={15} />
+                                    <span>Justificar</span>
+                                  </button>
+                                </div>
 
-                                    {/* Justificada */}
-                                    <td className="px-4 py-3 text-center">
-                                      <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
-                                        <input
-                                          type="checkbox"
-                                          checked={estado === 'justificada'}
-                                          onChange={() => !isPastDate && setEstado(ga.id, 'justificada')}
-                                          disabled={isPastDate}
-                                          className="sr-only peer"
-                                        />
-                                        <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
-                                          isPastDate ? 'opacity-60 cursor-not-allowed' : ''
-                                        } ${
-                                          estado === 'justificada'
-                                            ? 'bg-amber-500 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.35)]'
-                                            : 'border-white/20 hover:border-amber-400/50 bg-slate-800/80'
-                                        }`}>
-                                          {estado === 'justificada' && (
-                                            <FileCheck size={16} className="text-white" />
-                                          )}
-                                        </div>
-                                      </label>
-                                    </td>
-                                  </tr>
+                                {/* Sub-panel para justificación en móvil */}
+                                {estado === 'justificada' && (
+                                  <div className="pt-2 border-t border-amber-500/30 space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-wider text-amber-300 block">
+                                      Motivo / Justificación
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={obs}
+                                      onChange={(e) => setObservaciones((prev) => ({ ...prev, [ga.id]: e.target.value }))}
+                                      disabled={isPastDate}
+                                      placeholder="Ej. Cita médica / Permiso..."
+                                      className="w-full bg-slate-900 border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-white/30 outline-none focus:border-amber-400 transition"
+                                    />
 
-                                  {/* Sub-fila para observaciones y evidencia cuando es justificada */}
-                                  {estado === 'justificada' && (
-                                    <tr className="bg-amber-500/10 border-b border-amber-500/20">
-                                      <td colSpan="5" className="px-6 py-3">
-                                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                                          <div className="flex-1 space-y-1">
-                                            <label className="text-[10px] font-black uppercase tracking-wider text-amber-300">
-                                              Motivo / Justificación del Alumno
-                                            </label>
-                                            <input
-                                              type="text"
-                                              value={obs}
-                                              onChange={(e) => setObservaciones((prev) => ({ ...prev, [ga.id]: e.target.value }))}
-                                              disabled={isPastDate}
-                                              placeholder="Ej. Incapacidad por cita médica / Permiso especial..."
-                                              className="w-full bg-slate-900/90 border border-amber-500/30 rounded-xl px-3 py-1.5 text-xs text-white placeholder-white/30 outline-none focus:border-amber-400 transition"
-                                            />
+                                    <div className="pt-1">
+                                      {compUrl ? (
+                                        <button
+                                          type="button"
+                                          onClick={() => setActiveDoc({
+                                            url: compUrl,
+                                            title: `Justificante - ${ga.alumno?.nombre || ''} ${ga.alumno?.apellidoPaterno || ''}`
+                                          })}
+                                          className="w-full py-2 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition flex items-center justify-center gap-1.5"
+                                        >
+                                          <Eye size={14} /> Ver Evidencia 📎
+                                        </button>
+                                      ) : isUploading ? (
+                                        <span className="flex items-center justify-center gap-1.5 text-xs text-amber-300 animate-pulse font-semibold py-2">
+                                          <Loader2 size={14} className="animate-spin" /> Subiendo...
+                                        </span>
+                                      ) : !isPastDate ? (
+                                        <>
+                                          <input
+                                            type="file"
+                                            id={`file-input-mobile-${ga.id}`}
+                                            className="hidden"
+                                            accept=".pdf,image/*"
+                                            onChange={(e) => {
+                                              const f = e.target.files ? e.target.files[0] : null;
+                                              if (f) handleFileUpload(ga.id, f);
+                                            }}
+                                          />
+                                          <label
+                                            htmlFor={`file-input-mobile-${ga.id}`}
+                                            className="w-full py-2 rounded-xl bg-slate-800 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                          >
+                                            <Upload size={14} /> Adjuntar Receta / Foto
+                                          </label>
+                                        </>
+                                      ) : null}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* VISTA ESCRITORIO: Tabla tradicional de 5 columnas */}
+                        <div className="hidden md:block overflow-x-auto rounded-xl border border-white/15">
+                          <table className="w-full text-sm">
+                            {/* Cabecera de la tabla */}
+                            <thead>
+                              <tr className="border-b border-white/15 bg-slate-800/80">
+                                <th className="text-left px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-12">#</th>
+                                <th className="text-left px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider">Alumno</th>
+                                <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-24">✅ Presente</th>
+                                <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-24">❌ Falta</th>
+                                <th className="text-center px-4 py-3 text-white/40 font-bold text-[11px] uppercase tracking-wider w-28">📄 Justificada</th>
+                              </tr>
+                            </thead>
+                            {/* Cuerpo de la tabla */}
+                            <tbody className="divide-y divide-slate-800/80">
+                              {alumnos.map((ga, idx) => {
+                                const estado = asistencias[ga.id] || null;
+                                const obs = observaciones[ga.id] || '';
+                                const compUrl = comprobantes[ga.id] || null;
+                                const isUploading = uploadingMap[ga.id] || false;
+
+                                return (
+                                  <Fragment key={ga.id}>
+                                    <tr className={`transition-colors ${
+                                      estado === 'asistencia'
+                                        ? 'bg-emerald-500/5 hover:bg-emerald-500/10'
+                                        : estado === 'falta'
+                                        ? 'bg-red-500/5 hover:bg-red-500/10'
+                                        : estado === 'justificada'
+                                        ? 'bg-amber-500/5 hover:bg-amber-500/10'
+                                        : 'hover:bg-slate-800/80'
+                                    }`}>
+                                      {/* # */}
+                                      <td className="px-4 py-3 text-white/30 text-xs font-mono">{idx + 1}</td>
+
+                                      {/* Alumno - Clic para marcar/alternar asistencia */}
+                                      <td 
+                                        className={`px-4 py-3 ${isPastDate ? '' : 'cursor-pointer select-none'}`}
+                                        onClick={() => !isPastDate && setEstado(ga.id, estado === 'asistencia' ? 'falta' : 'asistencia')}
+                                      >
+                                        <div className="flex items-center gap-3 group">
+                                          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colors.avatar} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                                            <span className="text-white font-bold text-[10px]">
+                                              {ga.alumno?.nombre?.[0] || 'A'}{ga.alumno?.apellidoPaterno?.[0] || ''}
+                                            </span>
                                           </div>
-
-                                          <div className="flex items-center gap-2 pt-4 sm:pt-0 shrink-0">
-                                            {compUrl ? (
-                                              <button
-                                                type="button"
-                                                onClick={() => setActiveDoc({
-                                                  url: compUrl,
-                                                  title: `Justificante - ${ga.alumno?.nombre || ''} ${ga.alumno?.apellidoPaterno || ''}`
-                                                })}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition cursor-pointer"
-                                              >
-                                                <Eye size={14} /> Ver Evidencia 📎
-                                              </button>
-                                            ) : isUploading ? (
-                                              <span className="flex items-center gap-1.5 text-xs text-amber-300 animate-pulse font-semibold">
-                                                <Loader2 size={14} className="animate-spin" /> Subiendo...
-                                              </span>
-                                            ) : !isPastDate ? (
-                                              <>
-                                                <input
-                                                  type="file"
-                                                  id={`file-input-${ga.id}`}
-                                                  className="hidden"
-                                                  accept=".pdf,image/*"
-                                                  onChange={(e) => {
-                                                    const f = e.target.files ? e.target.files[0] : null;
-                                                    if (f) handleFileUpload(ga.id, f);
-                                                  }}
-                                                />
-                                                <label
-                                                  htmlFor={`file-input-${ga.id}`}
-                                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-slate-800 transition cursor-pointer select-none"
-                                                >
-                                                  <Upload size={14} /> Adjuntar Receta / Foto
-                                                </label>
-                                              </>
-                                            ) : null}
+                                          <div>
+                                            <p className="font-semibold text-white text-sm group-hover:text-pink-300 transition-colors">
+                                              {ga.alumno?.nombre || 'Alumno sin nombre'} {ga.alumno?.apellidoPaterno || ''} {ga.alumno?.apellidoMaterno || ''}
+                                            </p>
+                                            {ga.alumno?.telefono && (
+                                              <p className="text-[11px] text-white/30">{ga.alumno.telefono}</p>
+                                            )}
                                           </div>
                                         </div>
                                       </td>
+
+                                      {/* Asistencia */}
+                                      <td className="px-4 py-3 text-center">
+                                        <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
+                                          <input
+                                            type="checkbox"
+                                            checked={estado === 'asistencia'}
+                                            onChange={() => !isPastDate && setEstado(ga.id, 'asistencia')}
+                                            disabled={isPastDate}
+                                            className="sr-only peer"
+                                          />
+                                          <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                                            isPastDate ? 'opacity-60 cursor-not-allowed' : ''
+                                          } ${
+                                            estado === 'asistencia'
+                                              ? 'bg-emerald-500 border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.35)]'
+                                              : 'border-white/20 hover:border-emerald-400/50 bg-slate-800/80'
+                                          }`}>
+                                            {estado === 'asistencia' && (
+                                              <CheckCircle2 size={16} className="text-white" />
+                                            )}
+                                          </div>
+                                        </label>
+                                      </td>
+
+                                      {/* Falta */}
+                                      <td className="px-4 py-3 text-center">
+                                        <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
+                                          <input
+                                            type="checkbox"
+                                            checked={estado === 'falta'}
+                                            onChange={() => !isPastDate && setEstado(ga.id, 'falta')}
+                                            disabled={isPastDate}
+                                            className="sr-only peer"
+                                          />
+                                          <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                                            isPastDate ? 'opacity-60 cursor-not-allowed' : ''
+                                          } ${
+                                            estado === 'falta'
+                                              ? 'bg-red-500 border-red-400 shadow-[0_0_12px_rgba(248,113,113,0.35)]'
+                                              : 'border-white/20 hover:border-red-400/50 bg-slate-800/80'
+                                          }`}>
+                                            {estado === 'falta' && (
+                                              <XCircle size={16} className="text-white" />
+                                            )}
+                                          </div>
+                                        </label>
+                                      </td>
+
+                                      {/* Justificada */}
+                                      <td className="px-4 py-3 text-center">
+                                        <label className={`inline-flex items-center justify-center ${isPastDate ? '' : 'cursor-pointer'}`}>
+                                          <input
+                                            type="checkbox"
+                                            checked={estado === 'justificada'}
+                                            onChange={() => !isPastDate && setEstado(ga.id, 'justificada')}
+                                            disabled={isPastDate}
+                                            className="sr-only peer"
+                                          />
+                                          <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                                            isPastDate ? 'opacity-60 cursor-not-allowed' : ''
+                                          } ${
+                                            estado === 'justificada'
+                                              ? 'bg-amber-500 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.35)]'
+                                              : 'border-white/20 hover:border-amber-400/50 bg-slate-800/80'
+                                          }`}>
+                                            {estado === 'justificada' && (
+                                              <FileCheck size={16} className="text-white" />
+                                            )}
+                                          </div>
+                                        </label>
+                                      </td>
                                     </tr>
-                                  )}
-                                </Fragment>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
+
+                                    {/* Sub-fila para observaciones y evidencia cuando es justificada */}
+                                    {estado === 'justificada' && (
+                                      <tr className="bg-amber-500/10 border-b border-amber-500/20">
+                                        <td colSpan="5" className="px-6 py-3">
+                                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                            <div className="flex-1 space-y-1">
+                                              <label className="text-[10px] font-black uppercase tracking-wider text-amber-300">
+                                                Motivo / Justificación del Alumno
+                                              </label>
+                                              <input
+                                                type="text"
+                                                value={obs}
+                                                onChange={(e) => setObservaciones((prev) => ({ ...prev, [ga.id]: e.target.value }))}
+                                                disabled={isPastDate}
+                                                placeholder="Ej. Incapacidad por cita médica / Permiso especial..."
+                                                className="w-full bg-slate-900/90 border border-amber-500/30 rounded-xl px-3 py-1.5 text-xs text-white placeholder-white/30 outline-none focus:border-amber-400 transition"
+                                              />
+                                            </div>
+
+                                            <div className="flex items-center gap-2 pt-4 sm:pt-0 shrink-0">
+                                              {compUrl ? (
+                                                <button
+                                                  type="button"
+                                                  onClick={() => setActiveDoc({
+                                                    url: compUrl,
+                                                    title: `Justificante - ${ga.alumno?.nombre || ''} ${ga.alumno?.apellidoPaterno || ''}`
+                                                  })}
+                                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition cursor-pointer"
+                                                >
+                                                  <Eye size={14} /> Ver Evidencia 📎
+                                                </button>
+                                              ) : isUploading ? (
+                                                <span className="flex items-center gap-1.5 text-xs text-amber-300 animate-pulse font-semibold">
+                                                  <Loader2 size={14} className="animate-spin" /> Subiendo...
+                                                </span>
+                                              ) : !isPastDate ? (
+                                                <>
+                                                  <input
+                                                    type="file"
+                                                    id={`file-input-${ga.id}`}
+                                                    className="hidden"
+                                                    accept=".pdf,image/*"
+                                                    onChange={(e) => {
+                                                      const f = e.target.files ? e.target.files[0] : null;
+                                                      if (f) handleFileUpload(ga.id, f);
+                                                    }}
+                                                  />
+                                                  <label
+                                                    htmlFor={`file-input-${ga.id}`}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-slate-800 transition cursor-pointer select-none"
+                                                  >
+                                                    <Upload size={14} /> Adjuntar Receta / Foto
+                                                  </label>
+                                                </>
+                                              ) : null}
+                                            </div>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    )}
+                                  </Fragment>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
