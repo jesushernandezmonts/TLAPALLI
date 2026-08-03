@@ -1,15 +1,16 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Calendar as CalendarIcon, 
-  Plus, 
-  Clock, 
-  MapPin, 
-  CheckCircle2, 
-  XCircle, 
-  AlertCircle, 
-  Loader2, 
-  ChevronLeft, 
+import {
+  Calendar as CalendarIcon,
+  Plus,
+  Clock,
+  MapPin,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Loader2,
+  ChevronLeft,
   ChevronRight,
   Info,
   Sparkles,
@@ -192,7 +193,7 @@ export default function EventosProfesor() {
         tipo: formData.tipo,
         ubicacion: formData.ubicacion,
       };
-      
+
       if (isAdmin) {
         // Admin crea evento directamente aprobado
         await api.post('/actividades', payload);
@@ -257,8 +258,8 @@ export default function EventosProfesor() {
             {isAdmin ? 'Gestión de Eventos y Calendario' : 'Mis Eventos y Propuestas'}
           </h1>
           <p className="mt-1 text-base font-semibold text-white/75">
-            {isAdmin 
-              ? 'Revisa y aprueba solicitudes de eventos de profesores o crea eventos institucionales' 
+            {isAdmin
+              ? 'Revisa y aprueba solicitudes de eventos de profesores o crea eventos institucionales'
               : 'Propón actividades culturales y consulta el calendario confirmado'}
           </p>
         </div>
@@ -282,7 +283,7 @@ export default function EventosProfesor() {
 
       {/* Sección exclusiva de Admin: Solicitudes Pendientes por Aprobar */}
       {isAdmin && pendientesAprobacion.length > 0 && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-amber-500/10 border-2 border-amber-500/30 rounded-3xl p-6 shadow-xl backdrop-blur-xl space-y-4"
@@ -314,8 +315,8 @@ export default function EventosProfesor() {
               const instructorNombre = act.instructor?.nombre || act.instructor?.usuario?.nombre || 'Profesor sin asignar';
 
               return (
-                <motion.div 
-                  key={act.id} 
+                <motion.div
+                  key={act.id}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleOpenDetailModal(act)}
@@ -435,7 +436,7 @@ export default function EventosProfesor() {
               const monthStr = String(month + 1).padStart(2, '0');
               const dayStr = String(day).padStart(2, '0');
               const fullDateStr = `${year}-${monthStr}-${dayStr}`;
-              
+
               const isToday = new Date().toISOString().split('T')[0] === fullDateStr;
               const isSelected = selectedDateString === fullDateStr;
 
@@ -452,11 +453,11 @@ export default function EventosProfesor() {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleDayClick(day)}
                   className={`aspect-square rounded-2xl border-2 flex flex-col items-center justify-center relative cursor-pointer select-none transition-all p-1
-                    ${isToday 
+                    ${isToday
                       ? 'bg-gradient-to-br from-pink-600 to-orange-600 border-pink-400 text-white shadow-lg shadow-pink-500/20'
                       : isSelected
-                      ? 'bg-slate-800 border-white/40 text-white ring-2 ring-pink-500/50'
-                      : 'bg-slate-800/60 border-slate-800 hover:border-white/20 text-white/80'
+                        ? 'bg-slate-800 border-white/40 text-white ring-2 ring-pink-500/50'
+                        : 'bg-slate-800/60 border-slate-800 hover:border-white/20 text-white/80'
                     }`}
                 >
                   <span className="text-sm font-black">{day}</span>
@@ -507,11 +508,10 @@ export default function EventosProfesor() {
                 <button
                   key={f.id}
                   onClick={() => setStatusFilter(f.id)}
-                  className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition capitalize whitespace-nowrap ${
-                    statusFilter === f.id
+                  className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition capitalize whitespace-nowrap ${statusFilter === f.id
                       ? 'bg-pink-600 text-white shadow-md shadow-pink-600/30'
                       : 'bg-slate-800 text-white/50 hover:bg-slate-700 hover:text-white'
-                  }`}
+                    }`}
                 >
                   {f.label}
                 </button>
@@ -535,7 +535,7 @@ export default function EventosProfesor() {
                   const instructorNombre = act.instructor?.nombre || act.instructor?.usuario?.nombre;
 
                   return (
-                    <motion.div 
+                    <motion.div
                       key={act.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -612,10 +612,10 @@ export default function EventosProfesor() {
       </div>
 
       {/* Modal de Propuesta / Creación de Evento */}
-      <Modal 
-        isOpen={showModal} 
-        onClose={() => setShowModal(false)} 
-        title={isAdmin ? "Crear Evento Oficial" : "Proponer Nuevo Evento / Actividad"} 
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={isAdmin ? "Crear Evento Oficial" : "Proponer Nuevo Evento / Actividad"}
         maxWidth="max-w-md"
       >
         <form onSubmit={handleSavePropuesta} className="space-y-4">
@@ -682,7 +682,7 @@ export default function EventosProfesor() {
           <div className="p-3 bg-pink-500/10 border border-pink-500/20 rounded-xl text-xs text-pink-200 flex items-start gap-2">
             <Info size={16} className="text-pink-400 flex-shrink-0 mt-0.5" />
             <span>
-              {isAdmin 
+              {isAdmin
                 ? 'Como Administrador, este evento se publicará de manera oficial de forma directa.'
                 : 'Al enviar la propuesta, el evento se enviará al Administrador para su aprobación antes de publicarse oficialmente.'}
             </span>
@@ -708,10 +708,10 @@ export default function EventosProfesor() {
       </Modal>
 
       {/* Modal para Rechazar Evento (Admin) */}
-      <Modal 
-        isOpen={showRejectModal} 
-        onClose={() => setShowRejectModal(false)} 
-        title="Rechazar Propuesta de Evento" 
+      <Modal
+        isOpen={showRejectModal}
+        onClose={() => setShowRejectModal(false)}
+        title="Rechazar Propuesta de Evento"
         maxWidth="max-w-md"
       >
         <form onSubmit={handleRechazar} className="space-y-4">
@@ -751,19 +751,19 @@ export default function EventosProfesor() {
       </Modal>
 
       {/* Modal de Detalle Completo de Evento */}
-      <Modal 
-        isOpen={showDetailModal} 
-        onClose={() => setShowDetailModal(false)} 
-        title="Detalles de la Solicitud / Evento" 
+      <Modal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        title="Detalles de la Solicitud / Evento"
         maxWidth="max-w-lg"
       >
         {selectedEventDetail && (() => {
           const actDate = new Date(selectedEventDetail.fecha);
-          const fechaFormatted = actDate.toLocaleDateString('es-MX', { 
-            weekday: 'long', 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
+          const fechaFormatted = actDate.toLocaleDateString('es-MX', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
           });
           const actTime = actDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
           const instructorNombre = selectedEventDetail.instructor?.nombre || selectedEventDetail.instructor?.usuario?.nombre || 'Profesor sin asignar';
