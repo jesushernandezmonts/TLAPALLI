@@ -88,7 +88,7 @@ const ADMIN_TOUR_STEPS = [
   {
     target: '[data-tour="sidebar-help-tour"]',
     title: 'Centro de Ayuda y Reinicio',
-    description: 'Esta guía automática se mostrará en tus primeras 3 visitas. Si deseas volver a consultarla en el futuro, haz clic en este botón en cualquier momento.',
+    description: 'Esta guía automática se mostrará solo 1 vez en tu primera visita. Si deseas volver a consultarla en el futuro, haz clic en este botón en cualquier momento.',
     icon: HelpCircle,
     badge: 'Paso 10 de 10',
   },
@@ -115,7 +115,7 @@ export default function AdminTour({ forceOpen = false, onCloseForce }) {
     if (!isAdmin) return;
 
     const count = parseInt(localStorage.getItem(storageKey) || '0', 10);
-    if (count < 3) {
+    if (count < 1) {
       const timer = setTimeout(() => {
         setCurrentStep(0);
         setIsOpen(true);
@@ -185,8 +185,7 @@ export default function AdminTour({ forceOpen = false, onCloseForce }) {
 
   const incrementCount = () => {
     if (!forceOpen) {
-      const current = parseInt(localStorage.getItem(storageKey) || '0', 10);
-      localStorage.setItem(storageKey, (current + 1).toString());
+      localStorage.setItem(storageKey, '1');
     }
   };
 

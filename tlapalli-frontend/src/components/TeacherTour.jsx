@@ -56,7 +56,7 @@ const TOUR_STEPS = [
   {
     target: '[data-tour="sidebar-help-tour"]',
     title: 'Centro de Ayuda / Reorganizar Guía',
-    description: 'Esta guía automática se mostrará en tus primeras 3 visitas. Si deseas volver a revisarla en el futuro, siempre podrás hacer clic en este botón.',
+    description: 'Esta guía automática se mostrará solo 1 vez en tu primera visita. Si deseas volver a revisarla en el futuro, siempre podrás hacer clic en este botón.',
     icon: HelpCircle,
     badge: 'Paso 6 de 6',
   },
@@ -83,7 +83,7 @@ export default function TeacherTour({ forceOpen = false, onCloseForce }) {
     if (!isProfesor) return;
 
     const count = parseInt(localStorage.getItem(storageKey) || '0', 10);
-    if (count < 3) {
+    if (count < 1) {
       const timer = setTimeout(() => {
         setCurrentStep(0);
         setIsOpen(true);
@@ -153,8 +153,7 @@ export default function TeacherTour({ forceOpen = false, onCloseForce }) {
 
   const incrementCount = () => {
     if (!forceOpen) {
-      const current = parseInt(localStorage.getItem(storageKey) || '0', 10);
-      localStorage.setItem(storageKey, (current + 1).toString());
+      localStorage.setItem(storageKey, '1');
     }
   };
 
