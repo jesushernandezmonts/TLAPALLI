@@ -1,25 +1,28 @@
 @import "tailwindcss";
 
-body {
+html, body {
+  background-color: #0b0f19;
   background-image: url('/huamantla-bg.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   background-repeat: no-repeat;
   margin: 0;
+  color: #ffffff;
   font-family: 'Outfit', sans-serif;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: high-quality;
 }
 
 @media (max-width: 768px) {
-  body {
+  html, body {
     background-attachment: scroll;
+    background-color: #0b0f19;
   }
 }
 
 #root {
-  @apply min-h-screen;
+  @apply min-h-screen bg-slate-950/40;
 }
 
 @layer components {

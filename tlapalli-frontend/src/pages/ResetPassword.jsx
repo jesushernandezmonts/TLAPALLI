@@ -76,7 +76,7 @@ function ResetPassword() {
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-['Outfit']">
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-900/60 via-purple-900/60 to-orange-900/60 z-10" />
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('/huamantla-bg.jpg')" }}
         />
@@ -147,17 +147,15 @@ function ResetPassword() {
                       {[1, 2, 3, 4].map((i) => (
                         <div
                           key={i}
-                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                            i <= strength.level ? strength.color : 'bg-slate-800/90'
-                          }`}
+                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength.level ? strength.color : 'bg-slate-800/90'
+                            }`}
                         />
                       ))}
                     </div>
-                    <p className={`text-[10px] font-bold uppercase tracking-wider ${
-                      strength.level <= 1 ? 'text-red-400' :
+                    <p className={`text-[10px] font-bold uppercase tracking-wider ${strength.level <= 1 ? 'text-red-400' :
                       strength.level === 2 ? 'text-yellow-400' :
-                      strength.level === 3 ? 'text-blue-400' : 'text-emerald-400'
-                    }`}>
+                        strength.level === 3 ? 'text-blue-400' : 'text-emerald-400'
+                      }`}>
                       {strength.label}
                     </p>
                   </motion.div>
@@ -207,7 +205,7 @@ function ResetPassword() {
               </motion.button>
             </form>
           ) : (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="text-center py-8"
