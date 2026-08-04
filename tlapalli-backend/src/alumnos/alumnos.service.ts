@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthService } from '../auth/auth.service';
 import { CreateAlumnoDto } from './dto/create-alumno.dto';
@@ -127,7 +127,23 @@ export class AlumnosService {
 
   // ========== MÉTODOS ADMIN/INSTRUCTOR ==========
 
-  async create(dto: CreateAlumnoDto) {
+  async create(dto: CreateAlumnoDto, user?: { rol: string; id: number; instructorId?: number }) {
+    // Si es profesor, validar que tiene permiso de gestionar alumnos
+    let instructorTallerId: number | null = null;
+    if (user?.rol === 'profesor') {
+      if (!user.instructorId) {
+        throw new ForbiddenException('No tienes un perfil de instructor asociado');
+      }
+      const instructor = await this.prisma.instructor.findUnique({
+        where: { id: user.instructorId },
+        select: { gestionaAlumnos: true, tallerId: true },
+      });
+      if (!instructor?.gestionaAlumnos) {
+        throw new ForbiddenException('No tienes permiso para agregar alumnos');
+      }
+      instructorTallerId = instructor.tallerId;
+    }
+
     const { fechaNacimiento, email, periodo, anio, ...rest } = dto;
     const fecha = fechaNacimiento ? new Date(fechaNacimiento) : undefined;
     let savedAlumno;
@@ -160,6 +176,19 @@ export class AlumnosService {
         // El alumno se creó, pero si falla el envío del correo, no bloqueamos
         console.error(`⚠️ Alumno creado pero falló envío de activación a ${email}:`, err.message);
       }
+    }
+
+    // Si fue creado por un profe, inscribir automáticamente al taller del profe
+    if (user?.rol === 'profesor' && instructorTallerId) {
+      await this.prisma.inscripcion.create({
+        data: {
+          alumnoId: savedAlumno.id,
+          tallerId: instructorTallerId,
+          estatusPago: 'pendiente',
+          periodo: dto.periodo || 'ordinario',
+          anio: dto.anio || new Date().getFullYear(),
+        },
+      });
     }
 
     this.gateway.emitAlumnosUpdated();

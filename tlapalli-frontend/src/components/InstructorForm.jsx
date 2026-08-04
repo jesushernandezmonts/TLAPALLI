@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Send, ChevronDown, Loader2, CheckCircle, AlertTriangle, Lock, Unlock, Check, Upload, FileText, Trash2, ExternalLink, X } from 'lucide-react';
+import { Mail, Send, ChevronDown, Loader2, CheckCircle, AlertTriangle, Lock, Unlock, Check, Upload, FileText, Trash2, ExternalLink, X, Users, UserPlus } from 'lucide-react';
 import api from '../services/api';
 import DocumentViewerModal from './DocumentViewerModal';
 
@@ -10,6 +10,7 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
     telefono: '',
     tallerId: '',
   });
+  const [gestionaAlumnos, setGestionaAlumnos] = useState(false);
   const [cvFile, setCvFile] = useState(null);
   const [temarioFile, setTemarioFile] = useState(null);
   const [curriculumUrl, setCurriculumUrl] = useState('');
@@ -31,6 +32,7 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
       });
       setCurriculumUrl(instructor.curriculumUrl || '');
       setTemarioUrl(instructor.temarioUrl || '');
+      setGestionaAlumnos(instructor.gestionaAlumnos ?? false);
     }
   }, [instructor]);
 
@@ -64,7 +66,8 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
     try {
       const payload = {
         ...form,
-        tallerId: form.tallerId ? parseInt(form.tallerId) : null
+        tallerId: form.tallerId ? parseInt(form.tallerId) : null,
+        gestionaAlumnos,
       };
 
       let instructorId = null;
@@ -248,6 +251,64 @@ function InstructorForm({ instructor, talleres, onClose, onSave }) {
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* Gestión de Alumnos */}
+      <div className="space-y-2">
+        <label className="text-sm text-white/60 ml-1">¿Quién gestiona los alumnos?</label>
+        <div className="bg-black/35 border border-white/15 rounded-2xl p-3 shadow-inner shadow-black/40">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {/* Opción: El admin */}
+            <div
+              onClick={() => setGestionaAlumnos(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition border ${
+                !gestionaAlumnos
+                  ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                  : 'text-white/70 hover:bg-slate-800/80 border-transparent'
+              }`}
+            >
+              <div className={`w-4 h-4 rounded border flex items-center justify-center transition shrink-0 ${
+                !gestionaAlumnos ? 'bg-blue-500 border-blue-500' : 'border-white/30'
+              }`}>
+                {!gestionaAlumnos && <Check size={11} className="text-white" />}
+              </div>
+              <div className="flex items-center gap-2">
+                <Users size={15} className={!gestionaAlumnos ? 'text-blue-400' : 'text-white/40'} />
+                <div>
+                  <p className="text-xs font-bold">El admin los agrega</p>
+                  <p className="text-[10px] text-white/40">El profe solo consulta</p>
+                </div>
+              </div>
+            </div>
+            {/* Opción: El profe */}
+            <div
+              onClick={() => setGestionaAlumnos(true)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition border ${
+                gestionaAlumnos
+                  ? 'bg-pink-500/20 text-pink-300 border-pink-500/30'
+                  : 'text-white/70 hover:bg-slate-800/80 border-transparent'
+              }`}
+            >
+              <div className={`w-4 h-4 rounded border flex items-center justify-center transition shrink-0 ${
+                gestionaAlumnos ? 'bg-pink-500 border-pink-500' : 'border-white/30'
+              }`}>
+                {gestionaAlumnos && <Check size={11} className="text-white" />}
+              </div>
+              <div className="flex items-center gap-2">
+                <UserPlus size={15} className={gestionaAlumnos ? 'text-pink-400' : 'text-white/40'} />
+                <div>
+                  <p className="text-xs font-bold">El profe los agrega</p>
+                  <p className="text-[10px] text-white/40">Se inscriben a su taller</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {gestionaAlumnos && (
+            <p className="text-[10px] text-amber-400/80 mt-2 ml-1 flex items-center gap-1">
+              ⚠️ El profe podrá crear alumnos desde su panel. Se inscriben automáticamente a su taller.
+            </p>
+          )}
         </div>
       </div>
 

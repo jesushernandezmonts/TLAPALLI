@@ -43,6 +43,7 @@ export class InstructoresService {
         tallerId: dto.tallerId,
         estado: 'Pendiente',
         activo: true,
+        gestionaAlumnos: dto.gestionaAlumnos ?? false,
       },
     });
 
@@ -134,6 +135,7 @@ export class InstructoresService {
         telefono: dto.telefono,
         tallerId: dto.tallerId,
         activo: dto.activo,
+        gestionaAlumnos: dto.gestionaAlumnos,
       },
       include: { taller: true },
     });

@@ -61,10 +61,10 @@ export class AlumnosController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'profesor')
   @ApiOperation({ summary: 'Crear un nuevo alumno' })
-  create(@Body() createAlumnoDto: CreateAlumnoDto) {
-    return this.alumnosService.create(createAlumnoDto);
+  create(@Req() req, @Body() createAlumnoDto: CreateAlumnoDto) {
+    return this.alumnosService.create(createAlumnoDto, req.user);
   }
 
   @Get()

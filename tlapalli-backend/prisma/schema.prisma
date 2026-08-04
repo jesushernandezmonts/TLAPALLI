@@ -101,6 +101,7 @@ model Instructor {
   usuario       Usuario?
   temarioUrl    String?  @map("temario_url")
   curriculumUrl String?  @map("curriculum_url")
+  gestionaAlumnos Boolean  @default(false) @map("gestiona_alumnos")
   grupos        Grupo[]
   justificaciones JustificacionInstructor[]
   actividades   Actividad[]

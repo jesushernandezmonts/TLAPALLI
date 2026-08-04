@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Trash2, Edit3, Loader2, AlertCircle, RefreshCw,
-  Users, BookOpen, ChevronDown, GraduationCap, FileCheck
+  Users, BookOpen, ChevronDown, GraduationCap, FileCheck, UserPlus
 } from 'lucide-react';
 import api from '../services/api';
 import Modal from '../components/Modal';
@@ -11,6 +11,7 @@ import StatCard from '../components/StatCard';
 import SearchBar from '../components/SearchBar';
 import ConfirmModal from '../components/ConfirmModal';
 import ModalJustificante from '../components/ModalJustificante';
+import AlumnoForm from '../components/AlumnoForm';
 
 const GRUPO_COLORS = [
   { from: 'from-pink-600', to: 'to-rose-600', bg: 'bg-pink-500/10', border: 'border-pink-500/30', text: 'text-pink-300', avatar: 'from-pink-500 to-rose-500', glow: 'shadow-pink-500/20' },
@@ -41,6 +42,10 @@ export default function MisGrupos() {
 
   const [modalJustificanteOpen, setModalJustificanteOpen] = useState(false);
 
+  // Perfil instructor
+  const [instructorPerfil, setInstructorPerfil] = useState(null);
+  const [showNuevoAlumnoModal, setShowNuevoAlumnoModal] = useState(false);
+
   // Toast state
   const [toast, setToast] = useState(null);
   const showToast = (title, message = '', type = 'success') => {
@@ -60,7 +65,17 @@ export default function MisGrupos() {
   useEffect(() => {
     fetchGrupos();
     fetchAlumnosDisponibles();
+    fetchInstructorPerfil();
   }, []);
+
+  const fetchInstructorPerfil = async () => {
+    try {
+      const { data } = await api.get('/instructores/me');
+      setInstructorPerfil(data);
+    } catch (err) {
+      console.error('Error al cargar perfil instructor:', err);
+    }
+  };
 
   const fetchAlumnosDisponibles = async () => {
     try {
@@ -248,15 +263,28 @@ export default function MisGrupos() {
           </h1>
           <p className="mt-1 text-base font-semibold text-white/75">Gestiona tus grupos y alumnos</p>
         </div>
-        <motion.button
-          data-tour="btn-nuevo-grupo"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => handleOpenModal('grupo')}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white rounded-xl font-bold text-sm transition shadow-lg cursor-pointer"
-        >
-          <Plus size={16} /> Nuevo Grupo
-        </motion.button>
+        <div className="flex items-center gap-3">
+          {/* Botón agregar alumno nuevo — solo si el profe gestiona alumnos */}
+          {instructorPerfil?.gestionaAlumnos && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowNuevoAlumnoModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl font-bold text-sm transition shadow-lg cursor-pointer"
+            >
+              <UserPlus size={16} /> Nuevo Alumno
+            </motion.button>
+          )}
+          <motion.button
+            data-tour="btn-nuevo-grupo"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => handleOpenModal('grupo')}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white rounded-xl font-bold text-sm transition shadow-lg cursor-pointer"
+          >
+            <Plus size={16} /> Nuevo Grupo
+          </motion.button>
+        </div>
       </div>
 
       {/* Stats con StatCard */}
@@ -585,6 +613,46 @@ export default function MisGrupos() {
           </div>
         )}
       </Modal>
+
+      {/* Modal: Nuevo Alumno (solo si gestionaAlumnos = true) */}
+      {showNuevoAlumnoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                  <UserPlus size={18} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-black text-base">Nuevo Alumno</h3>
+                  <p className="text-white/40 text-xs">
+                    Se inscribirá automáticamente a tu taller
+                    {instructorPerfil?.taller ? `: ${instructorPerfil.taller.nombreTaller}` : ''}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowNuevoAlumnoModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/80 hover:bg-slate-800 text-white/50 hover:text-white transition"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-5">
+              <AlumnoForm
+                alumno={null}
+                modoProfesor={true}
+                onClose={() => setShowNuevoAlumnoModal(false)}
+                onSave={() => {
+                  setShowNuevoAlumnoModal(false);
+                  fetchAlumnosDisponibles();
+                  showToast('¡Alumno registrado!', 'El alumno fue creado e inscrito a tu taller.', 'success');
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
