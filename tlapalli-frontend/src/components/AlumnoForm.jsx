@@ -52,7 +52,7 @@ const emptyArchivos = {
   registro: null,
 };
 
-function AlumnoForm({ alumno, onClose, onSave }) {
+function AlumnoForm({ alumno, onClose, onSave, modoProfesor = false }) {
   const [form, setForm] = useState(emptyForm);
   const [talleres, setTalleres] = useState([]);
   const [selectedTallerIds, setSelectedTallerIds] = useState([]);
@@ -276,23 +276,26 @@ function AlumnoForm({ alumno, onClose, onSave }) {
       }
 
       // Sincronizar inscripciones (crear nuevas, dar de baja las que ya no están)
-      const currentIds = new Set(selectedTallerIds);
-      const originalMap = new Map(originalInscripciones.map(i => [i.tallerId, i.id]));
+      // En modoProfesor el backend inscribe automáticamente, no se hace aquí
+      if (!modoProfesor) {
+        const currentIds = new Set(selectedTallerIds);
+        const originalMap = new Map(originalInscripciones.map(i => [i.tallerId, i.id]));
 
-      for (const insc of originalInscripciones) {
-        if (!currentIds.has(insc.tallerId)) {
-          await api.delete(`/inscripciones/${insc.id}`);
+        for (const insc of originalInscripciones) {
+          if (!currentIds.has(insc.tallerId)) {
+            await api.delete(`/inscripciones/${insc.id}`);
+          }
         }
-      }
 
-      for (const tallerId of selectedTallerIds) {
-        if (!originalMap.has(tallerId)) {
-          await api.post('/inscripciones', {
-            alumnoId: savedAlumno.id,
-            tallerId,
-            periodo: formPeriodo,
-            anio: Number(formAnio),
-          });
+        for (const tallerId of selectedTallerIds) {
+          if (!originalMap.has(tallerId)) {
+            await api.post('/inscripciones', {
+              alumnoId: savedAlumno.id,
+              tallerId,
+              periodo: formPeriodo,
+              anio: Number(formAnio),
+            });
+          }
         }
       }
 
@@ -444,6 +447,7 @@ function AlumnoForm({ alumno, onClose, onSave }) {
               className="bg-slate-800/80 border border-white/15 rounded-xl px-3 py-2 text-sm text-white placeholder-white/20 w-full focus:border-pink-500/50 outline-none transition"
             />
           </div>
+          {!modoProfesor && (
           <div className="space-y-1 md:col-span-4 relative">
             <label className="text-[10px] text-white/40 uppercase font-black px-1">Inscribir a Taller (Opcional)</label>
             <div className="relative">
@@ -508,8 +512,9 @@ function AlumnoForm({ alumno, onClose, onSave }) {
               </div>
             )}
           </div>
+          )}
 
-          {selectedTallerIds.length > 0 && (
+          {!modoProfesor && selectedTallerIds.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:col-span-4">
               <div className="space-y-1">
                 <label className="text-[10px] text-white/40 uppercase font-black px-1">Periodo de Inscripción</label>
