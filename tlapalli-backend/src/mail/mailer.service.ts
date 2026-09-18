@@ -24,17 +24,18 @@ export class MailerService {
 
       this.transporter = nodemailer.createTransport(
         isGmail
-          ? {
+          ? ({
               service: 'gmail',
               auth: {
                 user: smtpUser,
                 pass: smtpPass,
               },
-              connectionTimeout: 5000,
-              greetingTimeout: 5000,
-              socketTimeout: 5000,
-            }
-          : {
+              family: 4,
+              connectionTimeout: 10000,
+              greetingTimeout: 10000,
+              socketTimeout: 10000,
+            } as nodemailer.TransportOptions)
+          : ({
               host: smtpHost,
               port: smtpPort,
               secure: smtpPort === 465,
@@ -42,10 +43,11 @@ export class MailerService {
                 user: smtpUser,
                 pass: smtpPass,
               },
-              connectionTimeout: 5000,
-              greetingTimeout: 5000,
-              socketTimeout: 5000,
-            }
+              family: 4,
+              connectionTimeout: 10000,
+              greetingTimeout: 10000,
+              socketTimeout: 10000,
+            } as nodemailer.TransportOptions)
       );
       this.logger.log(`📧 Servicio de correo inicializado con ${isGmail ? 'Gmail Service' : 'SMTP'} (${smtpUser})`);
     } else {
