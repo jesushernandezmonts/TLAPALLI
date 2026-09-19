@@ -31,6 +31,10 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
     lowerUrl.includes('/pdf')
   );
 
+  // Generar URL de vista previa convertida a JPG si Cloudinary bloquea la extensión .pdf
+  const isCloudinaryPdf = url && url.includes('cloudinary.com') && lowerUrl.endsWith('.pdf');
+  const fallbackJpgUrl = isCloudinaryPdf ? url.replace(/\.pdf$/i, '.jpg') : null;
+
   useEffect(() => {
     let active = true;
     let createdUrl = null;
@@ -40,7 +44,6 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
       setError(false);
       setBlobUrl(null);
 
-      // Usar api de axios con Token para endpoints del backend, o fetch directo si es URL externa de Cloudinary
       const isExternalUrl = url.startsWith('http') && url.includes('cloudinary.com');
 
       const requestPromise = isExternalUrl
@@ -59,10 +62,9 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
           setLoading(false);
         })
         .catch((err) => {
-          console.warn('Falló la carga en memoria de Blob, usando URL directa:', err);
+          console.warn('Falló la carga de Blob (posible 401 de Cloudinary):', err);
           if (active) {
-            // Fallback elegante: si falla el blob o devuelve 401, usar la URL directa directamente
-            setBlobUrl(url);
+            setError(true);
             setLoading(false);
           }
         });
@@ -118,7 +120,7 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
           
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Alternar Visor Google Docs si se desea */}
-            {isPdf && (
+            {isPdf && !error && (
               <button
                 onClick={() => setUseGoogleDocs(!useGoogleDocs)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer select-none border ${
@@ -175,21 +177,27 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
             loading ? (
               <div className="flex flex-col items-center gap-3 text-white/70">
                 <Loader2 size={36} className="animate-spin text-pink-500" />
-                <p className="text-sm font-semibold tracking-wide">Cargando PDF...</p>
+                <p className="text-sm font-semibold tracking-wide">Cargando documento...</p>
               </div>
-            ) : error && !useGoogleDocs ? (
+            ) : error && fallbackJpgUrl ? (
+              // Si Cloudinary bloqueó el PDF con 401, mostramos la vista previa JPG convertida por Cloudinary
+              <div className="w-full h-full overflow-auto flex flex-col items-center justify-center p-4 rounded-b-2xl">
+                <img
+                  src={fallbackJpgUrl}
+                  alt={displayTitle}
+                  className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl transition duration-300"
+                />
+                <p className="text-xs text-white/40 mt-3 font-medium">
+                  Vista previa de alta definición generada automáticamente. Usa el botón "Descargar" para obtener el PDF original.
+                </p>
+              </div>
+            ) : error ? (
               <div className="flex flex-col items-center justify-center p-6 text-center text-white/80 gap-4 max-w-md">
                 <FileText size={48} className="text-pink-400" />
                 <p className="text-sm font-medium leading-relaxed">
-                  El navegador requiere abrir el PDF externamente o mediante el visor auxiliar.
+                  El servidor de almacenamiento bloqueó el acceso directo al PDF. Haz clic a continuación para abrirlo o descargarlo.
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
-                  <button
-                    onClick={() => setUseGoogleDocs(true)}
-                    className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow"
-                  >
-                    Usar Visor Auxiliar
-                  </button>
                   <a
                     href={rawUrl}
                     target="_blank"
@@ -215,7 +223,7 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
               </object>
             )
           ) : (
-            <div className="w-full h-full overflow-auto flex items-center justify-center p-4 rounded-b-2xl">
+            <div className="w-full h-full overflow-auto flex flex-col items-center justify-center p-4 rounded-b-2xl">
               <img
                 src={rawUrl}
                 alt={displayTitle}
