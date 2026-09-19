@@ -118,6 +118,36 @@ export class MailerService {
       }
     }
 
+    // D. Fallback a Brevo API (HTTP Puerto 443 - Permite cualquier destinatario sin dominio propio)
+    const brevoApiKey = this.configService.get<string>('BREVO_API_KEY');
+    if (brevoApiKey && !brevoApiKey.includes('tu-key')) {
+      try {
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: {
+            'api-key': brevoApiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            sender: { name: 'TLAPALLI', email: 'jesushernandezmonts@gmail.com' },
+            to: [{ email: to }],
+            subject,
+            htmlContent: html,
+          }),
+        });
+
+        if (response.ok) {
+          this.logger.success(`Email enviado exitosamente a ${to} via Brevo API`);
+          return;
+        } else {
+          const errData = await response.json();
+          this.logger.error(`Error enviando email via Brevo API: ${JSON.stringify(errData)}`, '', 'MailerService');
+        }
+      } catch (error: any) {
+        this.logger.error(`Error en la petición de Brevo API: ${error.message}`, error.stack, 'MailerService');
+      }
+    }
+
     // D. Simulación si no hay transportes activos
     this.logger.email('MODO DESARROLLO/SIMULACIÓN: Email procesado');
     this.logger.email(`PARA: ${to}`);
