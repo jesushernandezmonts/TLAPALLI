@@ -13,34 +13,27 @@ const cleanTitle = (str) => {
 };
 
 function DocumentViewerModal({ isOpen, onClose, url, title }) {
-  const [useGoogleDocs, setUseGoogleDocs] = useState(true);
+  const [useGoogleDocs, setUseGoogleDocs] = useState(false);
 
   useEffect(() => {
-    setUseGoogleDocs(true);
+    setUseGoogleDocs(false);
   }, [url]);
 
   if (!isOpen || !url) return null;
 
   const lowerUrl = url.toLowerCase();
-  const lowerTitle = (title || '').toLowerCase();
 
-  // Detectar si es una imagen (JPG, PNG, GIF, WEBP, etc.)
+  // Detectar si es una imagen (extensiones comunes)
   const isImage = lowerUrl.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i);
-  
-  // Detectar si es PDF solo si NO es una imagen
+
+  // Detectar si es PDF
   const isPdf = !isImage && (
     lowerUrl.endsWith('.pdf') ||
     lowerUrl.includes('.pdf') ||
-    lowerUrl.includes('/pdf') ||
-    lowerTitle.includes('.pdf') ||
-    lowerTitle.includes('pdf') ||
-    lowerTitle.includes('cv') ||
-    lowerTitle.includes('temario')
+    lowerUrl.includes('/pdf')
   );
 
   const displayTitle = cleanTitle(title);
-
-  // Mantener la URL original intacta para no romper la firma ni el path de Cloudinary
   const rawUrl = url;
 
   const iframeSrc = isPdf
@@ -136,12 +129,18 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
         {/* Área del Contenido */}
         <div className="flex-1 bg-[#202124] overflow-hidden flex items-center justify-center p-0 rounded-b-2xl relative">
           {isPdf ? (
-            <iframe
-              src={iframeSrc}
-              title={displayTitle}
+            <object
+              data={iframeSrc}
+              type="application/pdf"
               className="w-full h-full bg-[#202124] rounded-b-2xl"
-              style={{ border: 'none' }}
-            />
+            >
+              <iframe
+                src={iframeSrc}
+                title={displayTitle}
+                className="w-full h-full bg-[#202124] rounded-b-2xl"
+                style={{ border: 'none' }}
+              />
+            </object>
           ) : (
             <div className="w-full h-full overflow-auto flex items-center justify-center p-4 rounded-b-2xl">
               <img
