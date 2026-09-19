@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Download, FileText, ExternalLink } from 'lucide-react';
+import { X, Download, FileText, ExternalLink, RotateCw } from 'lucide-react';
 
 const cleanTitle = (str) => {
   if (!str) return '';
@@ -12,20 +13,39 @@ const cleanTitle = (str) => {
 };
 
 function DocumentViewerModal({ isOpen, onClose, url, title }) {
+  const [useGoogleDocs, setUseGoogleDocs] = useState(false);
+
+  useEffect(() => {
+    setUseGoogleDocs(false);
+  }, [url]);
+
   if (!isOpen || !url) return null;
 
-  const isPdf = url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('pdf') || url.toLowerCase().includes('cv') || url.toLowerCase().includes('temario');
+  const isPdf =
+    url.toLowerCase().endsWith('.pdf') ||
+    url.toLowerCase().includes('.pdf') ||
+    url.toLowerCase().includes('/pdf') ||
+    url.toLowerCase().includes('cv') ||
+    url.toLowerCase().includes('temario') ||
+    url.toLowerCase().includes('reporte');
+  
   const displayTitle = cleanTitle(title);
 
-  // Agrega parámetros para ocultar la barra lateral de miniaturas (navpanes=0) 
-  // y ajustar el PDF al ancho de la pantalla (view=FitH) para que no se vea pequeño
-  const iframeSrc = isPdf 
-    ? (url.includes('#') ? url : `${url}#view=FitH&navpanes=0`)
-    : url;
+  // Procesamiento de URL para Cloudinary (fuerza fl_inline para evitar Content-Disposition: attachment)
+  let cleanUrl = url;
+  if (cleanUrl.includes('cloudinary.com') && cleanUrl.includes('/upload/') && !cleanUrl.includes('/fl_inline/')) {
+    cleanUrl = cleanUrl.replace('/upload/', '/upload/fl_inline/');
+  }
+
+  const iframeSrc = isPdf
+    ? (useGoogleDocs
+        ? `https://docs.google.com/gview?url=${encodeURIComponent(cleanUrl)}&embedded=true`
+        : (cleanUrl.includes('#') ? cleanUrl : `${cleanUrl}#view=FitH&navpanes=0`))
+    : cleanUrl;
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = url;
+    link.href = cleanUrl;
     link.download = displayTitle || 'documento';
     link.target = '_blank';
     document.body.appendChild(link);
@@ -34,32 +54,47 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
   };
 
   // Usamos createPortal para renderizar el modal en el body directamente.
-  // Esto evita que quede atrapado en el contexto de CSS, z-index o bordes de otros modales padres.
   return createPortal(
     <div className="fixed inset-0 z-200 flex items-center justify-center p-2 sm:p-4">
       {/* Overlay oscuro de fondo */}
       <div 
-        className="absolute inset-0 bg-black/85  transition-opacity duration-300"
+        className="absolute inset-0 bg-black/85 transition-opacity duration-300"
         onClick={onClose}
       />
       
-      {/* Contenedor del Modal - Color oscuro unificado (estilo lector de PDFs) para que sea uniforme */}
-      <div className="relative w-full max-w-4xl h-[82vh] flex flex-col bg-[#202124] border border-white/15 rounded-2xl shadow-2xl text-white overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
+      {/* Contenedor del Modal */}
+      <div className="relative w-full max-w-4xl h-[85vh] flex flex-col bg-[#202124] border border-white/15 rounded-2xl shadow-2xl text-white overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
         
-        {/* Cabecera - Color unificado con el fondo de herramientas de PDF */}
-        <div className="flex justify-between items-center px-6 py-4.5 bg-[#202124] border-b border-white/15 shrink-0">
+        {/* Cabecera */}
+        <div className="flex justify-between items-center px-4 sm:px-6 py-3.5 bg-[#202124] border-b border-white/15 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <FileText size={20} className="text-pink-400 shrink-0" />
-            <h3 className="text-sm sm:text-base md:text-lg font-black text-white/90 truncate pr-4">
+            <h3 className="text-sm sm:text-base md:text-lg font-black text-white/90 truncate pr-2">
               {displayTitle || 'Visualización de Documento'}
             </h3>
           </div>
           
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Alternar Visor Google Docs si es PDF */}
+            {isPdf && (
+              <button
+                onClick={() => setUseGoogleDocs(!useGoogleDocs)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer select-none border ${
+                  useGoogleDocs 
+                    ? 'bg-purple-600/30 text-purple-300 border-purple-500/40 hover:bg-purple-600/40' 
+                    : 'bg-slate-800 text-white/70 border-white/15 hover:bg-slate-700'
+                }`}
+                title="Cambiar visor si el navegador no puede renderizar el PDF"
+              >
+                <RotateCw size={14} />
+                <span className="hidden sm:inline">{useGoogleDocs ? 'Visor Google' : 'Cambiar Visor'}</span>
+              </button>
+            )}
+
             {/* Botón de descargar */}
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider bg-pink-600/10 text-pink-400 hover:bg-pink-600/25 border border-pink-500/15 hover:border-pink-500/30 transition cursor-pointer select-none"
+              className="flex items-center gap-2 px-3 sm:px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider bg-pink-600/10 text-pink-400 hover:bg-pink-600/25 border border-pink-500/15 hover:border-pink-500/30 transition cursor-pointer select-none"
               title="Descargar documento"
             >
               <Download size={16} />
@@ -68,10 +103,10 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
 
             {/* Botón de abrir en pestaña nueva */}
             <a
-              href={url}
+              href={cleanUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider bg-slate-800/80 text-white/70 hover:bg-slate-800/90 border border-white/15 hover:border-white/20 transition cursor-pointer select-none"
+              className="flex items-center gap-2 px-3 sm:px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider bg-slate-800/80 text-white/70 hover:bg-slate-800/90 border border-white/15 hover:border-white/20 transition cursor-pointer select-none"
               title="Abrir en pestaña nueva"
             >
               <ExternalLink size={16} />
@@ -92,8 +127,8 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
           </div>
         </div>
         
-        {/* Área del Contenido - Sin márgenes para integrarse perfectamente. Redondeado inferior para consistencia */}
-        <div className="flex-1 bg-[#202124] overflow-hidden flex items-center justify-center p-0 rounded-b-2xl">
+        {/* Área del Contenido */}
+        <div className="flex-1 bg-[#202124] overflow-hidden flex items-center justify-center p-0 rounded-b-2xl relative">
           {isPdf ? (
             <iframe
               src={iframeSrc}
@@ -104,7 +139,7 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
           ) : (
             <div className="w-full h-full overflow-auto flex items-center justify-center p-4 rounded-b-2xl">
               <img
-                src={url}
+                src={cleanUrl}
                 alt={displayTitle}
                 className="max-w-full max-h-full object-contain rounded-xl shadow-2xl transition duration-300"
                 onError={(e) => {

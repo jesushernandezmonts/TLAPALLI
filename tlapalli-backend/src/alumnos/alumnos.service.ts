@@ -125,10 +125,9 @@ export class AlumnosService {
     return { tipo, inscripciones, servicioSocial };
   }
 
-  // ========== MÉTODOS ADMIN/INSTRUCTOR ==========
 
   async create(dto: CreateAlumnoDto, user?: { rol: string; id: number; instructorId?: number }) {
-    // Si es profesor, validar que tiene permiso de gestionar alumnos
+
     let instructorTallerId: number | null = null;
     if (user?.rol === 'profesor') {
       if (!user.instructorId) {

@@ -17,7 +17,6 @@ export class AuthService {
     private logger: AppLogger,
   ) { }
 
-  // ========== ALUMNO LOGIN ==========
   async alumnoLogin(email: string, password: string) {
     const alumno = await this.prisma.alumno.findUnique({ where: { email } });
     if (!alumno) {
@@ -41,7 +40,7 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // Generar tokens
+
     const payload = {
       sub: alumno.id,
       email: alumno.email,
@@ -69,7 +68,7 @@ export class AuthService {
     };
   }
 
-  // ========== REFRESH TOKEN ALUMNO ==========
+
   async alumnoRefreshTokens(refreshTokenStr: string) {
     const token = await this.prisma.alumnoRefreshToken.findUnique({
       where: { token: refreshTokenStr },
