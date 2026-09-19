@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Download, FileText, ExternalLink, Loader2, RotateCw } from 'lucide-react';
+import api from '../services/api';
 
 const cleanTitle = (str) => {
   if (!str) return '';
@@ -39,22 +40,29 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
       setError(false);
       setBlobUrl(null);
 
-      fetch(url)
-        .then((res) => {
-          if (!res.ok) throw new Error('Error al obtener el archivo PDF');
-          return res.blob();
-        })
-        .then((blob) => {
+      // Usar api de axios con Token para endpoints del backend, o fetch directo si es URL externa de Cloudinary
+      const isExternalUrl = url.startsWith('http') && url.includes('cloudinary.com');
+
+      const requestPromise = isExternalUrl
+        ? fetch(url).then((res) => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.blob();
+          })
+        : api.get(url, { responseType: 'blob' }).then((res) => res.data);
+
+      requestPromise
+        .then((blobData) => {
           if (!active) return;
-          const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+          const pdfBlob = new Blob([blobData], { type: 'application/pdf' });
           createdUrl = URL.createObjectURL(pdfBlob);
           setBlobUrl(createdUrl);
           setLoading(false);
         })
         .catch((err) => {
-          console.error('Error cargando Blob de PDF:', err);
+          console.warn('Falló la carga en memoria de Blob, usando URL directa:', err);
           if (active) {
-            setError(true);
+            // Fallback elegante: si falla el blob o devuelve 401, usar la URL directa directamente
+            setBlobUrl(url);
             setLoading(false);
           }
         });
