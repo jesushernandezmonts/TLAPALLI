@@ -3,6 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { MailService } from '@sendgrid/mail';
 import { AppLogger } from '../common/logger/logger.service';
+import * as dns from 'dns';
+
+// Forzar la resolución DNS a IPv4 primero para evitar ENETUNREACH en servidores Cloud como Render
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch (e) {
+  // Ignorar en versiones antiguas de Node
+}
 
 @Injectable()
 export class MailerService {
@@ -16,40 +24,27 @@ export class MailerService {
     const smtpUser = this.configService.get<string>('SMTP_USER');
     const smtpPass = this.configService.get<string>('SMTP_PASS');
     const smtpHost = this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
-    const smtpPort = parseInt(this.configService.get<string>('SMTP_PORT') || '587', 10);
+    const smtpPort = parseInt(this.configService.get<string>('SMTP_PORT') || '465', 10);
 
     // 1. Configurar Nodemailer con Gmail SMTP (Prioridad 1 para garantizar entrega a la Bandeja Principal)
     if (smtpUser && smtpPass && !smtpPass.includes('tu-') && !smtpPass.includes('cambiar-')) {
       const isGmail = smtpUser.includes('@gmail.com') || smtpHost.includes('gmail');
 
-      this.transporter = nodemailer.createTransport(
-        isGmail
-          ? ({
-              service: 'gmail',
-              auth: {
-                user: smtpUser,
-                pass: smtpPass,
-              },
-              family: 4,
-              connectionTimeout: 10000,
-              greetingTimeout: 10000,
-              socketTimeout: 10000,
-            } as nodemailer.TransportOptions)
-          : ({
-              host: smtpHost,
-              port: smtpPort,
-              secure: smtpPort === 465,
-              auth: {
-                user: smtpUser,
-                pass: smtpPass,
-              },
-              family: 4,
-              connectionTimeout: 10000,
-              greetingTimeout: 10000,
-              socketTimeout: 10000,
-            } as nodemailer.TransportOptions)
-      );
-      this.logger.log(`📧 Servicio de correo inicializado con ${isGmail ? 'Gmail Service' : 'SMTP'} (${smtpUser})`);
+      this.transporter = nodemailer.createTransport({
+        host: isGmail ? 'smtp.gmail.com' : smtpHost,
+        port: isGmail ? 465 : smtpPort,
+        secure: isGmail ? true : smtpPort === 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+        family: 4, // Explicito para socket IPv4
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
+      } as nodemailer.TransportOptions);
+
+      this.logger.log(`📧 Servicio de correo inicializado con ${isGmail ? 'Gmail SSL (Puerto 465 IPv4)' : 'SMTP'} (${smtpUser})`);
     } else {
       this.logger.warn('⚠️ SMTP_USER o SMTP_PASS no están configurados en el entorno. Revisa tus variables de entorno.');
     }
