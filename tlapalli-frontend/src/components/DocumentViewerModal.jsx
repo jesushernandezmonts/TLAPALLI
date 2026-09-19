@@ -13,39 +13,45 @@ const cleanTitle = (str) => {
 };
 
 function DocumentViewerModal({ isOpen, onClose, url, title }) {
-  const [useGoogleDocs, setUseGoogleDocs] = useState(false);
+  const [useGoogleDocs, setUseGoogleDocs] = useState(true);
 
   useEffect(() => {
-    setUseGoogleDocs(false);
+    setUseGoogleDocs(true);
   }, [url]);
 
   if (!isOpen || !url) return null;
 
-  const isPdf =
-    url.toLowerCase().endsWith('.pdf') ||
-    url.toLowerCase().includes('.pdf') ||
-    url.toLowerCase().includes('/pdf') ||
-    url.toLowerCase().includes('cv') ||
-    url.toLowerCase().includes('temario') ||
-    url.toLowerCase().includes('reporte');
+  const lowerUrl = url.toLowerCase();
+  const lowerTitle = (title || '').toLowerCase();
+
+  // Detectar si es una imagen (JPG, PNG, GIF, WEBP, etc.)
+  const isImage = lowerUrl.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i);
   
+  // Detectar si es PDF solo si NO es una imagen
+  const isPdf = !isImage && (
+    lowerUrl.endsWith('.pdf') ||
+    lowerUrl.includes('.pdf') ||
+    lowerUrl.includes('/pdf') ||
+    lowerTitle.includes('.pdf') ||
+    lowerTitle.includes('pdf') ||
+    lowerTitle.includes('cv') ||
+    lowerTitle.includes('temario')
+  );
+
   const displayTitle = cleanTitle(title);
 
-  // Procesamiento de URL para Cloudinary (fuerza fl_inline para evitar Content-Disposition: attachment)
-  let cleanUrl = url;
-  if (cleanUrl.includes('cloudinary.com') && cleanUrl.includes('/upload/') && !cleanUrl.includes('/fl_inline/')) {
-    cleanUrl = cleanUrl.replace('/upload/', '/upload/fl_inline/');
-  }
+  // Mantener la URL original intacta para no romper la firma ni el path de Cloudinary
+  const rawUrl = url;
 
   const iframeSrc = isPdf
     ? (useGoogleDocs
-        ? `https://docs.google.com/gview?url=${encodeURIComponent(cleanUrl)}&embedded=true`
-        : (cleanUrl.includes('#') ? cleanUrl : `${cleanUrl}#view=FitH&navpanes=0`))
-    : cleanUrl;
+        ? `https://docs.google.com/gview?url=${encodeURIComponent(rawUrl)}&embedded=true`
+        : (rawUrl.includes('#') ? rawUrl : `${rawUrl}#view=FitH&navpanes=0`))
+    : rawUrl;
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = cleanUrl;
+    link.href = rawUrl;
     link.download = displayTitle || 'documento';
     link.target = '_blank';
     document.body.appendChild(link);
@@ -103,7 +109,7 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
 
             {/* Botón de abrir en pestaña nueva */}
             <a
-              href={cleanUrl}
+              href={rawUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-3 sm:px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider bg-slate-800/80 text-white/70 hover:bg-slate-800/90 border border-white/15 hover:border-white/20 transition cursor-pointer select-none"
@@ -139,7 +145,7 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
           ) : (
             <div className="w-full h-full overflow-auto flex items-center justify-center p-4 rounded-b-2xl">
               <img
-                src={cleanUrl}
+                src={rawUrl}
                 alt={displayTitle}
                 className="max-w-full max-h-full object-contain rounded-xl shadow-2xl transition duration-300"
                 onError={(e) => {
