@@ -12,25 +12,24 @@ import {
   DollarSign,
 } from 'lucide-react';
 
-/* ── KPI Card — estilo idéntico al admin ── */
+/* ── KPI Card — estilo sólido y de alto contraste ── */
 function KpiCard({ title, value, color, subtitle }) {
-  const colorClasses = {
-    pink: 'bg-pink-500/20 border-pink-500/30 text-pink-100 hover:shadow-pink-500/20',
-    emerald: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-100 hover:shadow-emerald-500/20',
-    cyan: 'bg-cyan-500/20 border-cyan-500/30 text-cyan-100 hover:shadow-cyan-500/20',
-    amber: 'bg-amber-500/20 border-amber-500/30 text-amber-100 hover:shadow-amber-500/20',
+  const borderClasses = {
+    pink: 'border-l-pink-500 text-pink-400',
+    emerald: 'border-l-emerald-500 text-emerald-400',
+    cyan: 'border-l-cyan-500 text-cyan-400',
+    amber: 'border-l-amber-500 text-amber-400',
   };
 
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className={`rounded-2xl p-6 border ${colorClasses[color] || colorClasses.pink} shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative group`}
+      className={`bg-slate-900/95 border border-slate-700/80 border-l-4 ${borderClasses[color] || borderClasses.pink} rounded-2xl p-6 shadow-2xl transition-all duration-300 relative overflow-hidden group`}
     >
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-slate-800/80 rounded-full blur-2xl group-hover:bg-slate-800/90 transition-all" />
-      <p className="text-sm opacity-60 font-medium uppercase tracking-wider">{title}</p>
-      <p className="text-3xl font-black mt-2 tracking-tighter">{value}</p>
+      <p className="text-xs font-bold uppercase tracking-wider text-slate-300">{title}</p>
+      <p className="text-3xl font-black mt-2 tracking-tight text-white">{value}</p>
       {subtitle && (
-        <div className="flex items-center gap-1 mt-2 text-xs font-bold text-white/40">
+        <div className="flex items-center gap-1 mt-2 text-xs font-semibold text-slate-400">
           <span>{subtitle}</span>
         </div>
       )}

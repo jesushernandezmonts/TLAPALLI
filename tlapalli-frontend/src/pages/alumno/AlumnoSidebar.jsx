@@ -12,10 +12,10 @@ import {
 
 function AlumnoSidebar({ isOpen, onClose, alumno, onLogout, tipo }) {
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
+    `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 font-semibold ${
       isActive
-        ? 'bg-gradient-to-r from-pink-600/30 to-orange-600/20 text-pink-400 border border-pink-500/30 shadow-[0_0_20px_rgba(219,39,119,0.2)]'
-        : 'text-white/60 hover:bg-slate-800/80 hover:text-white'
+        ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white border border-pink-400/40 shadow-lg shadow-pink-600/30'
+        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
     }`;
 
   const tieneTalleres = tipo === 'talleres' || tipo === 'ambos';
@@ -25,12 +25,12 @@ function AlumnoSidebar({ isOpen, onClose, alumno, onLogout, tipo }) {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-slate-900 z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-950/90 z-40 lg:hidden"
           onClick={onClose}
         />
       )}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 lg:bg-slate-900/95 border-r border-white/15 flex flex-col p-6 transition-transform duration-300 transform
+        fixed inset-y-0 left-0 z-50 w-72 bg-slate-950 border-r border-slate-800 flex flex-col p-6 transition-transform duration-300 transform
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:static lg:flex
       `}>

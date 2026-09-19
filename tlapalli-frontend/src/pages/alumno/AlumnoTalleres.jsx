@@ -45,37 +45,38 @@ function AlumnoTalleres() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {talleres.map((insc) => (
-            <div key={insc.id} className="bg-gradient-to-br from-violet-600/10 to-purple-600/5 border border-violet-500/20 rounded-2xl p-6 hover:border-violet-500/40 transition-all duration-300 shadow-lg">
+            <div key={insc.id} className="bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl p-6 hover:border-pink-500/50 transition-all duration-300 shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-1.5 h-full bg-pink-500" />
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-xl bg-violet-500/20">
-                  <Palette size={24} className="text-violet-400" />
+                <div className="p-3 rounded-xl bg-pink-500/20 border border-pink-500/30 text-pink-400">
+                  <Palette size={24} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">{insc.taller?.nombreTaller}</h3>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-violet-400">
+                  <h3 className="text-xl font-black text-white group-hover:text-pink-400 transition-colors">{insc.taller?.nombreTaller}</h3>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-pink-400">
                     Inscrito desde {new Date(insc.fechaInscripcion).toLocaleDateString()}
                   </span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-white/60">
-                  <Clock size={14} className="text-cyan-400" />
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2.5 text-sm text-slate-200 font-medium">
+                  <Clock size={16} className="text-cyan-400 shrink-0" />
                   <span>{insc.taller?.horarioDescripcion || 'Horario no especificado'}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-white/60">
-                  <DollarSign size={14} className="text-emerald-400" />
-                  <span className="text-emerald-400 font-bold">${Number(insc.taller?.costoMensual).toFixed(2)} / mes</span>
+                <div className="flex items-center gap-2.5 text-sm text-slate-200 font-medium">
+                  <DollarSign size={16} className="text-emerald-400 shrink-0" />
+                  <span className="text-emerald-400 font-black text-base">${Number(insc.taller?.costoMensual).toFixed(2)} / mes</span>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-white/15">
-                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              <div className="mt-5 pt-4 border-t border-slate-800 flex justify-between items-center">
+                <span className={`px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-md ${
                   insc.estatusPago === 'al_corriente'
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    ? 'bg-emerald-500 text-slate-950'
                     : insc.estatusPago === 'deudor'
-                    ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                    ? 'bg-rose-500 text-white'
+                    : 'bg-amber-400 text-slate-950'
                 }`}>
-                  {insc.estatusPago === 'al_corriente' ? 'Al corriente' : insc.estatusPago === 'deudor' ? 'Deudor' : 'Pendiente'}
+                  {insc.estatusPago === 'al_corriente' ? '✓ Al corriente' : insc.estatusPago === 'deudor' ? '✕ Deudor' : '⏳ Pendiente'}
                 </span>
               </div>
             </div>
