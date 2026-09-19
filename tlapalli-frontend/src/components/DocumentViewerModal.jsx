@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Download, FileText, ExternalLink, RotateCw } from 'lucide-react';
+import { X, Download, FileText, ExternalLink, Loader2, RotateCw } from 'lucide-react';
 
 const cleanTitle = (str) => {
   if (!str) return '';
@@ -13,15 +13,12 @@ const cleanTitle = (str) => {
 };
 
 function DocumentViewerModal({ isOpen, onClose, url, title }) {
+  const [blobUrl, setBlobUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [useGoogleDocs, setUseGoogleDocs] = useState(false);
 
-  useEffect(() => {
-    setUseGoogleDocs(false);
-  }, [url]);
-
-  if (!isOpen || !url) return null;
-
-  const lowerUrl = url.toLowerCase();
+  const lowerUrl = (url || '').toLowerCase();
 
   // Detectar si es una imagen (extensiones comunes)
   const isImage = lowerUrl.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i);
@@ -33,14 +30,52 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
     lowerUrl.includes('/pdf')
   );
 
+  useEffect(() => {
+    let active = true;
+    let createdUrl = null;
+
+    if (isOpen && url && isPdf) {
+      setLoading(true);
+      setError(false);
+      setBlobUrl(null);
+
+      fetch(url)
+        .then((res) => {
+          if (!res.ok) throw new Error('Error al obtener el archivo PDF');
+          return res.blob();
+        })
+        .then((blob) => {
+          if (!active) return;
+          const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+          createdUrl = URL.createObjectURL(pdfBlob);
+          setBlobUrl(createdUrl);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error('Error cargando Blob de PDF:', err);
+          if (active) {
+            setError(true);
+            setLoading(false);
+          }
+        });
+    }
+
+    return () => {
+      active = false;
+      if (createdUrl) {
+        URL.revokeObjectURL(createdUrl);
+      }
+    };
+  }, [isOpen, url, isPdf]);
+
+  if (!isOpen || !url) return null;
+
   const displayTitle = cleanTitle(title);
   const rawUrl = url;
 
-  const iframeSrc = isPdf
-    ? (useGoogleDocs
-        ? `https://docs.google.com/gview?url=${encodeURIComponent(rawUrl)}&embedded=true`
-        : (rawUrl.includes('#') ? rawUrl : `${rawUrl}#view=FitH&navpanes=0`))
-    : rawUrl;
+  const activePdfUrl = useGoogleDocs
+    ? `https://docs.google.com/gview?url=${encodeURIComponent(rawUrl)}&embedded=true`
+    : (blobUrl ? `${blobUrl}#view=FitH&navpanes=0` : `${rawUrl}#view=FitH&navpanes=0`);
 
   const handleDownload = () => {
     const link = document.createElement('a');
@@ -74,7 +109,7 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
           </div>
           
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Alternar Visor Google Docs si es PDF */}
+            {/* Alternar Visor Google Docs si se desea */}
             {isPdf && (
               <button
                 onClick={() => setUseGoogleDocs(!useGoogleDocs)}
@@ -83,10 +118,10 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
                     ? 'bg-purple-600/30 text-purple-300 border-purple-500/40 hover:bg-purple-600/40' 
                     : 'bg-slate-800 text-white/70 border-white/15 hover:bg-slate-700'
                 }`}
-                title="Cambiar visor si el navegador no puede renderizar el PDF"
+                title="Cambiar a visor secundario de Google"
               >
                 <RotateCw size={14} />
-                <span className="hidden sm:inline">{useGoogleDocs ? 'Visor Google' : 'Cambiar Visor'}</span>
+                <span className="hidden sm:inline">{useGoogleDocs ? 'Visor Google' : 'Visor Nativo'}</span>
               </button>
             )}
 
@@ -129,18 +164,48 @@ function DocumentViewerModal({ isOpen, onClose, url, title }) {
         {/* Área del Contenido */}
         <div className="flex-1 bg-[#202124] overflow-hidden flex items-center justify-center p-0 rounded-b-2xl relative">
           {isPdf ? (
-            <object
-              data={iframeSrc}
-              type="application/pdf"
-              className="w-full h-full bg-[#202124] rounded-b-2xl"
-            >
-              <iframe
-                src={iframeSrc}
-                title={displayTitle}
+            loading ? (
+              <div className="flex flex-col items-center gap-3 text-white/70">
+                <Loader2 size={36} className="animate-spin text-pink-500" />
+                <p className="text-sm font-semibold tracking-wide">Cargando PDF...</p>
+              </div>
+            ) : error && !useGoogleDocs ? (
+              <div className="flex flex-col items-center justify-center p-6 text-center text-white/80 gap-4 max-w-md">
+                <FileText size={48} className="text-pink-400" />
+                <p className="text-sm font-medium leading-relaxed">
+                  El navegador requiere abrir el PDF externamente o mediante el visor auxiliar.
+                </p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <button
+                    onClick={() => setUseGoogleDocs(true)}
+                    className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow"
+                  >
+                    Usar Visor Auxiliar
+                  </button>
+                  <a
+                    href={rawUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2.5 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-bold transition shadow"
+                  >
+                    Abrir PDF en Nueva Pestaña
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <object
+                data={activePdfUrl}
+                type="application/pdf"
                 className="w-full h-full bg-[#202124] rounded-b-2xl"
-                style={{ border: 'none' }}
-              />
-            </object>
+              >
+                <iframe
+                  src={activePdfUrl}
+                  title={displayTitle}
+                  className="w-full h-full bg-[#202124] rounded-b-2xl"
+                  style={{ border: 'none' }}
+                />
+              </object>
+            )
           ) : (
             <div className="w-full h-full overflow-auto flex items-center justify-center p-4 rounded-b-2xl">
               <img
